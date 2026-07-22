@@ -49,14 +49,15 @@ export interface AgentActionPayload<T = unknown> {
 
 ---
 
-## Stream Accumulator
+## Stream Accumulator & Stream Consumer
 
-When streaming tokens chunk-by-chunk from LLMs, HTML tags arrive incomplete. `ConversedStreamAccumulator` buffers raw stream tokens and updates AST blocks without breaking or flickering the DOM during token streaming:
+When streaming tokens chunk-by-chunk from LLMs, HTML tags arrive incomplete. **conversed** provides `consumeConversedStream` and `ConversedStreamAccumulator` to buffer raw stream tokens and update AST blocks without DOM flickering:
 
 ```typescript
-import { ConversedStreamAccumulator, parseMessageBlocks } from '@conversed/core';
+import { consumeConversedStream } from '@conversed/core';
 
-const stream = new ConversedStreamAccumulator(parseMessageBlocks);
-const state = stream.appendChunk("<table><thead><tr><th>Task</th></tr>...");
-// state.blocks contains updated AST
+// Works with Firebase Genkit, OpenAI, Anthropic, or Web ReadableStreams
+for await (const state of consumeConversedStream(stream)) {
+  console.log('Updated AST blocks:', state.blocks);
+}
 ```
