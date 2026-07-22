@@ -17,7 +17,7 @@ export class ConversedStreamAccumulator {
     this.parseFn = parseFn;
   }
 
-  public appendChunk(chunk: string): ConversedStreamState {
+  appendChunk(chunk: string): ConversedStreamState {
     this.rawBuffer += chunk;
     const blocks = this.parseFn(this.rawBuffer);
     return {
@@ -27,11 +27,11 @@ export class ConversedStreamAccumulator {
     };
   }
 
-  public reset(): void {
+  reset(): void {
     this.rawBuffer = '';
   }
 
-  public get currentBuffer(): string {
+  get currentBuffer(): string {
     return this.rawBuffer;
   }
 }

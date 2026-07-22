@@ -117,10 +117,10 @@ import { ConversedContentBlock, ConversedMessage, AgentActionEvent, AgentActionP
   `]
 })
 export class ConversedBlockComponent {
-  @Input({ required: true }) block!: ConversedContentBlock;
+  @Input() block!: ConversedContentBlock;
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
-  @Output() action = new EventEmitter<AgentActionEvent>();
+  @Output() action = new EventEmitter();
 
   @HostBinding('style')
   get styleBindings() {
@@ -190,10 +190,10 @@ export class ConversedBlockComponent {
   `]
 })
 export class ConversedFeedComponent {
-  @Input({ required: true }) messages: ConversedMessage[] = [];
+  @Input() messages: ConversedMessage[] = [];
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
-  @Output() action = new EventEmitter<AgentActionEvent>();
+  @Output() action = new EventEmitter();
 
   @HostBinding('style')
   get styleBindings() {
