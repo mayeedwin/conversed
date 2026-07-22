@@ -7,7 +7,9 @@
     "build:core": "tsc -p packages/core/tsconfig.json",
     "build:react": "tsc -p packages/react/tsconfig.json",
     "build:angular": "tsc -p packages/angular/tsconfig.json",
-    "build": "npm run build:core && npm run build:react && npm run build:angular"
+    "build": "npm run build:core && npm run build:react && npm run build:angular",
+    "release": "./scripts/release.sh latest",
+    "release:rc": "./scripts/release.sh rc"
   },
   "keywords": ["ai", "chat", "agent", "rich-content", "angular", "react"],
   "author": "Maye Edwin",
