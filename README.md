@@ -2,7 +2,25 @@
 
 > **conversed** is a high-performance, composable Rich Content UI library designed for AI Agents, LLM Chat interfaces, and dynamic conversational experiences.
 
-Instead of outputting plain text or static markdown bubbles, **conversed** parses model responses into a structured **Content Block AST (Abstract Syntax Tree)** featuring interactive tables with custom row actions, metric cards, native charts, callouts, and prompt follow-up chips.
+### What Problem Does Conversed Solve?
+Standard AI chat components render static markdown text or plain chat bubbles. When LLMs generate complex data (tables, metric cards, callouts, or charts), standard parsers fail to make them interactive.
+
+**conversed** bridges this gap by parsing model responses into a structured **Content Block AST (Abstract Syntax Tree)**. It allows developers to:
+- Render interactive tables with custom row action triggers (e.g. "Approve Transaction", "View Detail").
+- Embed metric/stats cards, callouts, native charts, and prompt chips directly into AI streams.
+- Render standalone rich blocks anywhere in custom application layouts (dashboards, drawers, modals) without being forced into a fixed chat feed container.
+- Theme components instantly using a single `primaryColor` prop or CSS design tokens.
+
+---
+
+## 📚 Documentation & Guides
+
+- 📐 [**Architecture & AST Protocol**](./docs/ARCHITECTURE.md) — AST Block types, Action event model, and Stream Accumulator.
+- 🤖 [**LLM System Prompt Guide**](./docs/PROMPTS.md) — Provider-agnostic prompt setup for OpenAI, Gemini, Claude & Firebase Vertex AI.
+- ⚛️ [**Angular & React Integration**](./docs/FRAMEWORKS.md) — Standalone block rendering & chat feed usage guide.
+- 🎨 [**Theming & Design Tokens**](./docs/THEMING.md) — Single-line primary color and CSS variable overrides.
+- 🤝 [**Contribution Guide**](./CONTRIBUTING.md) — Development workflow and setup instructions.
+- 🤖 [**AI Agent Guide**](./AGENTS.md) — Architectural guidelines for AI coding assistants.
 
 ---
 
@@ -16,33 +34,9 @@ Instead of outputting plain text or static markdown bubbles, **conversed** parse
 
 ---
 
-## ⚡ Core Concept: Action Protocol
-
-Interactive elements inside blocks (table buttons, metric cards, follow-up chips, links) trigger standardized actions via `AgentActionEvent`:
-
-```typescript
-export type ActionTriggerType =
-  | 'navigate'       // Routing trigger
-  | 'custom-command' // App-defined domain action (e.g., complete task, update status)
-  | 'prompt-submit'  // Prompt action (e.g., click follow-up chip)
-  | 'copy-code'      // Copy snippet content
-  | 'external-url';  // Open external web link
-
-export interface AgentActionPayload<T = unknown> {
-  type: ActionTriggerType;
-  actionId: string;
-  target?: string;
-  params?: Record<string, T>;
-}
-```
-
----
-
 ## 🚀 Quickstart
 
-### LLM System Prompt Integration (Provider-Agnostic)
-
-Works out-of-the-box with **OpenAI GPT-4o**, **Anthropic Claude 3.5**, **Google Gemini**, **Firebase Vertex AI**, or **DeepSeek**:
+### LLM System Prompt Integration
 
 ```typescript
 import { getSystemPromptInstruction } from '@conversed/core';
@@ -56,10 +50,6 @@ ${getSystemPromptInstruction()}
 ---
 
 ### React Integration
-
-```bash
-npm install @conversed/react @conversed/core
-```
 
 ```tsx
 import React from 'react';
@@ -82,10 +72,6 @@ export const ChatApp = () => {
 ---
 
 ### Angular Integration
-
-```bash
-npm install @conversed/angular @conversed/core
-```
 
 ```typescript
 import { Component, signal } from '@angular/core';
@@ -110,21 +96,6 @@ export class ChatComponent {
   onAction(event: AgentActionEvent) {
     console.log('Action triggered:', event.action);
   }
-}
-```
-
----
-
-## 🎨 Theme Engine
-
-Styled via standard CSS custom properties for effortless light, dark, and glassmorphic designs:
-
-```css
-:root {
-  --conversed-primary: #6366f1;
-  --conversed-card-bg: rgba(255, 255, 255, 0.04);
-  --conversed-border-color: rgba(255, 255, 255, 0.1);
-  --conversed-radius: 12px;
 }
 ```
 

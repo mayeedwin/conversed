@@ -1,0 +1,5 @@
+# Conversed Cursor Rules
+
+- Maintain pure TypeScript in `@conversed/core`.
+- Maintain standalone component support in `@conversed/angular` and `@conversed/react`.
+- Always run `pnpm build` after making modifications to package sources.
