@@ -1,0 +1,26 @@
+{
+  "name": "@conversed/angular",
+  "version": "0.0.1-rc1",
+  "description": "Angular 17+ Signals-based UI components and block renderers for conversed",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@conversed/core": "0.0.1-rc1"
+  },
+  "peerDependencies": {
+    "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "@angular/common": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0"
+  },
+  "keywords": [
+    "angular",
+    "ai",
+    "chat",
+    "conversed",
+    "components"
+  ],
+  "license": "MIT"
+}

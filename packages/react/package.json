@@ -1,0 +1,26 @@
+{
+  "name": "@conversed/react",
+  "version": "0.0.1-rc1",
+  "description": "React 18+ components and hooks for conversed rich AI chat UI",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@conversed/core": "0.0.1-rc1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "keywords": [
+    "react",
+    "ai",
+    "chat",
+    "conversed",
+    "components"
+  ],
+  "license": "MIT"
+}

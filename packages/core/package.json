@@ -1,0 +1,22 @@
+{
+  "name": "@conversed/core",
+  "version": "0.0.1-rc1",
+  "description": "Core AST, Parser Engine, and Action Protocol for conversed rich AI chat UI",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "agent",
+    "rich-content",
+    "markdown",
+    "parser",
+    "conversed"
+  ],
+  "author": "",
+  "license": "MIT"
+}
