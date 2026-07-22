@@ -1,90 +1,124 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, HostBinding } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, HostBinding } from '@angular/core';
 import { ConversedContentBlock, ConversedMessage, AgentActionEvent, AgentActionPayload, ConversedThemeTokens, generateCssVariables } from '@conversed/core';
 
 @Component({
   selector: 'conversed-block',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
-    <ng-container [ngSwitch]="block.type">
+    @switch (block.type) {
       <!-- Paragraph -->
-      <p *ngSwitchCase="'paragraph'" class="conversed-p" [innerHTML]="block.html"></p>
+      @case ('paragraph') {
+        <p class="conversed-p" [innerHTML]="block.html"></p>
+      }
 
       <!-- Heading -->
-      <div *ngSwitchCase="'heading'" [class]="'conversed-h conversed-h' + block.level" [innerHTML]="block.html"></div>
+      @case ('heading') {
+        <div [class]="'conversed-h conversed-h' + block.level" [innerHTML]="block.html"></div>
+      }
 
       <!-- List -->
-      <ul *ngSwitchCase="'list'" [class.conversed-ol]="block.ordered" [class.conversed-ul]="!block.ordered">
-        <li *ngFor="let item of block.items" [innerHTML]="item"></li>
-      </ul>
+      @case ('list') {
+        <ul [class.conversed-ol]="block.ordered" [class.conversed-ul]="!block.ordered">
+          @for (item of block.items; track $index) {
+            <li [innerHTML]="item"></li>
+          }
+        </ul>
+      }
 
       <!-- Code -->
-      <div *ngSwitchCase="'code'" class="conversed-code-wrapper">
-        <div class="conversed-code-header" *ngIf="block.language">
-          <span>{{ block.language }}</span>
-          <button (click)="copyCode(block.content)">Copy</button>
+      @case ('code') {
+        <div class="conversed-code-wrapper">
+          @if (block.language) {
+            <div class="conversed-code-header">
+              <span>{{ block.language }}</span>
+              <button (click)="copyCode(block.content)">Copy</button>
+            </div>
+          }
+          <pre class="conversed-code"><code>{{ block.content }}</code></pre>
         </div>
-        <pre class="conversed-code"><code>{{ block.content }}</code></pre>
-      </div>
+      }
 
       <!-- Callout -->
-      <div *ngSwitchCase="'callout'" [class]="'conversed-callout conversed-callout-' + block.tone">
-        <span class="conversed-callout-badge">{{ block.badgeLabel }}</span>
-        <strong *ngIf="block.title" class="conversed-callout-title">{{ block.title }}</strong>
-        <div class="conversed-callout-body" [innerHTML]="block.html"></div>
-      </div>
+      @case ('callout') {
+        <div [class]="'conversed-callout conversed-callout-' + block.tone">
+          <span class="conversed-callout-badge">{{ block.badgeLabel }}</span>
+          @if (block.title) {
+            <strong class="conversed-callout-title">{{ block.title }}</strong>
+          }
+          <div class="conversed-callout-body" [innerHTML]="block.html"></div>
+        </div>
+      }
 
       <!-- Stats -->
-      <div *ngSwitchCase="'stats'" class="conversed-stats-grid">
-        <div
-          *ngFor="let item of block.items"
-          class="conversed-stat-card"
-          [class.interactive]="!!item.action"
-          (click)="handleAction(item.action)"
-        >
-          <span class="conversed-stat-label">{{ item.label }}</span>
-          <span class="conversed-stat-value">{{ item.value }}</span>
-          <span *ngIf="item.delta" [class]="'conversed-stat-delta conversed-trend-' + (item.trend || 'neutral')">
-            {{ item.delta }}
-          </span>
+      @case ('stats') {
+        <div class="conversed-stats-grid">
+          @for (item of block.items; track $index) {
+            <div
+              class="conversed-stat-card"
+              [class.interactive]="!!item.action"
+              (click)="handleAction(item.action)"
+            >
+              <span class="conversed-stat-label">{{ item.label }}</span>
+              <span class="conversed-stat-value">{{ item.value }}</span>
+              @if (item.delta) {
+                <span [class]="'conversed-stat-delta conversed-trend-' + (item.trend || 'neutral')">
+                  {{ item.delta }}
+                </span>
+              }
+            </div>
+          }
         </div>
-      </div>
+      }
 
       <!-- Table -->
-      <div *ngSwitchCase="'table'" class="conversed-table-container">
-        <table class="conversed-table">
-          <thead *ngIf="block.headers?.length">
-            <tr>
-              <th *ngFor="let header of block.headers">{{ header }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let row of block.rows"
-              [class.interactive]="!!row.action"
-              (click)="handleAction(row.action)"
-            >
-              <td *ngFor="let cell of row.cells" [innerHTML]="cell"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @case ('table') {
+        <div class="conversed-table-container">
+          <table class="conversed-table">
+            @if (block.headers.length) {
+              <thead>
+                <tr>
+                  @for (header of block.headers; track $index) {
+                    <th>{{ header }}</th>
+                  }
+                </tr>
+              </thead>
+            }
+            <tbody>
+              @for (row of block.rows; track $index) {
+                <tr
+                  [class.interactive]="!!row.action"
+                  (click)="handleAction(row.action)"
+                >
+                  @for (cell of row.cells; track $index) {
+                    <td [innerHTML]="cell"></td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
 
       <!-- Followups -->
-      <div *ngSwitchCase="'followups'" class="conversed-followups">
-        <button
-          *ngFor="let chip of block.items"
-          class="conversed-followup-chip"
-          (click)="handleAction({ type: 'prompt-submit', actionId: 'submit-prompt', target: chip })"
-        >
-          {{ chip }}
-        </button>
-      </div>
+      @case ('followups') {
+        <div class="conversed-followups">
+          @for (chip of block.items; track $index) {
+            <button
+              class="conversed-followup-chip"
+              (click)="handleAction({ type: 'prompt-submit', actionId: 'submit-prompt', target: chip })"
+            >
+              {{ chip }}
+            </button>
+          }
+        </div>
+      }
 
       <!-- Divider -->
-      <hr *ngSwitchCase="'divider'" class="conversed-divider" />
-    </ng-container>
+      @case ('divider') {
+        <hr class="conversed-divider" />
+      }
+    }
   `,
   styles: [`
     :host {
@@ -119,7 +153,7 @@ export class ConversedBlockComponent {
   @Input() block!: ConversedContentBlock;
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
-  @Output() action = new EventEmitter();
+  @Output() action = new EventEmitter<AgentActionEvent>();
 
   @HostBinding('style')
   get styleBindings() {
@@ -145,29 +179,33 @@ export class ConversedBlockComponent {
 @Component({
   selector: 'conversed-feed',
   standalone: true,
-  imports: [CommonModule, ConversedBlockComponent],
+  imports: [ConversedBlockComponent],
   template: `
     <div class="conversed-feed">
-      <div *ngFor="let msg of messages" [class]="'conversed-message conversed-role-' + msg.role">
-        <div class="conversed-avatar">{{ msg.role === 'user' ? 'U' : 'AI' }}</div>
-        <div class="conversed-content">
-          <div *ngIf="msg.imageUrl" class="conversed-image">
-            <img [src]="msg.imageUrl" alt="Attachment" />
+      @for (msg of messages; track msg.id) {
+        <div [class]="'conversed-message conversed-role-' + msg.role">
+          <div class="conversed-avatar">{{ msg.role === 'user' ? 'U' : 'AI' }}</div>
+          <div class="conversed-content">
+            @if (msg.imageUrl) {
+              <div class="conversed-image">
+                <img [src]="msg.imageUrl" alt="Attachment" />
+              </div>
+            }
+            @if (msg.blocks?.length) {
+              @for (block of msg.blocks; track $index) {
+                <conversed-block
+                  [block]="block"
+                  [theme]="theme"
+                  [primaryColor]="primaryColor"
+                  (action)="action.emit($event)"
+                ></conversed-block>
+              }
+            } @else {
+              <p class="conversed-p">{{ msg.text }}</p>
+            }
           </div>
-          <ng-container *ngIf="msg.blocks?.length; else textFallback">
-            <conversed-block
-              *ngFor="let block of msg.blocks"
-              [block]="block"
-              [theme]="theme"
-              [primaryColor]="primaryColor"
-              (action)="action.emit($event)"
-            ></conversed-block>
-          </ng-container>
-          <ng-template #textFallback>
-            <p class="conversed-p">{{ msg.text }}</p>
-          </ng-template>
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`
@@ -191,7 +229,7 @@ export class ConversedFeedComponent {
   @Input() messages: ConversedMessage[] = [];
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
-  @Output() action = new EventEmitter();
+  @Output() action = new EventEmitter<AgentActionEvent>();
 
   @HostBinding('style')
   get styleBindings() {

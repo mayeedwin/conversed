@@ -19,7 +19,9 @@ echo "-> Publishing @conversed/core..."
 (cd packages/core && npm publish --access public --tag "${TAG}")
 
 echo "-> Publishing @conversed/angular..."
-(cd packages/angular && npm publish --access public --tag "${TAG}")
+# ng-packagr emits the complete, publishable package into dist/ (APF format),
+# so publish from there — NOT from the package root.
+(cd packages/angular/dist && npm publish --access public --tag "${TAG}")
 
 echo "-> Publishing @conversed/react..."
 (cd packages/react && npm publish --access public --tag "${TAG}")

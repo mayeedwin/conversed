@@ -1,0 +1,8 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "dist",
+  "allowedNonPeerDependencies": ["@conversed/core"],
+  "lib": {
+    "entryFile": "src/index.ts"
+  }
+}

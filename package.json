@@ -4,9 +4,9 @@
   "version": "0.0.1-rc.1",
   "description": "Composable Rich Content UI library for AI Agents and Chat interfaces",
   "scripts": {
-    "build:core": "tsc -p packages/core/tsconfig.json",
-    "build:react": "tsc -p packages/react/tsconfig.json",
-    "build:angular": "tsc -p packages/angular/tsconfig.json",
+    "build:core": "pnpm --filter @conversed/core run build",
+    "build:react": "pnpm --filter @conversed/react run build",
+    "build:angular": "pnpm --filter @conversed/angular run build",
     "build": "npm run build:core && npm run build:react && npm run build:angular",
     "release": "./scripts/release.sh latest",
     "release:rc": "./scripts/release.sh rc"
