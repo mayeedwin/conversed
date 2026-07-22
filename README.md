@@ -1,43 +1,46 @@
-# conversed
+# Conversed
 
-> **conversed** is a high-performance, composable Rich Content UI library designed for AI Agents, LLM Chat interfaces, and dynamic conversational experiences.
+A high-performance, composable Rich Content UI library for AI Agents and LLM chat interfaces.
 
-### What Problem Does Conversed Solve?
-Standard AI chat components render static markdown text or plain chat bubbles. When LLMs generate complex data (tables, metric cards, callouts, or charts), standard parsers fail to make them interactive.
+## Overview
 
-**conversed** bridges this gap by parsing model responses into a structured **Content Block AST (Abstract Syntax Tree)**. It allows developers to:
-- Render interactive tables with custom row action triggers (e.g. "Approve Transaction", "View Detail").
-- Embed metric/stats cards, callouts, native charts, and prompt chips directly into AI streams.
-- Render standalone rich blocks anywhere in custom application layouts (dashboards, drawers, modals) without being forced into a fixed chat feed container.
-- Theme components instantly using a single `primaryColor` prop or CSS design tokens.
+Standard AI chat interfaces render static text or basic Markdown. When models generate structured data like tables, metric cards, callouts, or charts, plain text renderers fail to provide interactive UX.
 
----
+**Conversed** solves this by parsing model responses into a structured **Content Block AST (Abstract Syntax Tree)**.
 
-## 📚 Documentation & Guides
-
-- 📐 [**Architecture & AST Protocol**](./docs/ARCHITECTURE.md) — AST Block types, Action event model, and Stream Accumulator.
-- 🔀 [**Git & Workflow Conventions**](./docs/GIT_WORKFLOW.md) — Branch naming, commit message scope rules, and PR guidelines.
-- 🤖 [**LLM System Prompt Guide**](./docs/PROMPTS.md) — Provider-agnostic prompt setup for OpenAI, Gemini, Claude & Firebase Vertex AI.
-- ⚛️ [**Angular & React Integration**](./docs/FRAMEWORKS.md) — Standalone block rendering & chat feed usage guide.
-- 🎨 [**Theming & Design Tokens**](./docs/THEMING.md) — Single-line primary color and CSS variable overrides.
-- 🤝 [**Contribution Guide**](./CONTRIBUTING.md) — Development workflow and setup instructions.
-- 🤖 [**AI Agent Guide**](./AGENTS.md) — Architectural guidelines for AI coding assistants.
+### Key Capabilities
+- **Interactive Action Protocol**: Attach custom action triggers (e.g. `view-detail`, `approve-transaction`) directly to table rows, metric cards, and prompt chips.
+- **Standalone Component Rendering**: Render individual rich blocks anywhere in custom application layouts (dashboards, side drawers, modals) without being constrained to a chat feed container.
+- **Provider-Agnostic Engine**: Works with OpenAI, Anthropic Claude, Google Gemini, Firebase Vertex AI, or local models via standard HTML/Markdown parsing.
+- **Zero-Config Theming**: Theme components using a single `primaryColor` prop or custom CSS variables.
 
 ---
 
-## 📦 Packages in this Monorepo
+## Packages
 
 | Package | Version | Description |
 | :--- | :--- | :--- |
-| [`@conversed/core`](./packages/core) | `0.0.1-rc1` | Pure TypeScript AST definitions, Markdown/Stream parser engine, and Action Protocol |
-| [`@conversed/angular`](./packages/angular) | `0.0.1-rc1` | Angular 17+ Signals-based UI components & block renderers |
-| [`@conversed/react`](./packages/react) | `0.0.1-rc1` | React 18+ JSX components, hooks & context providers |
+| [`@conversed/core`](./packages/core) | `0.0.1-rc1` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
+| [`@conversed/angular`](./packages/angular) | `0.0.1-rc1` | Angular 17+ Signals-based UI components and block renderers |
+| [`@conversed/react`](./packages/react) | `0.0.1-rc1` | React 18+ JSX components and block renderers |
 
 ---
 
-## 🚀 Quickstart
+## Documentation
 
-### LLM System Prompt Integration
+- [Architecture & AST Specification](./docs/ARCHITECTURE.md)
+- [Git & Workflow Conventions](./docs/GIT_WORKFLOW.md)
+- [LLM System Prompt Guide](./docs/PROMPTS.md)
+- [Angular & React Integration](./docs/FRAMEWORKS.md)
+- [Theming & Design Tokens](./docs/THEMING.md)
+- [Contributing Guide](./CONTRIBUTING.md)
+- [AI Agent Specification](./AGENTS.md)
+
+---
+
+## Quickstart
+
+### LLM System Prompt
 
 ```typescript
 import { getSystemPromptInstruction } from '@conversed/core';
@@ -48,9 +51,7 @@ ${getSystemPromptInstruction()}
 `;
 ```
 
----
-
-### React Integration
+### React
 
 ```tsx
 import React from 'react';
@@ -70,9 +71,7 @@ export const ChatApp = () => {
 };
 ```
 
----
-
-### Angular Integration
+### Angular
 
 ```typescript
 import { Component, signal } from '@angular/core';
@@ -102,5 +101,6 @@ export class ChatComponent {
 
 ---
 
-## 📄 License
+## License
+
 MIT © [Maye Edwin](https://github.com/mayeedwin)
