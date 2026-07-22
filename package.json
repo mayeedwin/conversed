@@ -1,7 +1,7 @@
 {
   "name": "conversed-monorepo",
   "private": true,
-  "version": "0.0.1-rc1",
+  "version": "0.0.1-rc.1",
   "description": "Composable Rich Content UI library for AI Agents and Chat interfaces",
   "scripts": {
     "build:core": "tsc -p packages/core/tsconfig.json",

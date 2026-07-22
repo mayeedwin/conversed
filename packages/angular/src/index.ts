@@ -6,7 +6,6 @@ import { ConversedContentBlock, ConversedMessage, AgentActionEvent, AgentActionP
   selector: 'conversed-block',
   standalone: true,
   imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container [ngSwitch]="block.type">
       <!-- Paragraph -->
@@ -147,7 +146,6 @@ export class ConversedBlockComponent {
   selector: 'conversed-feed',
   standalone: true,
   imports: [CommonModule, ConversedBlockComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="conversed-feed">
       <div *ngFor="let msg of messages" [class]="'conversed-message conversed-role-' + msg.role">
