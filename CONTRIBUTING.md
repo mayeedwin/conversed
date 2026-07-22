@@ -32,6 +32,14 @@ pnpm build
 
 ---
 
+## 📜 Git & Commit Conventions
+
+Please follow our [Git & Workflow Conventions](./docs/GIT_WORKFLOW.md):
+- **Branch Naming**: `type/short-description` (e.g. `feature/block-ast-parser`, `fix/table-action`).
+- **Commit Format**: `type(scope): #issue_number description` where `scope` strictly matches your branch name.
+
+---
+
 ## 📜 Pull Request Guidelines
 
 1. Ensure code compiles cleanly (`pnpm build`).

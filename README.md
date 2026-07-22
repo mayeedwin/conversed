@@ -16,6 +16,7 @@ Standard AI chat components render static markdown text or plain chat bubbles. W
 ## 📚 Documentation & Guides
 
 - 📐 [**Architecture & AST Protocol**](./docs/ARCHITECTURE.md) — AST Block types, Action event model, and Stream Accumulator.
+- 🔀 [**Git & Workflow Conventions**](./docs/GIT_WORKFLOW.md) — Branch naming, commit message scope rules, and PR guidelines.
 - 🤖 [**LLM System Prompt Guide**](./docs/PROMPTS.md) — Provider-agnostic prompt setup for OpenAI, Gemini, Claude & Firebase Vertex AI.
 - ⚛️ [**Angular & React Integration**](./docs/FRAMEWORKS.md) — Standalone block rendering & chat feed usage guide.
 - 🎨 [**Theming & Design Tokens**](./docs/THEMING.md) — Single-line primary color and CSS variable overrides.
