@@ -77,11 +77,11 @@ Chart.register(...registerables);
       border-radius: var(--radius);
       background: var(--card-bg);
       border: 1px solid var(--border);
-      box-shadow: none !important;
+      box-shadow: none;
       transition: border-color 0.15s ease, background 0.15s ease;
     }
     .conversed-stat-card.interactive { cursor: pointer; }
-    .conversed-stat-card.interactive:hover { border-color: var(--primary); background: #0071e30a; }
+    .conversed-stat-card.interactive:hover { border-color: var(--primary); background: var(--conversed-primary-alpha15, #0071e314); }
     .conversed-stat-label { font-size: 0.62rem; opacity: 0.75; font-weight: 500; display: block; margin-bottom: 0.1rem; }
     .conversed-stat-value { font-size: 0.95rem; font-weight: 600; display: block; letter-spacing: -0.01em; }
     .conversed-stat-delta { font-size: 0.62rem; font-weight: 500; margin-top: 0.1rem; display: inline-block; }
@@ -167,14 +167,14 @@ export class ConversedStatsComponent {
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--card-bg);
-      box-shadow: none !important;
+      box-shadow: none;
     }
     .conversed-data-table { display: flex; flex-direction: column; width: 100%; min-width: 220px; font-size: 0.7rem; }
     .conversed-table-header { display: flex; border-bottom: 1px solid var(--border); background: var(--conversed-gray-100, #f2f2f7); font-weight: 600; }
     .conversed-table-row { display: flex; border-bottom: 1px solid var(--border); transition: background 0.15s ease; }
     .conversed-table-row:last-child { border-bottom: none; }
     .conversed-table-row.interactive { cursor: pointer; }
-    .conversed-table-row.interactive:hover { background: #0071e30a; }
+    .conversed-table-row.interactive:hover { background: var(--conversed-primary-alpha15, #0071e314); }
     .conversed-cell { flex: 1; min-width: 0; padding: 0.3rem 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
     .conversed-cell:last-child { border-right: none; }
     .th-cell { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.58rem; opacity: 0.65; }
@@ -187,15 +187,15 @@ export class ConversedStatsComponent {
       line-height: 1;
       padding: 0.2rem 0.55rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      color: inherit;
+      border: 1px solid var(--conversed-button-border-color, var(--border));
+      background: var(--conversed-button-bg, var(--card-bg));
+      color: var(--conversed-button-text, var(--primary));
       cursor: pointer;
-      box-shadow: none !important;
+      box-shadow: none;
       transition: border-color 0.15s ease, background 0.15s ease;
     }
     .conversed-row-action:hover { border-color: var(--primary); }
-    .conversed-row-action.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .conversed-row-action.primary { background: var(--primary); border-color: var(--primary); color: var(--conversed-primary-contrast, #fff); }
   `]
 })
 export class ConversedTableComponent {
@@ -259,7 +259,7 @@ export class ConversedTableComponent {
       border-left: 3px solid var(--primary);
       background: var(--card-bg);
       margin: 0.35rem 0;
-      box-shadow: none !important;
+      box-shadow: none;
     }
     .conversed-callout-badge { font-size: 0.58rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; display: block; margin-bottom: 0.1rem; }
     .conversed-callout-title { font-weight: 600; font-size: 0.75rem; display: block; margin-bottom: 0.1rem; }
@@ -304,26 +304,26 @@ export class ConversedCalloutComponent {
   styles: [`
     :host {
       --primary: var(--conversed-primary, #0071e3);
-      --card-bg: var(--conversed-card-bg, #ffffff);
+      --card-bg: var(--conversed-card-bg, transparent);
       --border: var(--conversed-border-color, #e5e5ea);
       display: block;
     }
     .conversed-followups { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
     .conversed-followup-chip {
-      background: var(--card-bg);
-      color: var(--primary);
-      border: 1px solid var(--border) !important;
+      background: var(--conversed-button-bg, var(--card-bg));
+      color: var(--conversed-button-text, var(--primary));
+      border: 1px solid var(--conversed-button-border-color, var(--border));
       border-radius: 14px;
       padding: 0.25rem 0.65rem;
       cursor: pointer;
       font-size: 0.72rem;
       font-weight: 500;
-      box-shadow: none !important;
+      box-shadow: none;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
     .conversed-followup-chip:hover {
-      background: #0071e30d;
-      border-color: var(--primary) !important;
+      background: var(--conversed-primary-alpha15, #0071e314);
+      border-color: var(--primary);
     }
   `]
 })
@@ -540,7 +540,7 @@ export class ConversedDetailsComponent {
     .conversed-steps { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.35rem 0; }
     .conversed-step { display: flex; gap: 0.55rem; position: relative; }
     .conversed-step:not(:last-child)::before { content: ''; position: absolute; left: 0.68rem; top: 1.4rem; bottom: -0.5rem; width: 1px; background: var(--border); }
-    .conversed-step-index { flex: none; width: 1.35rem; height: 1.35rem; border-radius: 50%; background: var(--primary); color: #fff; font-size: 0.68rem; font-weight: 600; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .conversed-step-index { flex: none; width: 1.35rem; height: 1.35rem; border-radius: 50%; background: var(--primary); color: var(--conversed-primary-contrast, #fff); font-size: 0.68rem; font-weight: 600; display: flex; align-items: center; justify-content: center; z-index: 1; }
     .conversed-step-content { flex: 1; min-width: 0; padding-top: 0.1rem; }
     .conversed-step-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.05rem; }
     .conversed-step-body { font-size: 0.75rem; line-height: 1.45; }
@@ -587,7 +587,7 @@ export class ConversedStepsComponent {
   styles: [`
     :host {
       --primary: var(--conversed-primary, #0071e3);
-      --card-bg: var(--conversed-card-bg, #ffffff);
+      --card-bg: var(--conversed-card-bg, transparent);
       --border: var(--conversed-border-color, #e5e5ea);
       display: block;
     }
@@ -731,8 +731,8 @@ export class ConversedMediaComponent {
   styles: [`
     :host { display: block; }
     .conversed-p { margin: 0; padding: 0; line-height: 1.45; font-size: 0.8rem; }
-    .conversed-code-wrapper { background: #1c1c1e; color: #ffffff; border-radius: 8px; overflow: hidden; margin: 0.35rem 0; box-shadow: none !important; }
-    .conversed-code-header { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; background: #2c2c2e; font-size: 0.68rem; }
+    .conversed-code-wrapper { background: var(--conversed-code-bg, #1c1c1e); color: var(--conversed-code-text, #ffffff); border-radius: var(--conversed-radius, 8px); overflow: hidden; margin: 0.35rem 0; box-shadow: none; }
+    .conversed-code-header { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; background: color-mix(in srgb, var(--conversed-code-text, #ffffff) 10%, transparent); font-size: 0.68rem; }
     .conversed-code { padding: 0.55rem; margin: 0; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, SF Pro Text, monospace; font-size: 0.72rem; }
     .conversed-divider { border: 0; border-top: 1px solid var(--conversed-border-color, #e5e5ea); margin: 0.55rem 0; }
   `]

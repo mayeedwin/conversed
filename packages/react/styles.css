@@ -138,7 +138,7 @@
   height: 1.35rem;
   border-radius: 50%;
   background: var(--conversed-primary, #0071e3);
-  color: #fff;
+  color: var(--conversed-primary-contrast, #fff);
   font-size: 0.68rem;
   font-weight: 600;
   display: flex;
@@ -241,8 +241,8 @@
 
 /* Code */
 .conversed-code-wrapper {
-  background: #1c1c1e;
-  color: #ffffff;
+  background: var(--conversed-code-bg, #1c1c1e);
+  color: var(--conversed-code-text, #ffffff);
   border-radius: var(--conversed-radius, 8px);
   overflow: hidden;
   margin: 0.35rem 0;
@@ -253,7 +253,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.3rem 0.6rem;
-  background: #2c2c2e;
+  background: color-mix(in srgb, var(--conversed-code-text, #ffffff) 10%, transparent);
   font-size: 0.68rem;
 }
 .conversed-code-header button {
@@ -423,11 +423,11 @@
   line-height: 1;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  border: 1px solid var(--conversed-border-color, #e5e5ea);
-  background: var(--conversed-card-bg, transparent);
-  color: inherit;
+  border: 1px solid var(--conversed-button-border-color, var(--conversed-border-color, #e5e5ea));
+  background: var(--conversed-button-bg, var(--conversed-card-bg, transparent));
+  color: var(--conversed-button-text, var(--conversed-primary, #0071e3));
   cursor: pointer;
-  box-shadow: none !important;
+  box-shadow: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 .conversed-row-action:hover {
@@ -436,7 +436,7 @@
 .conversed-row-action.primary {
   background: var(--conversed-primary, #0071e3);
   border-color: var(--conversed-primary, #0071e3);
-  color: #fff;
+  color: var(--conversed-primary-contrast, #fff);
 }
 
 /* Follow-up chips */
@@ -447,9 +447,9 @@
   margin-top: 0.35rem;
 }
 .conversed-followup-chip {
-  background: var(--conversed-card-bg, transparent);
-  color: var(--conversed-primary, #0071e3);
-  border: 1px solid var(--conversed-border-color, #e5e5ea);
+  background: var(--conversed-button-bg, var(--conversed-card-bg, transparent));
+  color: var(--conversed-button-text, var(--conversed-primary, #0071e3));
+  border: 1px solid var(--conversed-button-border-color, var(--conversed-border-color, #e5e5ea));
   border-radius: 14px;
   padding: 0.25rem 0.65rem;
   cursor: pointer;
