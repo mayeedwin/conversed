@@ -1,0 +1,55 @@
+:root {
+  /* Palette — warm paper, Claude clay accent */
+  --paper: #f5f4ee;
+  --surface: #ffffff;
+  --ink: #22201c;
+  --muted: #6f6b62;
+  --faint: #97928713;
+  --faint-ink: #938f85;
+  --line: #e6e3da;
+  --clay: #c96442;
+  --clay-ink: #a24a30;
+  --clay-soft: #f4e3db;
+
+  /* Per-action-type accents (badge ink / soft bg) */
+  --t-navigate: #35608f;
+  --t-navigate-bg: #e6eef6;
+  --t-command: #a24a30;
+  --t-command-bg: #f4e3db;
+  --t-prompt: #4b7f55;
+  --t-prompt-bg: #e4efe4;
+  --t-copy: #6f5799;
+  --t-copy-bg: #ece5f4;
+  --t-link: #97701f;
+  --t-link-bg: #f3ead2;
+
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  display: flex;
+}

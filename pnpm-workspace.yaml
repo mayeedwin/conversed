@@ -1,2 +1,9 @@
 packages:
   - 'packages/*'
+  - 'demos/*'
+
+# Resolve cross-package deps (e.g. @conversed/core) to the local workspace
+# copy during development, even though they're pinned to exact published
+# versions. We publish with `npm publish`, which does not rewrite the
+# `workspace:` protocol, so deps stay as exact versions and rely on this.
+linkWorkspacePackages: true

@@ -1,6 +1,35 @@
 import React from 'react';
-import type { ConversedContentBlock, ConversedMessage, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
-import { generateCssVariables } from '@conversed/core';
+import { Chart, registerables } from 'chart.js';
+import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
+import { generateCssVariables, toChartJsConfig, logConversedAction } from '@conversed/core';
+
+Chart.register(...registerables);
+
+const ConversedChart: React.FC<{ block: ChartBlock; primaryColor?: string }> = ({ block, primaryColor }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const resolved =
+      primaryColor ||
+      getComputedStyle(canvas).getPropertyValue('--conversed-primary').trim() ||
+      '#0071e3';
+    const chart = new Chart(canvas, toChartJsConfig(block, { primaryColor: resolved }) as never);
+    return () => chart.destroy();
+  }, [block, primaryColor]);
+
+  return React.createElement(
+    'figure',
+    { className: 'conversed-chart' },
+    block.title && React.createElement('figcaption', { className: 'conversed-chart-title' }, block.title),
+    React.createElement(
+      'div',
+      { className: 'conversed-chart-canvas' },
+      React.createElement('canvas', { ref: canvasRef })
+    )
+  );
+};
 
 export interface ConversedBlockProps {
   block: ConversedContentBlock;
@@ -36,11 +65,104 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
         });
       case 'list':
         return React.createElement(
-          block.ordered ? 'ol' : 'ul',
-          { className: block.ordered ? 'conversed-ol' : 'conversed-ul' },
+          'div',
+          {
+            className: `conversed-list ${block.ordered ? 'conversed-list-ordered' : 'conversed-list-unordered'}`,
+            role: 'list'
+          },
           block.items.map((item: string, idx: number) =>
-            React.createElement('li', { key: idx, dangerouslySetInnerHTML: { __html: item } })
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-list-row', role: 'listitem' },
+              React.createElement(
+                'span',
+                { className: 'conversed-list-marker', 'aria-hidden': true },
+                block.ordered ? `${idx + 1}` : ''
+              ),
+              React.createElement('span', {
+                className: 'conversed-list-content',
+                dangerouslySetInnerHTML: { __html: item }
+              })
+            )
           )
+        );
+      case 'details':
+        return React.createElement(
+          'details',
+          { className: 'conversed-details', open: block.open },
+          React.createElement('summary', {
+            className: 'conversed-details-summary',
+            dangerouslySetInnerHTML: { __html: block.summary }
+          }),
+          React.createElement('div', {
+            className: 'conversed-details-body',
+            dangerouslySetInnerHTML: { __html: block.html }
+          })
+        );
+      case 'steps':
+        return React.createElement(
+          'div',
+          { className: 'conversed-steps' },
+          block.items.map((step, idx: number) =>
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-step' },
+              React.createElement('span', { className: 'conversed-step-index', 'aria-hidden': true }, `${idx + 1}`),
+              React.createElement(
+                'div',
+                { className: 'conversed-step-content' },
+                step.title &&
+                  React.createElement('div', {
+                    className: 'conversed-step-title',
+                    dangerouslySetInnerHTML: { __html: step.title }
+                  }),
+                React.createElement('div', {
+                  className: 'conversed-step-body',
+                  dangerouslySetInnerHTML: { __html: step.html }
+                })
+              )
+            )
+          )
+        );
+      case 'timeline':
+        return React.createElement(
+          'div',
+          { className: 'conversed-timeline' },
+          block.items.map((entry, idx: number) =>
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-timeline-item' },
+              React.createElement('span', { className: 'conversed-timeline-dot', 'aria-hidden': true }),
+              React.createElement(
+                'div',
+                { className: 'conversed-timeline-content' },
+                entry.time &&
+                  React.createElement('span', { className: 'conversed-timeline-time' }, entry.time),
+                entry.title &&
+                  React.createElement('div', {
+                    className: 'conversed-timeline-title',
+                    dangerouslySetInnerHTML: { __html: entry.title }
+                  }),
+                React.createElement('div', {
+                  className: 'conversed-timeline-body',
+                  dangerouslySetInnerHTML: { __html: entry.html }
+                })
+              )
+            )
+          )
+        );
+      case 'media':
+        return React.createElement(
+          'figure',
+          { className: 'conversed-media' },
+          React.createElement('img', {
+            className: 'conversed-media-img',
+            src: block.src,
+            alt: block.alt || '',
+            loading: 'lazy'
+          }),
+          block.caption &&
+            React.createElement('figcaption', { className: 'conversed-media-caption' }, block.caption)
         );
       case 'code':
         return React.createElement(
@@ -103,32 +225,34 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
           'div',
           { className: 'conversed-table-container' },
           React.createElement(
-            'table',
-            { className: 'conversed-table' },
+            'div',
+            { className: 'conversed-data-table' },
             block.headers &&
               block.headers.length > 0 &&
               React.createElement(
-                'thead',
-                null,
-                React.createElement(
-                  'tr',
-                  null,
-                  block.headers.map((h: string, i: number) => React.createElement('th', { key: i }, h))
+                'div',
+                { className: 'conversed-table-header' },
+                block.headers.map((h: string, i: number) =>
+                  React.createElement('div', { key: i, className: 'conversed-cell th-cell' }, h)
                 )
               ),
             React.createElement(
-              'tbody',
-              null,
+              'div',
+              { className: 'conversed-table-body' },
               block.rows.map((row: TableRow, rIdx: number) =>
                 React.createElement(
-                  'tr',
+                  'div',
                   {
                     key: rIdx,
-                    className: row.action ? 'interactive' : '',
+                    className: `conversed-table-row ${row.action ? 'interactive' : ''}`,
                     onClick: () => handleAction(row.action)
                   },
                   row.cells.map((cell: string, cIdx: number) =>
-                    React.createElement('td', { key: cIdx, dangerouslySetInnerHTML: { __html: cell } })
+                    React.createElement('div', {
+                      key: cIdx,
+                      className: 'conversed-cell td-cell',
+                      dangerouslySetInnerHTML: { __html: cell }
+                    })
                   )
                 )
               )
@@ -152,6 +276,8 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
             )
           )
         );
+      case 'chart':
+        return React.createElement(ConversedChart, { block, primaryColor });
       case 'divider':
         return React.createElement('hr', { className: 'conversed-divider' });
       default:
@@ -162,46 +288,29 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
   return React.createElement('div', { className: 'conversed-block-wrapper', style: styleVars }, renderContent());
 };
 
-export interface ConversedFeedProps {
-  messages: ConversedMessage[];
+export interface ConversedContentProps {
+  blocks: ConversedContentBlock[];
   primaryColor?: string;
   theme?: ConversedThemeTokens;
   onAction?: (event: AgentActionEvent) => void;
+  debug?: boolean;
 }
 
-export const ConversedFeed: React.FC<ConversedFeedProps> = (props: ConversedFeedProps) => {
-  const { messages, primaryColor, theme, onAction } = props;
+export const ConversedContent: React.FC<ConversedContentProps> = (props: ConversedContentProps) => {
+  const { blocks, primaryColor, theme, onAction, debug } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
+  const handleAction = (event: AgentActionEvent) => {
+    if (debug) logConversedAction(event);
+    onAction?.(event);
+  };
+
   return React.createElement(
     'div',
-    { className: 'conversed-feed', style: styleVars },
-    messages.map((msg: ConversedMessage) =>
-      React.createElement(
-        'div',
-        { key: msg.id, className: `conversed-message conversed-role-${msg.role}` },
-        React.createElement(
-          'div',
-          { className: 'conversed-avatar' },
-          msg.role === 'user' ? 'U' : 'AI'
-        ),
-        React.createElement(
-          'div',
-          { className: 'conversed-content' },
-          msg.imageUrl &&
-            React.createElement(
-              'div',
-              { className: 'conversed-image' },
-              React.createElement('img', { src: msg.imageUrl, alt: 'Attachment' })
-            ),
-          msg.blocks && msg.blocks.length > 0
-            ? msg.blocks.map((block: ConversedContentBlock, bIdx: number) =>
-                React.createElement(ConversedBlock, { key: bIdx, block, primaryColor, theme, onAction })
-              )
-            : React.createElement('p', { className: 'conversed-p' }, msg.text)
-        )
-      )
+    { className: 'conversed-content', style: styleVars },
+    blocks.map((block: ConversedContentBlock, idx: number) =>
+      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, onAction: handleAction })
     )
   );
 };

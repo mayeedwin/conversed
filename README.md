@@ -2,6 +2,8 @@
 
 A high-performance, composable Rich Content UI library for AI Agents and LLM chat interfaces.
 
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app) — try the blocks and the Action Inspector in a live chat console.
+
 ## Overview
 
 Standard AI chat interfaces render static text or basic Markdown. When models generate structured data like tables, metric cards, callouts, or charts, plain text renderers fail to provide interactive UX.
@@ -10,9 +12,39 @@ Standard AI chat interfaces render static text or basic Markdown. When models ge
 
 ### Key Capabilities
 - **Interactive Action Protocol**: Attach custom action triggers (e.g. `view-detail`, `approve-transaction`) directly to table rows, metric cards, and prompt chips.
+- **Native Charts**: Render bar, line, and pie charts (via Chart.js) directly from model output — no manual chart wiring.
 - **Standalone Component Rendering**: Render individual rich blocks anywhere in custom application layouts (dashboards, side drawers, modals) without being constrained to a chat feed container.
 - **Provider-Agnostic Engine**: Works with OpenAI, Anthropic Claude, Google Gemini, Firebase Vertex AI, or local models via standard HTML/Markdown parsing.
 - **Zero-Config Theming**: Theme components using a single `primaryColor` prop or custom CSS variables.
+- **Built-in Debug Mode**: Pass `debug` to log the raw text, parsed blocks, and emitted actions to the console (silent by default).
+
+---
+
+## Screenshots
+
+Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
+
+- [Livestock table](docs/screenshots/01-livestock-table.png) — a `table` block rendering row data
+- [Financial summary](docs/screenshots/02-financial-summary.png) — `stats` cards, `followups` chips, and an income breakdown `table`
+- [Charts](docs/screenshots/03-charts.png) — bar and pie `chart` blocks via Chart.js
+- [Expense breakdown](docs/screenshots/04-expense-breakdown.png) — `stats` cards with an expense breakdown `table`
+
+---
+
+## Demo
+
+Play with it live at **[conversed-web.web.app](https://conversed-web.web.app)**.
+
+A React chat demo lives in [`demos/react-demo`](./demos/react-demo) — it renders every block type
+and shows a live **Action Inspector** for the Action Protocol. This is a **pnpm workspace**, so run
+it with pnpm from the repo root (npm can't resolve the `workspace:` deps):
+
+```bash
+pnpm install
+pnpm --filter @conversed/demo-react dev
+```
+
+See the [demo README](./demos/react-demo/README.md) for build and Firebase Hosting deployment.
 
 ---
 
@@ -20,9 +52,9 @@ Standard AI chat interfaces render static text or basic Markdown. When models ge
 
 | Package | Version | Description |
 | :--- | :--- | :--- |
-| [`@conversed/core`](./packages/core) | `0.0.1-rc.1` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
-| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.1` | Angular 17+ Signals-based UI components and block renderers |
-| [`@conversed/react`](./packages/react) | `0.0.1-rc.1` | React 18+ JSX components and block renderers |
+| [`@conversed/core`](./packages/core) | `0.0.1-rc.4` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
+| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.4` | Angular 17+ Signals-based UI components and block renderers |
+| [`@conversed/react`](./packages/react) | `0.0.1-rc.4` | React 18+ JSX components and block renderers |
 
 ---
 
@@ -51,22 +83,31 @@ ${getSystemPromptInstruction()}
 `;
 ```
 
+> Conversed renders **content, not conversations**. It never owns roles, avatars,
+> or message bubbles — you drop `<ConversedContent>` inside your existing chat's
+> assistant bubble and hand it the parsed blocks. Its only input is `blocks`.
+
 ### React
 
 ```tsx
-import React from 'react';
-import { ConversedFeed, ConversedBlock } from '@conversed/react';
+// Import the stylesheet once at your app root (React ships CSS separately).
+import '@conversed/react/styles.css';
+import { ConversedContent } from '@conversed/react';
 import { parseMessageBlocks } from '@conversed/core';
 
-export const ChatApp = () => {
+export const AssistantBubble = ({ rawAiResponse }: { rawAiResponse: string }) => {
   const blocks = parseMessageBlocks(rawAiResponse);
 
   return (
-    <ConversedFeed
-      messages={messages}
-      primaryColor="#6366f1"
-      onAction={(e) => console.log('Action:', e.action)}
-    />
+    // Your own chat bubble — Conversed only fills the content.
+    <div className="my-chat-bubble assistant">
+      <ConversedContent
+        blocks={blocks}
+        primaryColor="#0071e3"
+        onAction={(e) => console.log('Action:', e.action)}
+        debug
+      />
+    </div>
   );
 };
 ```
@@ -74,24 +115,29 @@ export const ChatApp = () => {
 ### Angular
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { ConversedFeedComponent } from '@conversed/angular';
-import { ConversedMessage, AgentActionEvent } from '@conversed/core';
+import { Component, computed, input } from '@angular/core';
+import { ConversedContentComponent } from '@conversed/angular';
+import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-assistant-bubble',
   standalone: true,
-  imports: [ConversedFeedComponent],
+  imports: [ConversedContentComponent],
   template: `
-    <conversed-feed
-      [messages]="messages()"
-      primaryColor="#6366f1"
-      (action)="onAction($event)">
-    </conversed-feed>
+    <!-- Your own chat bubble — Conversed only fills the content. -->
+    <div class="my-chat-bubble assistant">
+      <conversed-content
+        [blocks]="blocks()"
+        primaryColor="#0071e3"
+        [debug]="true"
+        (action)="onAction($event)">
+      </conversed-content>
+    </div>
   `
 })
-export class ChatComponent {
-  messages = signal<ConversedMessage[]>([]);
+export class AssistantBubbleComponent {
+  rawAiResponse = input.required<string>();
+  blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 
   onAction(event: AgentActionEvent) {
     console.log('Action triggered:', event.action);

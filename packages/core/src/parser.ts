@@ -6,8 +6,10 @@ import {
   ConversedContentBlock,
   StatItem,
   StatTrend,
+  StepItem,
   TableBlock,
-  TableRow
+  TableRow,
+  TimelineItem
 } from './types.js';
 
 const WRAPPER_TAGS = new Set(['div', 'section', 'article']);
@@ -206,6 +208,84 @@ const parseCalloutBlock = (blockquoteElement: Element): ConversedContentBlock | 
   };
 };
 
+/** Splits an <li> into an optional leading <strong> title and the remaining HTML body. */
+const splitTitleBody = (listItem: Element): { title?: string; html: string } => {
+  const fullHtml = listItem.innerHTML.trim();
+  const firstChild = listItem.firstElementChild;
+  if (
+    firstChild &&
+    firstChild.tagName.toLowerCase() === 'strong' &&
+    fullHtml.startsWith(firstChild.outerHTML)
+  ) {
+    return {
+      title: firstChild.innerHTML.trim(),
+      html: fullHtml.slice(firstChild.outerHTML.length).trim()
+    };
+  }
+  return { html: fullHtml };
+};
+
+const parseDetailsBlock = (element: Element): ConversedContentBlock | null => {
+  const summaryElement = element.querySelector(':scope > summary');
+  const summary = summaryElement?.innerHTML.trim() || 'Details';
+  const bodyHtml = Array.from(element.children)
+    .filter((child) => child.tagName.toLowerCase() !== 'summary')
+    .map((child) => child.outerHTML)
+    .join('')
+    .trim();
+
+  if (!summaryElement && !bodyHtml) return null;
+  return {
+    type: 'details',
+    summary,
+    html: bodyHtml,
+    open: element.hasAttribute('open')
+  };
+};
+
+const parseStepsBlock = (element: Element): ConversedContentBlock | null => {
+  const items: StepItem[] = Array.from(element.querySelectorAll(':scope > li'))
+    .map((listItem) => splitTitleBody(listItem))
+    .filter((step) => step.title || step.html);
+  if (!items.length) return null;
+  return { type: 'steps', items };
+};
+
+const parseTimelineBlock = (element: Element): ConversedContentBlock | null => {
+  const items: TimelineItem[] = Array.from(element.querySelectorAll(':scope > li'))
+    .map((listItem): TimelineItem => {
+      const { title, html } = splitTitleBody(listItem);
+      const time = listItem.getAttribute('data-time')?.trim() || undefined;
+      return {
+        ...(time ? { time } : {}),
+        ...(title ? { title } : {}),
+        html
+      };
+    })
+    .filter((entry) => entry.title || entry.html || entry.time);
+  if (!items.length) return null;
+  return { type: 'timeline', items };
+};
+
+const parseMediaBlock = (element: Element): ConversedContentBlock | null => {
+  const isImg = element.tagName.toLowerCase() === 'img';
+  const imgElement = isImg ? element : element.querySelector('img');
+  const src = imgElement?.getAttribute('src')?.trim();
+  if (!src) return null;
+
+  const alt = imgElement?.getAttribute('alt')?.trim() || undefined;
+  const caption = isImg
+    ? undefined
+    : element.querySelector('figcaption')?.textContent?.trim() || undefined;
+
+  return {
+    type: 'media',
+    src,
+    ...(alt ? { alt } : {}),
+    ...(caption ? { caption } : {})
+  };
+};
+
 const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => {
   const tag = element.tagName.toLowerCase();
 
@@ -217,17 +297,40 @@ const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => 
   }
 
   if (tag === 'p') {
+    const onlyImage =
+      element.children.length === 1 &&
+      element.children[0].tagName.toLowerCase() === 'img' &&
+      (element.textContent ?? '').trim() === '';
+    if (onlyImage) {
+      const mediaBlock = parseMediaBlock(element.children[0]);
+      if (mediaBlock) {
+        blocks.push(mediaBlock);
+        return;
+      }
+    }
     const innerHtml = element.innerHTML.trim();
     if (innerHtml) blocks.push({ type: 'paragraph', html: innerHtml });
     return;
   }
 
-  if (tag === 'ul' && element.hasAttribute('data-followups')) {
+  if ((tag === 'ul' || tag === 'ol') && element.hasAttribute('data-followups')) {
     const items = Array.from(element.querySelectorAll(':scope > li'))
       .map((listItem) => (listItem.textContent ?? '').trim())
       .filter(Boolean)
       .slice(0, 5);
     if (items.length) blocks.push({ type: 'followups', items });
+    return;
+  }
+
+  if ((tag === 'ul' || tag === 'ol') && element.hasAttribute('data-steps')) {
+    const stepsBlock = parseStepsBlock(element);
+    if (stepsBlock) blocks.push(stepsBlock);
+    return;
+  }
+
+  if ((tag === 'ul' || tag === 'ol') && element.hasAttribute('data-timeline')) {
+    const timelineBlock = parseTimelineBlock(element);
+    if (timelineBlock) blocks.push(timelineBlock);
     return;
   }
 
@@ -267,9 +370,26 @@ const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => 
     return;
   }
 
+  if (tag === 'details') {
+    const detailsBlock = parseDetailsBlock(element);
+    if (detailsBlock) blocks.push(detailsBlock);
+    return;
+  }
+
   if (tag === 'figure') {
-    const chartBlock = parseChartBlock(element);
-    if (chartBlock) blocks.push(chartBlock);
+    if (element.hasAttribute('data-chart')) {
+      const chartBlock = parseChartBlock(element);
+      if (chartBlock) blocks.push(chartBlock);
+      return;
+    }
+    const mediaBlock = parseMediaBlock(element);
+    if (mediaBlock) blocks.push(mediaBlock);
+    return;
+  }
+
+  if (tag === 'img') {
+    const mediaBlock = parseMediaBlock(element);
+    if (mediaBlock) blocks.push(mediaBlock);
     return;
   }
 
@@ -306,30 +426,43 @@ const parseNode = (node: Node, blocks: ConversedContentBlock[]) => {
 };
 
 import { normalizeMarkdownToHtml } from './markdown-normalizer.js';
+import { logConversedPipeline } from './debug.js';
 
-export const parseMessageBlocks = (rawHtml: string): ConversedContentBlock[] => {
+export interface ParseOptions {
+  /** When true, logs the raw text and the parsed blocks to the console. */
+  debug?: boolean;
+}
+
+export const parseMessageBlocks = (
+  rawHtml: string,
+  options?: ParseOptions
+): ConversedContentBlock[] => {
   if (!rawHtml || !rawHtml.trim()) return [];
 
   const html = normalizeMarkdownToHtml(rawHtml);
+  let blocks: ConversedContentBlock[];
 
   if (typeof DOMParser === 'undefined') {
     // Basic fallback for environments without DOMParser
-    return [{ type: 'paragraph', html: rawHtml.trim() }];
+    blocks = [{ type: 'paragraph', html: rawHtml.trim() }];
+  } else {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+    const container = doc.querySelector('div');
+    if (!container) {
+      blocks = [{ type: 'paragraph', html: html.trim() }];
+    } else {
+      blocks = [];
+      for (const node of Array.from(container.childNodes)) {
+        parseNode(node, blocks);
+      }
+      if (!blocks.length) {
+        blocks.push({ type: 'paragraph', html: rawHtml.trim() });
+      }
+    }
   }
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-  const container = doc.querySelector('div');
-  if (!container) return [{ type: 'paragraph', html: html.trim() }];
-
-  const blocks: ConversedContentBlock[] = [];
-  for (const node of Array.from(container.childNodes)) {
-    parseNode(node, blocks);
-  }
-
-  if (!blocks.length) {
-    blocks.push({ type: 'paragraph', html: rawHtml.trim() });
-  }
+  if (options?.debug) logConversedPipeline(rawHtml, blocks);
 
   return blocks;
 };

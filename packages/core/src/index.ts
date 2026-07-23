@@ -5,3 +5,5 @@ export * from './prompts.js';
 export * from './stream.js';
 export * from './markdown-normalizer.js';
 export * from './registry.js';
+export * from './chart.js';
+export * from './debug.js';

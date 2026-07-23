@@ -2,6 +2,8 @@
 
 > React 18+ components and hooks for **conversed** rich AI chat UI.
 
+▶ **Live playground:** [conversed-web.web.app](https://conversed-web.web.app) — built with this package.
+
 ## Installation
 
 ```bash
@@ -9,6 +11,19 @@ npm install @conversed/react @conversed/core
 # or
 pnpm add @conversed/react @conversed/core
 ```
+
+### Import the stylesheet (required)
+
+React ships its CSS separately — import it once at your app root, or blocks render
+unstyled (no borders, padding, or sizing):
+
+```tsx
+import '@conversed/react/styles.css';
+```
+
+The stylesheet is fully driven by `--conversed-*` CSS variables, so `primaryColor` /
+`theme` props (and your own `:root` overrides) still restyle everything after import.
+See [Theming](../../docs/THEMING.md) for the token list and the iOS gray scale.
 
 ## Usage
 
@@ -23,31 +38,38 @@ import { ConversedBlock } from '@conversed/react';
 export const DashboardWidget = ({ block }) => (
   <ConversedBlock
     block={block}
-    primaryColor="#6366f1"
+    primaryColor="#0071e3"
     onAction={(e) => console.log('Action:', e.action)}
   />
 );
 ```
 
-### Full Chat Feed Component
+### Rendering an Assistant Message
+
+Conversed renders **content, not conversations** — it never owns roles, avatars, or
+bubbles. Its only input is `blocks`. Parse the raw assistant text and render inside
+your own bubble:
 
 ```tsx
-import React, { useState } from 'react';
-import { ConversedFeed } from '@conversed/react';
-import { ConversedMessage, AgentActionEvent } from '@conversed/core';
+import { ConversedContent } from '@conversed/react';
+import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
 
-export const ChatApp = () => {
-  const [messages, setMessages] = useState<ConversedMessage[]>([]);
-
-  return (
-    <ConversedFeed
-      messages={messages}
-      primaryColor="#6366f1"
+export const AssistantBubble = ({ rawAiResponse }: { rawAiResponse: string }) => (
+  <div className="my-chat-bubble assistant">
+    <ConversedContent
+      blocks={parseMessageBlocks(rawAiResponse, { debug: true })}
+      primaryColor="#0071e3"
+      debug
       onAction={(e: AgentActionEvent) => console.log('Action:', e.action)}
     />
-  );
-};
+  </div>
+);
 ```
+
+`ConversedContent` props: `blocks`, `primaryColor?` (defaults to `#0071e3`),
+`theme?`, `onAction?`, and `debug?` (logs emitted actions when `true`).
+`ConversedBlock` renders a single block. Chart blocks render via **Chart.js**
+(bundled dependency).
 
 ## Documentation
 

@@ -1,17 +1,38 @@
 {
   "name": "conversed-monorepo",
   "private": true,
-  "version": "0.0.1-rc.1",
+  "version": "0.0.1-rc.4",
   "description": "Composable Rich Content UI library for AI Agents and Chat interfaces",
   "scripts": {
-    "build:core": "tsc -p packages/core/tsconfig.json",
-    "build:react": "tsc -p packages/react/tsconfig.json",
-    "build:angular": "tsc -p packages/angular/tsconfig.json",
-    "build": "npm run build:core && npm run build:react && npm run build:angular",
+    "build:core": "pnpm --filter @conversed/core run build",
+    "build:react": "pnpm --filter @conversed/react run build",
+    "build:angular": "pnpm --filter @conversed/angular run build",
+    "build:demos": "pnpm --filter @conversed/demo-react run build",
+    "build": "npm run build:core && npm run build:react && npm run build:angular && npm run build:demos",
+    "demo:react": "pnpm --filter @conversed/demo-react run dev",
+    "test": "pnpm --recursive run test",
     "release": "./scripts/release.sh latest",
-    "release:rc": "./scripts/release.sh rc"
+    "release:rc": "./scripts/release.sh rc",
+    "release:demo": "./scripts/release-demo.sh"
   },
-  "keywords": ["ai", "chat", "agent", "rich-content", "angular", "react"],
+  "keywords": [
+    "ai",
+    "chat",
+    "agent",
+    "rich-content",
+    "angular",
+    "react"
+  ],
   "author": "Maye Edwin",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayeedwin/conversed.git"
+  },
+  "homepage": "https://github.com/mayeedwin/conversed#readme",
+  "bugs": "https://github.com/mayeedwin/conversed/issues",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.10"
+  }
 }

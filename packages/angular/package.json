@@ -1,19 +1,29 @@
 {
   "name": "@conversed/angular",
-  "version": "0.0.1-rc.2",
+  "version": "0.0.1-rc.5",
   "description": "Angular 17+ Signals-based UI components and block renderers for conversed",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "publishConfig": {
+    "directory": "dist"
+  },
   "scripts": {
-    "build": "ngc"
+    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json",
+    "test": "echo \"No tests specified for angular package yet\""
   },
   "dependencies": {
-    "@conversed/core": "0.0.1-rc.2"
+    "@conversed/core": "workspace:*",
+    "chart.js": "^4.4.0",
+    "tslib": "^2.6.0"
   },
   "peerDependencies": {
     "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
     "@angular/common": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0"
+  },
+  "devDependencies": {
+    "@angular/compiler": "^21.0.0",
+    "@angular/compiler-cli": "^21.0.0",
+    "ng-packagr": "^21.0.0",
+    "typescript": "~5.9.0"
   },
   "keywords": [
     "angular",
@@ -22,5 +32,13 @@
     "conversed",
     "components"
   ],
-  "license": "MIT"
+  "author": "Maye Edwin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayeedwin/conversed.git",
+    "directory": "packages/angular"
+  },
+  "homepage": "https://github.com/mayeedwin/conversed#readme",
+  "bugs": "https://github.com/mayeedwin/conversed/issues"
 }

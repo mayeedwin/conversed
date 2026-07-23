@@ -44,5 +44,19 @@ export const normalizeMarkdownToHtml = (rawText: string): string => {
     return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>\n`;
   });
 
+  // 3. Simple Headings (### Header)
+  html = html.replace(/^(#{1,4})\s+(.+)$/gm, (_, hashes, title) => {
+    const level = hashes.length;
+    return `<h${level}>${title.trim()}</h${level}>`;
+  });
+
+  // 4. Wrap unwrapped lines in paragraph tags if no block tags present
+  if (!/<(p|h[1-6]|ul|ol|table|blockquote|pre|dl|figure|hr|details|img)/i.test(html)) {
+    html = html
+      .split(/\n\n+/)
+      .map((p) => `<p>${p.trim().replace(/\n/g, '<br/>')}</p>`)
+      .join('');
+  }
+
   return html;
 };

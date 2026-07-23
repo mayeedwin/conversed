@@ -2,7 +2,11 @@
 
 > **conversed** is a high-performance, composable Rich Content UI library designed for AI Agents, LLM Chat interfaces, and dynamic conversational experiences.
 
-Instead of outputting plain text or static markdown bubbles, **conversed** parses model responses into a structured **Content Block AST (Abstract Syntax Tree)** featuring interactive tables with custom row actions, metric cards, native charts, callouts, and prompt follow-up chips.
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app)
+
+Instead of outputting plain text or static markdown bubbles, **conversed** parses model responses into a structured **Content Block AST (Abstract Syntax Tree)** featuring interactive tables with custom row actions, metric cards, native charts (bar / line / pie via Chart.js), callouts, and prompt follow-up chips.
+
+conversed **renders content, not conversations** — components take a `blocks` array and render rich blocks _inside_ your app's own message bubble. Your host app still owns roles, avatars, and the message feed. Pass `debug` to any renderer to log the raw text, parsed blocks, and emitted actions to the console (silent by default).
 
 ---
 
@@ -12,7 +16,7 @@ Instead of outputting plain text or static markdown bubbles, **conversed** parse
 | :--- | :--- | :--- |
 | [`@conversed/core`](./core) | `0.0.1-rc1` | Pure TypeScript AST definitions, Markdown/Stream parser engine, and Action Protocol |
 | [`@conversed/angular`](./angular) | `0.0.1-rc1` | Angular 17+ Signals-based UI components & block renderers |
-| [`@conversed/react`](./react) | `0.0.1-rc1` | React 18+ JSX components, hooks & context providers |
+| [`@conversed/react`](./react) | `0.0.1-rc1` | React 18+ JSX components & block renderers |
 
 ---
 
@@ -46,7 +50,7 @@ Styled via standard CSS custom properties for effortless light, dark, and glassm
 :root {
   --conversed-bg: #0f172a;
   --conversed-card-bg: #1e293b;
-  --conversed-primary: #6366f1;
+  --conversed-primary: #0071e3;
   --conversed-text: #f8fafc;
   --conversed-radius: 12px;
 }

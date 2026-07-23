@@ -1,12 +1,29 @@
 {
   "name": "@conversed/core",
-  "version": "0.0.1-rc.2",
+  "version": "0.0.1-rc.5",
   "description": "Core AST, Parser Engine, and Action Protocol for conversed rich AI chat UI",
+  "sideEffects": false,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "~5.9.0"
   },
   "keywords": [
     "ai",
@@ -17,6 +34,13 @@
     "parser",
     "conversed"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "Maye Edwin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayeedwin/conversed.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/mayeedwin/conversed#readme",
+  "bugs": "https://github.com/mayeedwin/conversed/issues"
 }
