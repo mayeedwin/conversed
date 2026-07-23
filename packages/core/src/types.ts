@@ -69,9 +69,16 @@ export type MediaBlock = {
   caption?: string;
 };
 
+export type RowAction = {
+  label: string;
+  variant?: 'default' | 'primary';
+  action: AgentActionPayload;
+};
+
 export type TableRow = {
   cells: string[];
   action?: AgentActionPayload;
+  actions?: RowAction[];
 };
 
 export type TableBlock = {

@@ -124,6 +124,9 @@ export class ConversedStatsComponent {
             @for (header of (block?.headers || headers); track $index) {
               <div class="conversed-cell th-cell">{{ header }}</div>
             }
+            @if (hasRowActions) {
+              <div class="conversed-cell th-cell actions-head" aria-hidden="true"></div>
+            }
           </div>
         }
         <div class="conversed-table-body">
@@ -131,6 +134,18 @@ export class ConversedStatsComponent {
             <div class="conversed-table-row" [class.interactive]="!!row.action" (click)="handleAction(row.action)">
               @for (cell of row.cells; track $index) {
                 <div class="conversed-cell td-cell" [innerHTML]="cell"></div>
+              }
+              @if (hasRowActions) {
+                <div class="conversed-cell actions-cell">
+                  @for (rowAction of row.actions; track $index) {
+                    <button
+                      type="button"
+                      class="conversed-row-action"
+                      [class.primary]="rowAction.variant === 'primary'"
+                      (click)="handleRowAction(rowAction.action, $event)"
+                    >{{ rowAction.label }}</button>
+                  }
+                </div>
               }
             </div>
           }
@@ -140,6 +155,7 @@ export class ConversedStatsComponent {
   `,
   styles: [`
     :host {
+      --primary: var(--conversed-primary, #0071e3);
       --card-bg: var(--conversed-card-bg, transparent);
       --border: var(--conversed-border-color, #e5e5ea);
       --radius: var(--conversed-radius, 8px);
@@ -162,6 +178,24 @@ export class ConversedStatsComponent {
     .conversed-cell { flex: 1; min-width: 0; padding: 0.3rem 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
     .conversed-cell:last-child { border-right: none; }
     .th-cell { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.58rem; opacity: 0.65; }
+    .actions-cell { flex: none; display: flex; gap: 0.25rem; align-items: center; overflow: visible; white-space: normal; }
+    .actions-head { flex: none; }
+    .conversed-row-action {
+      font: inherit;
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: inherit;
+      cursor: pointer;
+      box-shadow: none !important;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .conversed-row-action:hover { border-color: var(--primary); }
+    .conversed-row-action.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
   `]
 })
 export class ConversedTableComponent {
@@ -178,8 +212,17 @@ export class ConversedTableComponent {
     return activeTheme ? generateCssVariables(activeTheme) : {};
   }
 
+  get hasRowActions() {
+    return (this.block?.rows || this.rows).some((row) => !!row.actions?.length);
+  }
+
   handleAction(payload?: AgentActionPayload) {
     if (!payload) return;
+    this.action.emit({ action: payload, defaultPrevented: false });
+  }
+
+  handleRowAction(payload: AgentActionPayload, event: Event) {
+    event.stopPropagation();
     this.action.emit({ action: payload, defaultPrevented: false });
   }
 }
