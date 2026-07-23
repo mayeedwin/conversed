@@ -862,7 +862,7 @@
 @media (max-width: 900px) {
   .workspace {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) minmax(180px, 40vh);
+    grid-template-rows: minmax(0, 1fr) minmax(160px, 42vh);
   }
   .inspector {
     border-left: none;
@@ -870,5 +870,49 @@
   }
   .brand-sub {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+    padding: 0.6rem 0.9rem;
+  }
+  .brand-sep {
+    display: none;
+  }
+  .topbar-actions {
+    gap: 0.55rem;
+  }
+  .topbar-links {
+    gap: 0.7rem;
+  }
+  .thread {
+    padding: 0.9rem 0.9rem 0.5rem;
+  }
+  .composer {
+    padding: 0.6rem 0.9rem 0.85rem;
+  }
+  /* Guide modal fits small screens */
+  .guide-backdrop {
+    padding: 0.6rem;
+    align-items: flex-start;
+  }
+  .guide {
+    padding: 1rem 1rem 1.1rem;
+    max-height: 94vh;
+  }
+  .guide-title {
+    font-size: 1.15rem;
+  }
+  .guide-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .guide-tab {
+    flex: none;
+    white-space: nowrap;
   }
 }
