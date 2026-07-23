@@ -158,6 +158,36 @@ export const DEMO_PRESET_PROMPTS: DemoPreset[] = [
       '  <li>What happened this season?</li>',
       '</ul>'
     ].join('\n')
+  },
+  {
+    id: 'tasks',
+    title: 'Pending tasks',
+    userText: 'What tasks are pending?',
+    markdown: [
+      '<h2>Pending tasks</h2>',
+      '<p>Each row has its own inline actions — tap one to fire an Action Protocol event (watch the inspector).</p>',
+      '<table>',
+      '  <thead><tr><th>Task</th><th>Status</th></tr></thead>',
+      '  <tbody>',
+      '    <tr>',
+      '      <td>Feed the goats</td><td>Pending</td>',
+      '      <td data-row-actions>',
+      '        <button data-action-type="custom-command" data-action-id="task-start" data-action-target="t-101">Start</button>',
+      '        <button data-action-type="custom-command" data-action-id="task-complete" data-action-target="t-101" data-variant="primary">Complete</button>',
+      '      </td>',
+      '    </tr>',
+      '    <tr>',
+      '      <td>Restock layer feed</td><td>Blocked</td>',
+      '      <td data-row-actions>',
+      '        <button data-action-type="navigate" data-action-id="open-supplier" data-action-target="/suppliers/acme" data-record-kind="supplier">Open supplier</button>',
+      '      </td>',
+      '    </tr>',
+      '  </tbody>',
+      '</table>',
+      '<ul data-followups>',
+      '  <li>Show my financial summary.</li>',
+      '</ul>'
+    ].join('\n')
   }
 ];
 

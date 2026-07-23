@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart, registerables } from 'chart.js';
-import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
+import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, RowAction, StatItem, ConversedThemeTokens } from '@conversed/core';
 import { generateCssVariables, toChartJsConfig, logConversedAction } from '@conversed/core';
 
 Chart.register(...registerables);
@@ -220,7 +220,10 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
             )
           )
         );
-      case 'table':
+      case 'table': {
+        const hasRowActions = block.rows.some(
+          (r: TableRow) => !!r.actions && r.actions.length > 0
+        );
         return React.createElement(
           'div',
           { className: 'conversed-table-container' },
@@ -234,7 +237,13 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
                 { className: 'conversed-table-header' },
                 block.headers.map((h: string, i: number) =>
                   React.createElement('div', { key: i, className: 'conversed-cell th-cell' }, h)
-                )
+                ),
+                hasRowActions &&
+                  React.createElement('div', {
+                    key: 'actions-head',
+                    className: 'conversed-cell th-cell actions-head',
+                    'aria-hidden': true
+                  })
               ),
             React.createElement(
               'div',
@@ -253,12 +262,33 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
                       className: 'conversed-cell td-cell',
                       dangerouslySetInnerHTML: { __html: cell }
                     })
-                  )
+                  ),
+                  hasRowActions &&
+                    React.createElement(
+                      'div',
+                      { key: 'actions', className: 'conversed-cell actions-cell' },
+                      (row.actions || []).map((rowAction: RowAction, aIdx: number) =>
+                        React.createElement(
+                          'button',
+                          {
+                            key: aIdx,
+                            type: 'button',
+                            className: `conversed-row-action ${rowAction.variant === 'primary' ? 'primary' : ''}`,
+                            onClick: (e: { stopPropagation: () => void }) => {
+                              e.stopPropagation();
+                              handleAction(rowAction.action);
+                            }
+                          },
+                          rowAction.label
+                        )
+                      )
+                    )
                 )
               )
             )
           )
         );
+      }
       case 'followups':
         return React.createElement(
           'div',
