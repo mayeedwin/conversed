@@ -299,7 +299,10 @@ export function App() {
               actions.map((a) => (
                 <article key={a.id} className={`event type-${a.type}`}>
                   <div className="event-top">
-                    <span className="event-type">{TYPE_LABEL[a.type] ?? a.type}</span>
+                    <span className="event-label">
+                      <span className="event-dot" aria-hidden="true" />
+                      <span className="event-type">{TYPE_LABEL[a.type] ?? a.type}</span>
+                    </span>
                     <time className="event-time">{a.timestamp}</time>
                   </div>
                   <div className="event-id">{a.actionId}</div>

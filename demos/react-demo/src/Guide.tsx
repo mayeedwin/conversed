@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
+import { getSystemPromptInstruction } from '@conversed/core';
 
 type Framework = 'react' | 'angular';
 type Tab = 'how' | 'prompt' | Framework;
+
+// The raw, framework-agnostic instruction — paste into any system prompt.
+const RAW_INSTRUCTION = getSystemPromptInstruction();
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'how', label: 'How it works' },
@@ -88,6 +92,16 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
     setTimeout(() => setCopied((c) => (c === label ? null : c)), 1200);
   };
 
+  const downloadRaw = () => {
+    const blob = new Blob([RAW_INSTRUCTION], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'conversed-system-prompt.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="guide-backdrop" onClick={onClose}>
       <div
@@ -164,7 +178,7 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
               returns the HTML/Markdown shapes Conversed knows how to render.
             </p>
             <div className="guide-step">
-              <span className="guide-step-label">Add to your system prompt</span>
+              <span className="guide-step-label">TypeScript — call the helper</span>
               <div className="guide-code">
                 <button className="guide-copy" onClick={() => copy('prompt', PROMPT_SNIPPET)}>
                   {copied === 'prompt' ? 'Copied' : 'Copy'}
@@ -172,6 +186,20 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
                 <pre>
                   <code>{PROMPT_SNIPPET}</code>
                 </pre>
+              </div>
+            </div>
+            <div className="guide-step">
+              <span className="guide-step-label">No TypeScript? Grab the raw instruction</span>
+              <div className="guide-actions-row">
+                <button className="guide-btn" onClick={() => copy('prompt-raw', RAW_INSTRUCTION)}>
+                  {copied === 'prompt-raw' ? 'Copied' : 'Copy text'}
+                </button>
+                <button className="guide-btn" onClick={downloadRaw}>
+                  Download .txt
+                </button>
+                <span className="guide-hint-inline">
+                  Paste into any system prompt — {RAW_INSTRUCTION.length.toLocaleString()} chars
+                </span>
               </div>
             </div>
             <p className="guide-note">

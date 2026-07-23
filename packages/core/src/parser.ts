@@ -4,6 +4,7 @@ import {
   CalloutTone,
   ChartBlock,
   ConversedContentBlock,
+  RowAction,
   StatItem,
   StatTrend,
   StepItem,
@@ -14,6 +15,48 @@ import {
 
 const WRAPPER_TAGS = new Set(['div', 'section', 'article']);
 
+// data-* attributes with a dedicated meaning elsewhere in the parser; everything
+// else on an actionable element is treated as an extra action param.
+const RESERVED_ACTION_ATTRS = new Set([
+  'data-action-type',
+  'data-action-id',
+  'data-action-target',
+  'data-action-params',
+  'data-link-type',
+  'data-link-id',
+  'data-delta',
+  'data-trend',
+  'data-tone',
+  'data-time',
+  'data-chart',
+  'data-labels',
+  'data-values',
+  'data-values-2',
+  'data-series-label',
+  'data-series-label-2',
+  'data-color',
+  'data-color-2',
+  'data-followups',
+  'data-steps',
+  'data-timeline',
+  'data-row-actions',
+  'data-variant'
+]);
+
+const toCamelCase = (dashed: string): string =>
+  dashed.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase());
+
+// Any non-reserved data-* attribute becomes an action param (e.g. data-record-kind
+// → params.recordKind), so domain metadata survives alongside the generic action.
+const collectExtraParams = (element: Element): Record<string, unknown> | undefined => {
+  const extras: Record<string, unknown> = {};
+  for (const attr of Array.from(element.attributes)) {
+    if (!attr.name.startsWith('data-') || RESERVED_ACTION_ATTRS.has(attr.name)) continue;
+    extras[toCamelCase(attr.name.slice('data-'.length))] = attr.value;
+  }
+  return Object.keys(extras).length ? extras : undefined;
+};
+
 export const parseActionFromElement = (element: Element): AgentActionPayload | undefined => {
   const type = element.getAttribute('data-action-type') as AgentActionPayload['type'] | null;
   const actionId = element.getAttribute('data-action-id') || element.getAttribute('data-link-type') || undefined;
@@ -22,15 +65,19 @@ export const parseActionFromElement = (element: Element): AgentActionPayload | u
 
   const target = element.getAttribute('data-action-target') || element.getAttribute('data-link-id') || undefined;
   const paramsAttr = element.getAttribute('data-action-params');
-  let params: Record<string, unknown> | undefined;
+  let jsonParams: Record<string, unknown> | undefined;
 
   if (paramsAttr) {
     try {
-      params = JSON.parse(paramsAttr);
+      jsonParams = JSON.parse(paramsAttr);
     } catch {
       // Fallback if not valid JSON
     }
   }
+
+  const extraParams = collectExtraParams(element);
+  const params =
+    extraParams || jsonParams ? { ...extraParams, ...jsonParams } : undefined;
 
   return {
     type: type || (target ? 'navigate' : 'custom-command'),
@@ -39,6 +86,18 @@ export const parseActionFromElement = (element: Element): AgentActionPayload | u
     params
   };
 };
+
+// Extracts the inline action buttons declared in a row's `data-row-actions` cell.
+const parseRowActions = (actionCell: Element): RowAction[] =>
+  Array.from(actionCell.querySelectorAll('button, a'))
+    .map((element): RowAction | null => {
+      const action = parseActionFromElement(element);
+      const label = (element.textContent ?? '').trim();
+      if (!action || !label) return null;
+      const variant = element.getAttribute('data-variant') === 'primary' ? 'primary' : undefined;
+      return { label, ...(variant ? { variant } : {}), action };
+    })
+    .filter((rowAction): rowAction is RowAction => rowAction !== null);
 
 const resolveCalloutTone = (element: Element, title?: string): CalloutTone => {
   const toneAttr = element.getAttribute('data-tone') as CalloutTone | null;
@@ -91,14 +150,19 @@ const parseTableBlock = (tableElement: Element): ConversedContentBlock | null =>
 
   const rows: TableRow[] = bodyRowElements
     .map((row): TableRow | null => {
-      const cells = Array.from(row.querySelectorAll('td, th')).map((cell) =>
-        cell.innerHTML.trim()
+      const actionCell = Array.from(row.children).find((child) =>
+        child.hasAttribute('data-row-actions')
       );
+      const cells = Array.from(row.querySelectorAll('td, th'))
+        .filter((cell) => cell !== actionCell)
+        .map((cell) => cell.innerHTML.trim());
       if (!cells.some((cell) => cell.length > 0)) return null;
       const action = parseActionFromElement(row);
+      const actions = actionCell ? parseRowActions(actionCell) : [];
       return {
         cells,
-        ...(action ? { action } : {})
+        ...(action ? { action } : {}),
+        ...(actions.length ? { actions } : {})
       };
     })
     .filter((row): row is TableRow => row !== null);
