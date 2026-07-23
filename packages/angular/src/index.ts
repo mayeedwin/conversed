@@ -734,7 +734,16 @@ export class ConversedBlockComponent {
   `]
 })
 export class ConversedContentComponent {
-  @Input() blocks: ConversedContentBlock[] = [];
+  private _blocks: ConversedContentBlock[] = [];
+
+  @Input()
+  set blocks(value: ConversedContentBlock[] | null | undefined) {
+    this._blocks = value ?? [];
+  }
+  get blocks() {
+    return this._blocks;
+  }
+
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
   @Input() debug = false;
