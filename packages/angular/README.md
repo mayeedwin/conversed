@@ -1,78 +1,41 @@
 # @conversed/angular
 
-> Angular 17+ Signals-based UI components and block renderers for **conversed**.
+> Angular 17+ Signals-based components for **conversed** rich AI chat UI.
 
-▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app)
+▶ **Live playground:** [conversed-web.web.app](https://conversed-web.web.app) (React build)
 
-## Installation
+## Install
 
 ```bash
-npm install @conversed/angular @conversed/core
-# or
 pnpm add @conversed/angular @conversed/core
 ```
 
+Styles are inlined — zero CSS setup. Charts render via **Chart.js** (a dependency, installed automatically).
+
 ## Usage
 
-### Standalone Block Renderer
-
-Render a single AI Metric Card or Table anywhere in your Angular layout:
-
-```html
-<conversed-block
-  [block]="myBlock"
-  primaryColor="#0071e3"
-  (action)="onAction($event)">
-</conversed-block>
-```
-
-### Rendering an Assistant Message
-
-Conversed renders **content, not conversations** — it never owns roles, avatars, or
-bubbles. Its only input is `blocks`. Drop `<conversed-content>` inside your own bubble:
+Conversed renders **content, not conversations** — parse the reply and drop `<conversed-content>` inside your own bubble:
 
 ```html
 <div class="my-chat-bubble assistant">
   <conversed-content
     [blocks]="blocks()"
     primaryColor="#0071e3"
-    [debug]="true"
     (action)="onAction($event)">
   </conversed-content>
 </div>
 ```
 
-`ConversedContentComponent` inputs: `[blocks]`, `[primaryColor]`, `[theme]`,
-`[debug]` (defaults to `false`; logs emitted actions when `true`), and the
-`(action)` output. `primaryColor` defaults to `#0071e3`.
-
-Chart blocks render via **Chart.js** (bundled dependency), and all styles are
-inlined — zero CSS setup required.
-
-```typescript
-import { Component, computed, input } from '@angular/core';
-import { ConversedContentComponent } from '@conversed/angular';
-import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
-
-@Component({
-  selector: 'app-assistant-bubble',
-  standalone: true,
-  imports: [ConversedContentComponent],
-  templateUrl: './assistant-bubble.component.html'
-})
-export class AssistantBubbleComponent {
-  rawAiResponse = input.required<string>();
-  blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
-
-  onAction(event: AgentActionEvent) {
-    console.log('Action triggered:', event.action);
-  }
-}
+```ts
+blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 ```
 
-## Documentation
+- `<conversed-content>` inputs: `[blocks]`, `[primaryColor]` (`#0071e3`), `[theme]`, `[debug]`; output `(action)`.
+- `<conversed-block [block]>` renders a single block anywhere.
 
-For full documentation and monorepo source code, visit [github.com/mayeedwin/conversed](https://github.com/mayeedwin/conversed).
+## Docs
+
+[github.com/mayeedwin/conversed](https://github.com/mayeedwin/conversed) · [Frameworks guide](../../docs/frameworks.md)
 
 ## License
 

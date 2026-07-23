@@ -37,7 +37,7 @@ model HTML  ->  parseMessageBlocks()  ->  ConversedContentBlock[]  ->  framework
 
 ## Charts
 
-`@conversed/core` stays dependency-free and describes charts declaratively. `toChartJsConfig(block, { primaryColor? })` builds a Chart.js config; the framework packages bundle Chart.js and render to `<canvas>`.
+`@conversed/core` stays dependency-free and describes charts declaratively — `toChartJsConfig(block, { primaryColor? })` returns a plain Chart.js config object (it never imports Chart.js). `@conversed/react` and `@conversed/angular` declare **Chart.js** as a dependency (installed automatically) and render to `<canvas>`.
 
 ## Action Protocol
 
