@@ -17,7 +17,7 @@
     "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json"
   },
   "dependencies": {
-    "@conversed/core": "file:../core",
+    "@conversed/core": "0.0.1-rc.3",
     "chart.js": "^4.4.0",
     "tslib": "^2.6.0"
   },
