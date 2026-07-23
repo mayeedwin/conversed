@@ -1,7 +1,7 @@
 {
   "name": "conversed-monorepo",
   "private": true,
-  "version": "0.0.1-rc.4",
+  "version": "0.0.1-rc.6",
   "description": "Composable Rich Content UI library for AI Agents and Chat interfaces",
   "scripts": {
     "build:core": "pnpm --filter @conversed/core run build",
