@@ -1,6 +1,6 @@
 # Angular & React Integration Guide
 
-Both renderers take a `blocks` array and render inside your own chat bubble — Conversed renders content, not conversations. Charts render via Chart.js (bundled; no extra setup). Parse first with `parseMessageBlocks` from `@conversed/core`.
+Both renderers take a `blocks` array and render inside your own chat bubble — Conversed renders content, not conversations. Charts render via Chart.js — a dependency of both framework packages, installed automatically (no extra setup). Parse first with `parseMessageBlocks` from `@conversed/core`.
 
 | | React (`@conversed/react`) | Angular (`@conversed/angular`) |
 | --- | --- | --- |
