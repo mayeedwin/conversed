@@ -178,8 +178,8 @@ export class ConversedStatsComponent {
     .conversed-cell { flex: 1; min-width: 0; padding: 0.3rem 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
     .conversed-cell:last-child { border-right: none; }
     .th-cell { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.58rem; opacity: 0.65; }
-    .actions-cell { flex: none; display: flex; gap: 0.25rem; align-items: center; overflow: visible; white-space: normal; }
-    .actions-head { flex: none; }
+    .actions-cell, .actions-head { flex: 0 0 10.5rem; width: 10.5rem; }
+    .actions-cell { display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: center; justify-content: flex-end; overflow: visible; white-space: normal; }
     .conversed-row-action {
       font: inherit;
       font-size: 0.62rem;

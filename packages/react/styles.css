@@ -401,17 +401,20 @@
   opacity: 0.65;
 }
 
-/* Inline per-row action buttons */
+/* Inline per-row action buttons — fixed-width column so header/body align */
+.conversed-data-table .actions-cell,
+.conversed-data-table .actions-head {
+  flex: 0 0 10.5rem;
+  width: 10.5rem;
+}
 .conversed-data-table .actions-cell {
-  flex: none;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.25rem;
   align-items: center;
+  justify-content: flex-end;
   overflow: visible;
   white-space: normal;
-}
-.conversed-data-table .actions-head {
-  flex: none;
 }
 .conversed-row-action {
   font: inherit;
