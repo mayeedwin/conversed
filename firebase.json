@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "conversed-zao-demo",
+    "site": "conversed-web",
     "public": "demos/react-demo/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }],

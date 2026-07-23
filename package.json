@@ -12,7 +12,8 @@
     "demo:react": "pnpm --filter @conversed/demo-react run dev",
     "test": "pnpm --recursive run test",
     "release": "./scripts/release.sh latest",
-    "release:rc": "./scripts/release.sh rc"
+    "release:rc": "./scripts/release.sh rc",
+    "release:demo": "./scripts/release-demo.sh"
   },
   "keywords": [
     "ai",
