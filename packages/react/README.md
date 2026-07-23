@@ -23,7 +23,7 @@ import '@conversed/react/styles.css';
 
 The stylesheet is fully driven by `--conversed-*` CSS variables, so `primaryColor` /
 `theme` props (and your own `:root` overrides) still restyle everything after import.
-See [Theming](../../docs/THEMING.md) for the token list and the iOS gray scale.
+See [Theming](../../docs/theming.md) for the token list and the iOS gray scale.
 
 ## Usage
 

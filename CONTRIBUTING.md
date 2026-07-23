@@ -109,7 +109,7 @@ resolve only where this repo sits alongside the consuming app.
 
 ## 📜 Git & Commit Conventions
 
-Please follow our [Git & Workflow Conventions](./docs/GIT_WORKFLOW.md):
+Please follow our [Git & Workflow Conventions](./docs/git_workflow.md):
 - **Branch Naming**: `type/short-description` (e.g. `feature/block-ast-parser`, `fix/table-action`).
 - **Commit Format**: `type(scope): #issue_number description` where `scope` strictly matches your branch name.
 

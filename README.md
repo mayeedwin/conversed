@@ -6,9 +6,9 @@ A high-performance, composable Rich Content UI library for AI Agents and LLM cha
 
 ## Overview
 
-Standard AI chat interfaces render static text or basic Markdown. When models generate structured data like tables, metric cards, callouts, or charts, plain text renderers fail to provide interactive UX.
+Most AI chat interfaces render static text or basic Markdown. But models don't just talk — they generate structured data: tables, metric cards, callouts, charts. A plain-text renderer can't make any of that feel interactive.
 
-**Conversed** solves this by parsing model responses into a structured **Content Block AST (Abstract Syntax Tree)**.
+**Conversed** parses model responses into a structured **Content Block AST (Abstract Syntax Tree)**, then renders each block as a real, interactive UI component — a table row you can act on, a metric card you can click, a chart drawn straight from the model's output. Works with Claude, OpenAI, Gemini, Firebase Vertex AI, or local models, and it renders **content, not conversations**: drop it inside your existing chat's assistant bubble and hand it the parsed blocks.
 
 ### Key Capabilities
 - **Interactive Action Protocol**: Attach custom action triggers (e.g. `view-detail`, `approve-transaction`) directly to table rows, metric cards, and prompt chips.
@@ -17,17 +17,6 @@ Standard AI chat interfaces render static text or basic Markdown. When models ge
 - **Provider-Agnostic Engine**: Works with OpenAI, Anthropic Claude, Google Gemini, Firebase Vertex AI, or local models via standard HTML/Markdown parsing.
 - **Zero-Config Theming**: Theme components using a single `primaryColor` prop or custom CSS variables.
 - **Built-in Debug Mode**: Pass `debug` to log the raw text, parsed blocks, and emitted actions to the console (silent by default).
-
----
-
-## Screenshots
-
-Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
-
-- [Livestock table](docs/screenshots/01-livestock-table.png) — a `table` block rendering row data
-- [Financial summary](docs/screenshots/02-financial-summary.png) — `stats` cards, `followups` chips, and an income breakdown `table`
-- [Charts](docs/screenshots/03-charts.png) — bar and pie `chart` blocks via Chart.js
-- [Expense breakdown](docs/screenshots/04-expense-breakdown.png) — `stats` cards with an expense breakdown `table`
 
 ---
 
@@ -52,19 +41,19 @@ See the [demo README](./demos/react-demo/README.md) for build and Firebase Hosti
 
 | Package | Version | Description |
 | :--- | :--- | :--- |
-| [`@conversed/core`](./packages/core) | `0.0.1-rc.4` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
-| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.4` | Angular 17+ Signals-based UI components and block renderers |
-| [`@conversed/react`](./packages/react) | `0.0.1-rc.4` | React 18+ JSX components and block renderers |
+| [`@conversed/core`](./packages/core) | `0.0.1-rc.5` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
+| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.5` | Angular 17+ Signals-based UI components and block renderers |
+| [`@conversed/react`](./packages/react) | `0.0.1-rc.5` | React 18+ JSX components and block renderers |
 
 ---
 
 ## Documentation
 
-- [Architecture & AST Specification](./docs/ARCHITECTURE.md)
-- [Git & Workflow Conventions](./docs/GIT_WORKFLOW.md)
-- [LLM System Prompt Guide](./docs/PROMPTS.md)
-- [Angular & React Integration](./docs/FRAMEWORKS.md)
-- [Theming & Design Tokens](./docs/THEMING.md)
+- [Architecture & AST Specification](./docs/architecture.md)
+- [Git & Workflow Conventions](./docs/git_workflow.md)
+- [LLM System Prompt Guide](./docs/prompts.md)
+- [Angular & React Integration](./docs/frameworks.md)
+- [Theming & Design Tokens](./docs/theming.md)
 - [Contributing Guide](./CONTRIBUTING.md)
 - [AI Agent Specification](./AGENTS.md)
 
