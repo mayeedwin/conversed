@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ConversedContentBlock, ConversedMessage, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
+import type { ConversedContentBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
 import { generateCssVariables } from '@conversed/core';
 
 export interface ConversedBlockProps {
@@ -103,32 +103,34 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
           'div',
           { className: 'conversed-table-container' },
           React.createElement(
-            'table',
-            { className: 'conversed-table' },
+            'div',
+            { className: 'conversed-data-table' },
             block.headers &&
               block.headers.length > 0 &&
               React.createElement(
-                'thead',
-                null,
-                React.createElement(
-                  'tr',
-                  null,
-                  block.headers.map((h: string, i: number) => React.createElement('th', { key: i }, h))
+                'div',
+                { className: 'conversed-table-header' },
+                block.headers.map((h: string, i: number) =>
+                  React.createElement('div', { key: i, className: 'conversed-cell th-cell' }, h)
                 )
               ),
             React.createElement(
-              'tbody',
-              null,
+              'div',
+              { className: 'conversed-table-body' },
               block.rows.map((row: TableRow, rIdx: number) =>
                 React.createElement(
-                  'tr',
+                  'div',
                   {
                     key: rIdx,
-                    className: row.action ? 'interactive' : '',
+                    className: `conversed-table-row ${row.action ? 'interactive' : ''}`,
                     onClick: () => handleAction(row.action)
                   },
                   row.cells.map((cell: string, cIdx: number) =>
-                    React.createElement('td', { key: cIdx, dangerouslySetInnerHTML: { __html: cell } })
+                    React.createElement('div', {
+                      key: cIdx,
+                      className: 'conversed-cell td-cell',
+                      dangerouslySetInnerHTML: { __html: cell }
+                    })
                   )
                 )
               )
@@ -162,46 +164,23 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
   return React.createElement('div', { className: 'conversed-block-wrapper', style: styleVars }, renderContent());
 };
 
-export interface ConversedFeedProps {
-  messages: ConversedMessage[];
+export interface ConversedContentProps {
+  blocks: ConversedContentBlock[];
   primaryColor?: string;
   theme?: ConversedThemeTokens;
   onAction?: (event: AgentActionEvent) => void;
 }
 
-export const ConversedFeed: React.FC<ConversedFeedProps> = (props: ConversedFeedProps) => {
-  const { messages, primaryColor, theme, onAction } = props;
+export const ConversedContent: React.FC<ConversedContentProps> = (props: ConversedContentProps) => {
+  const { blocks, primaryColor, theme, onAction } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
   return React.createElement(
     'div',
-    { className: 'conversed-feed', style: styleVars },
-    messages.map((msg: ConversedMessage) =>
-      React.createElement(
-        'div',
-        { key: msg.id, className: `conversed-message conversed-role-${msg.role}` },
-        React.createElement(
-          'div',
-          { className: 'conversed-avatar' },
-          msg.role === 'user' ? 'U' : 'AI'
-        ),
-        React.createElement(
-          'div',
-          { className: 'conversed-content' },
-          msg.imageUrl &&
-            React.createElement(
-              'div',
-              { className: 'conversed-image' },
-              React.createElement('img', { src: msg.imageUrl, alt: 'Attachment' })
-            ),
-          msg.blocks && msg.blocks.length > 0
-            ? msg.blocks.map((block: ConversedContentBlock, bIdx: number) =>
-                React.createElement(ConversedBlock, { key: bIdx, block, primaryColor, theme, onAction })
-              )
-            : React.createElement('p', { className: 'conversed-p' }, msg.text)
-        )
-      )
+    { className: 'conversed-content', style: styleVars },
+    blocks.map((block: ConversedContentBlock, idx: number) =>
+      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, onAction })
     )
   );
 };

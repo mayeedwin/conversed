@@ -51,22 +51,28 @@ ${getSystemPromptInstruction()}
 `;
 ```
 
+> Conversed renders **content, not conversations**. It never owns roles, avatars,
+> or message bubbles — you drop `<ConversedContent>` inside your existing chat's
+> assistant bubble and hand it the parsed blocks. Its only input is `blocks`.
+
 ### React
 
 ```tsx
-import React from 'react';
-import { ConversedFeed, ConversedBlock } from '@conversed/react';
+import { ConversedContent } from '@conversed/react';
 import { parseMessageBlocks } from '@conversed/core';
 
-export const ChatApp = () => {
+export const AssistantBubble = ({ rawAiResponse }: { rawAiResponse: string }) => {
   const blocks = parseMessageBlocks(rawAiResponse);
 
   return (
-    <ConversedFeed
-      messages={messages}
-      primaryColor="#6366f1"
-      onAction={(e) => console.log('Action:', e.action)}
-    />
+    // Your own chat bubble — Conversed only fills the content.
+    <div className="my-chat-bubble assistant">
+      <ConversedContent
+        blocks={blocks}
+        primaryColor="#6366f1"
+        onAction={(e) => console.log('Action:', e.action)}
+      />
+    </div>
   );
 };
 ```
@@ -74,24 +80,28 @@ export const ChatApp = () => {
 ### Angular
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { ConversedFeedComponent } from '@conversed/angular';
-import { ConversedMessage, AgentActionEvent } from '@conversed/core';
+import { Component, computed, input } from '@angular/core';
+import { ConversedContentComponent } from '@conversed/angular';
+import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-assistant-bubble',
   standalone: true,
-  imports: [ConversedFeedComponent],
+  imports: [ConversedContentComponent],
   template: `
-    <conversed-feed
-      [messages]="messages()"
-      primaryColor="#6366f1"
-      (action)="onAction($event)">
-    </conversed-feed>
+    <!-- Your own chat bubble — Conversed only fills the content. -->
+    <div class="my-chat-bubble assistant">
+      <conversed-content
+        [blocks]="blocks()"
+        primaryColor="#6366f1"
+        (action)="onAction($event)">
+      </conversed-content>
+    </div>
   `
 })
-export class ChatComponent {
-  messages = signal<ConversedMessage[]>([]);
+export class AssistantBubbleComponent {
+  rawAiResponse = input.required<string>();
+  blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 
   onAction(event: AgentActionEvent) {
     console.log('Action triggered:', event.action);

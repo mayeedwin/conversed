@@ -12,9 +12,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./styles.css": "./styles.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": ["dist", "styles.css"],
   "scripts": {
     "build": "tsup"
   },

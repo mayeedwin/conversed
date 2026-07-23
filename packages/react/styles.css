@@ -1,0 +1,242 @@
+/**
+ * @conversed/react default stylesheet.
+ *
+ * Import once at your app root:  import '@conversed/react/styles.css';
+ *
+ * Tiny, flat, gray-200-bordered rich blocks (no box shadows). Every value is
+ * driven by --conversed-* CSS variables so a single `primaryColor`/`theme` prop
+ * (or your own overrides) restyles the whole set. Defaults are light-mode safe.
+ */
+
+.conversed-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.conversed-block-wrapper {
+  display: block;
+}
+
+/* Text */
+.conversed-p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.45;
+  font-size: 0.8rem;
+}
+
+.conversed-h {
+  margin: 0.2rem 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.conversed-h1 { font-size: 1rem; }
+.conversed-h2 { font-size: 0.9rem; }
+.conversed-h3 { font-size: 0.82rem; }
+.conversed-h4 { font-size: 0.76rem; }
+
+.conversed-ul,
+.conversed-ol {
+  margin: 0.2rem 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.conversed-ul li,
+.conversed-ol li {
+  margin: 0.1rem 0;
+}
+
+/* Divider */
+.conversed-divider {
+  border: 0;
+  border-top: 1px solid var(--conversed-border-color, #e5e5ea);
+  margin: 0.55rem 0;
+}
+
+/* Code */
+.conversed-code-wrapper {
+  background: #1c1c1e;
+  color: #ffffff;
+  border-radius: var(--conversed-radius, 8px);
+  overflow: hidden;
+  margin: 0.35rem 0;
+  box-shadow: none;
+}
+.conversed-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  background: #2c2c2e;
+  font-size: 0.68rem;
+}
+.conversed-code-header button {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.66rem;
+  opacity: 0.8;
+}
+.conversed-code {
+  padding: 0.55rem;
+  margin: 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Pro Text", monospace;
+  font-size: 0.72rem;
+}
+
+/* Callout */
+.conversed-callout {
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--conversed-radius, 8px);
+  border: 1px solid var(--conversed-border-color, #e5e5ea);
+  border-left: 3px solid var(--conversed-primary, #0071e3);
+  background: var(--conversed-card-bg, transparent);
+  margin: 0.35rem 0;
+  box-shadow: none;
+}
+.conversed-callout-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  opacity: 0.7;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.conversed-callout-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.conversed-callout-body {
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* Stats */
+.conversed-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 0.35rem;
+  margin: 0.35rem 0;
+}
+.conversed-stat-card {
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--conversed-radius, 8px);
+  background: var(--conversed-card-bg, transparent);
+  border: 1px solid var(--conversed-border-color, #e5e5ea);
+  box-shadow: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.conversed-stat-card.interactive {
+  cursor: pointer;
+}
+.conversed-stat-card.interactive:hover {
+  border-color: var(--conversed-primary, #0071e3);
+  background: var(--conversed-primary-alpha15, #0071e314);
+}
+.conversed-stat-label {
+  font-size: 0.62rem;
+  opacity: 0.75;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.conversed-stat-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: block;
+  letter-spacing: -0.01em;
+}
+.conversed-stat-delta {
+  font-size: 0.62rem;
+  font-weight: 500;
+  margin-top: 0.1rem;
+  display: inline-block;
+}
+.conversed-trend-up { color: #34c759; }
+.conversed-trend-down { color: #ff3b30; }
+.conversed-trend-neutral { color: var(--conversed-primary, #0071e3); }
+
+/* Table (div grid, not a native <table>) */
+.conversed-table-container {
+  overflow-x: auto;
+  margin: 0.35rem 0;
+  border: 1px solid var(--conversed-border-color, #e5e5ea);
+  border-radius: var(--conversed-radius, 8px);
+  background: var(--conversed-card-bg, transparent);
+  box-shadow: none;
+}
+.conversed-data-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 220px;
+  font-size: 0.7rem;
+}
+.conversed-table-header {
+  display: flex;
+  border-bottom: 1px solid var(--conversed-border-color, #e5e5ea);
+  background: var(--conversed-gray-100, #f2f2f7);
+  font-weight: 600;
+}
+.conversed-table-row {
+  display: flex;
+  border-bottom: 1px solid var(--conversed-border-color, #e5e5ea);
+  transition: background 0.15s ease;
+}
+.conversed-table-row:last-child {
+  border-bottom: none;
+}
+.conversed-table-row.interactive {
+  cursor: pointer;
+}
+.conversed-table-row.interactive:hover {
+  background: var(--conversed-primary-alpha15, #0071e314);
+}
+.conversed-cell {
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-right: 1px solid var(--conversed-border-color, #e5e5ea);
+}
+.conversed-cell:last-child {
+  border-right: none;
+}
+.th-cell {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.58rem;
+  opacity: 0.65;
+}
+
+/* Follow-up chips */
+.conversed-followups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+}
+.conversed-followup-chip {
+  background: var(--conversed-card-bg, transparent);
+  color: var(--conversed-primary, #0071e3);
+  border: 1px solid var(--conversed-border-color, #e5e5ea);
+  border-radius: 14px;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 500;
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.conversed-followup-chip:hover {
+  background: var(--conversed-primary-alpha15, #0071e314);
+  border-color: var(--conversed-primary, #0071e3);
+}

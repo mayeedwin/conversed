@@ -24,29 +24,35 @@ Render a single AI Metric Card or Table anywhere in your Angular layout:
 </conversed-block>
 ```
 
-### Full Chat Feed Component
+### Rendering an Assistant Message
+
+Conversed renders **content, not conversations** — it never owns roles, avatars, or
+bubbles. Its only input is `blocks`. Drop `<conversed-content>` inside your own bubble:
 
 ```html
-<conversed-feed
-  [messages]="messages()"
-  primaryColor="#6366f1"
-  (action)="onAction($event)">
-</conversed-feed>
+<div class="my-chat-bubble assistant">
+  <conversed-content
+    [blocks]="blocks()"
+    primaryColor="#6366f1"
+    (action)="onAction($event)">
+  </conversed-content>
+</div>
 ```
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { ConversedFeedComponent, ConversedBlockComponent } from '@conversed/angular';
-import { ConversedMessage, AgentActionEvent } from '@conversed/core';
+import { Component, computed, input } from '@angular/core';
+import { ConversedContentComponent } from '@conversed/angular';
+import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-assistant-bubble',
   standalone: true,
-  imports: [ConversedFeedComponent, ConversedBlockComponent],
-  templateUrl: './chat.component.html'
+  imports: [ConversedContentComponent],
+  templateUrl: './assistant-bubble.component.html'
 })
-export class ChatComponent {
-  messages = signal<ConversedMessage[]>([]);
+export class AssistantBubbleComponent {
+  rawAiResponse = input.required<string>();
+  blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 
   onAction(event: AgentActionEvent) {
     console.log('Action triggered:', event.action);

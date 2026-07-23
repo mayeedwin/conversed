@@ -123,12 +123,3 @@ export type ConversedContentBlock =
   | DividerBlock
   | FollowUpBlock
   | CustomBlock;
-
-export interface ConversedMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  text: string;
-  imageUrl?: string;
-  blocks?: ConversedContentBlock[];
-  timestamp?: number;
-}

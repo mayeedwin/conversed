@@ -23,18 +23,23 @@ export const MyDashboardCard = ({ block }) => (
 );
 ```
 
-### Full Chat Feed
+### Rendering an Assistant Message
+
+Conversed does not own the feed, roles, or avatars — your app does. Parse the raw
+assistant text into blocks and render `<ConversedContent>` inside your own bubble:
 
 ```tsx
-import React from 'react';
-import { ConversedFeed } from '@conversed/react';
+import { ConversedContent } from '@conversed/react';
+import { parseMessageBlocks } from '@conversed/core';
 
-export const ChatPage = ({ messages }) => (
-  <ConversedFeed
-    messages={messages}
-    primaryColor="#6366f1"
-    onAction={(e) => console.log('Action:', e.action)}
-  />
+export const AssistantBubble = ({ rawAiResponse }) => (
+  <div className="my-chat-bubble assistant">
+    <ConversedContent
+      blocks={parseMessageBlocks(rawAiResponse)}
+      primaryColor="#6366f1"
+      onAction={(e) => console.log('Action:', e.action)}
+    />
+  </div>
 );
 ```
 
@@ -56,12 +61,17 @@ npm install @conversed/angular @conversed/core
 </conversed-block>
 ```
 
-### Full Chat Feed Component
+### Rendering an Assistant Message
+
+Drop `<conversed-content>` inside your own chat bubble and pass the parsed blocks
+(`blocks = computed(() => parseMessageBlocks(rawAiResponse()))`):
 
 ```html
-<conversed-feed
-  [messages]="messages()"
-  primaryColor="#6366f1"
-  (action)="onAction($event)">
-</conversed-feed>
+<div class="my-chat-bubble assistant">
+  <conversed-content
+    [blocks]="blocks()"
+    primaryColor="#6366f1"
+    (action)="onAction($event)">
+  </conversed-content>
+</div>
 ```

@@ -3,6 +3,16 @@
   "version": "0.0.1-rc.3",
   "description": "Angular 17+ Signals-based UI components and block renderers for conversed",
   "sideEffects": false,
+  "main": "dist/fesm2022/conversed-angular.mjs",
+  "module": "dist/fesm2022/conversed-angular.mjs",
+  "typings": "dist/types/conversed-angular.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/conversed-angular.d.ts",
+      "import": "./dist/fesm2022/conversed-angular.mjs",
+      "default": "./dist/fesm2022/conversed-angular.mjs"
+    }
+  },
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json"
   },
