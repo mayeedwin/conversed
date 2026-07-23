@@ -175,7 +175,16 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
               React.createElement('span', null, block.language),
               React.createElement(
                 'button',
-                { onClick: () => navigator.clipboard?.writeText(block.content) },
+                {
+                  onClick: () => {
+                    navigator.clipboard?.writeText(block.content);
+                    handleAction({
+                      type: 'copy-code',
+                      actionId: 'copy-code',
+                      ...(block.language ? { params: { language: block.language } } : {})
+                    });
+                  }
+                },
                 'Copy'
               )
             ),

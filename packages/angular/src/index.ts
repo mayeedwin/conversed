@@ -702,7 +702,7 @@ export class ConversedMediaComponent {
           @if (block.language) {
             <div class="conversed-code-header">
               <span>{{ block.language }}</span>
-              <button (click)="copyCode(block.content)">Copy</button>
+              <button (click)="copyCode(block.content, block.language)">Copy</button>
             </div>
           }
           <pre class="conversed-code"><code>{{ block.content }}</code></pre>
@@ -743,10 +743,18 @@ export class ConversedBlockComponent {
   @Input() theme?: ConversedThemeTokens;
   @Output() action = new EventEmitter<AgentActionEvent>();
 
-  copyCode(content: string) {
+  copyCode(content: string, language?: string) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(content);
     }
+    this.action.emit({
+      action: {
+        type: 'copy-code',
+        actionId: 'copy-code',
+        ...(language ? { params: { language } } : {})
+      },
+      defaultPrevented: false
+    });
   }
 }
 
