@@ -52,6 +52,24 @@ Use the following specifications for rich blocks:
 6. **Charts** (bar, line, or pie — pipe-separated labels and values):
 <figure data-chart="bar" data-labels="Mon|Tue|Wed" data-values="12|18|15" data-series-label="Eggs"><figcaption>Weekly eggs</figcaption></figure>
 <figure data-chart="pie" data-labels="Hens|Roosters|Chicks" data-values="40|10|25"><figcaption>Flock breakdown</figcaption></figure>
+
+7. **Collapsible Details** (use for supplementary info that can stay hidden; add "open" to expand by default):
+<details open><summary>Assumptions</summary><p>Figures assume current feed prices.</p></details>
+
+8. **Steps** (an ordered how-to; optional bold lead-in per step):
+<ol data-steps>
+  <li><strong>Isolate</strong> the affected animal from the herd.</li>
+  <li><strong>Call</strong> the vet within 24 hours.</li>
+</ol>
+
+9. **Timeline** (chronological events; optional data-time and bold title per entry):
+<ul data-timeline>
+  <li data-time="2026-07-20"><strong>Vaccinated</strong> — full herd.</li>
+  <li data-time="2026-07-22"><strong>Restocked</strong> — 20 layers added.</li>
+</ul>
+
+10. **Media** (an image with optional caption — a <figure> WITHOUT data-chart):
+<figure><img src="https://.../scan.jpg" alt="Ultrasound scan" /><figcaption>Pregnancy scan — day 45</figcaption></figure>
 `;
 
 export const getSystemPromptInstruction = (options?: SystemPromptOptions): string => {
