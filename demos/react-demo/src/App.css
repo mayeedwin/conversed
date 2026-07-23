@@ -45,6 +45,16 @@
   letter-spacing: -0.01em;
 }
 
+.brand-ver {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: var(--clay-ink);
+  background: var(--clay-soft);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+}
+
 .brand-sep {
   color: var(--faint-ink);
 }

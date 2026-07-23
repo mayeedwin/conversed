@@ -149,6 +149,7 @@ export function App() {
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">Z</span>
           <span className="brand-name">Zao</span>
+          <span className="brand-ver" title="@conversed/core version">v{__CONVERSED_VERSION__}</span>
           <span className="brand-sep" aria-hidden="true">·</span>
           <span className="brand-sub">rich, interactive AI replies</span>
         </div>
