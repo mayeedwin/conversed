@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react';
 
 type Framework = 'react' | 'angular';
-type Tab = 'how' | Framework;
+type Tab = 'how' | 'prompt' | Framework;
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'how', label: 'How it works' },
+  { id: 'prompt', label: 'System prompt' },
   { id: 'react', label: 'React' },
   { id: 'angular', label: 'Angular' }
 ];
+
+const PROMPT_SNIPPET = [
+  "import { getSystemPromptInstruction } from '@conversed/core';",
+  '',
+  'const systemPrompt = `',
+  'You are an AI assistant.',
+  '${getSystemPromptInstruction()}',
+  '`;'
+].join('\n');
 
 const INSTALL: Record<Framework, string> = {
   react: 'pnpm add @conversed/react @conversed/core',
@@ -147,6 +157,30 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
               </li>
             </ol>
           </div>
+        ) : tab === 'prompt' ? (
+          <>
+            <p className="guide-lead">
+              Give your model the block conventions with <code>getSystemPromptInstruction()</code> — it
+              returns the HTML/Markdown shapes Conversed knows how to render.
+            </p>
+            <div className="guide-step">
+              <span className="guide-step-label">Add to your system prompt</span>
+              <div className="guide-code">
+                <button className="guide-copy" onClick={() => copy('prompt', PROMPT_SNIPPET)}>
+                  {copied === 'prompt' ? 'Copied' : 'Copy'}
+                </button>
+                <pre>
+                  <code>{PROMPT_SNIPPET}</code>
+                </pre>
+              </div>
+            </div>
+            <p className="guide-note">
+              Conversed renders <strong>content, not conversations</strong>. It never owns roles,
+              avatars, or message bubbles — you drop <code>&lt;ConversedContent&gt;</code> inside your
+              existing chat’s assistant bubble and hand it the parsed blocks. Its only input is{' '}
+              <code>blocks</code>.
+            </p>
+          </>
         ) : (
           <>
             <div className="guide-step">
