@@ -1,0 +1,9 @@
+{
+  "hosting": {
+    "site": "conversed-zao-demo",
+    "public": "demos/react-demo/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "predeploy": ["pnpm --filter @conversed/demo-react build"]
+  }
+}
