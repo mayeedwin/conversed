@@ -34,6 +34,41 @@ export type ListBlock = {
   items: string[];
 };
 
+export type DetailsBlock = {
+  type: 'details';
+  summary: string;
+  html: string;
+  open: boolean;
+};
+
+export type StepItem = {
+  title?: string;
+  html: string;
+};
+
+export type StepsBlock = {
+  type: 'steps';
+  items: StepItem[];
+};
+
+export type TimelineItem = {
+  time?: string;
+  title?: string;
+  html: string;
+};
+
+export type TimelineBlock = {
+  type: 'timeline';
+  items: TimelineItem[];
+};
+
+export type MediaBlock = {
+  type: 'media';
+  src: string;
+  alt?: string;
+  caption?: string;
+};
+
 export type TableRow = {
   cells: string[];
   action?: AgentActionPayload;
@@ -114,6 +149,10 @@ export type CustomBlock = {
 export type ConversedContentBlock =
   | ParagraphBlock
   | ListBlock
+  | DetailsBlock
+  | StepsBlock
+  | TimelineBlock
+  | MediaBlock
   | TableBlock
   | CodeBlock
   | StatsBlock

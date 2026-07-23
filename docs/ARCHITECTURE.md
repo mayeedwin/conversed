@@ -56,6 +56,20 @@ interface ListBlock      { type: 'list'; ordered: boolean; items: string[]; }
 interface CodeBlock      { type: 'code'; language?: string; content: string; }
 interface DividerBlock   { type: 'divider'; }
 
+interface DetailsBlock   { type: 'details'; summary: string; html: string; open: boolean; }
+
+interface StepsBlock {
+  type: 'steps';
+  items: { title?: string; html: string }[];
+}
+
+interface TimelineBlock {
+  type: 'timeline';
+  items: { time?: string; title?: string; html: string }[];
+}
+
+interface MediaBlock { type: 'media'; src: string; alt?: string; caption?: string; }
+
 interface TableBlock {
   type: 'table';
   headers: string[];
@@ -103,14 +117,20 @@ The parser reads these HTML shapes emitted by the model:
 | --- | --- |
 | paragraph | `<p>` |
 | heading | `<h1>`–`<h4>` |
-| list | `<ul>` / `<ol>` |
+| list | `<ul>` / `<ol>` (rendered as a div-based grouped list) |
 | code | `<pre><code>` |
 | divider | `<hr>` |
 | table | `<table><thead><tbody>` |
 | stats | `<dl><dt><dd>` (`<dd data-delta data-trend>`) |
 | callout | `<blockquote data-tone><strong>title</strong>...</blockquote>` |
 | followups | `<ul data-followups>` |
+| details | `<details [open]><summary>Title</summary>...</details>` |
+| steps | `<ol data-steps><li><strong>Title</strong> body</li></ol>` |
+| timeline | `<ul data-timeline><li data-time="09:00"><strong>Title</strong> body</li></ul>` |
+| media | `<figure><img src alt><figcaption>Caption</figcaption></figure>` or a bare `<img>` |
 | chart | `<figure data-chart="bar\|line\|pie" data-labels="A\|B\|C" data-values="1\|2\|3" data-series-label="X"><figcaption>Title</figcaption></figure>` |
+
+> **Note:** `<figure>` routes to `chart` only when it carries a `data-chart` attribute; otherwise it becomes a `media` block. `<ol>`/`<ul>` become `steps`/`timeline`/`followups` when tagged with the matching `data-*` attribute, and a plain list otherwise.
 
 ---
 

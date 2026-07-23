@@ -65,11 +65,104 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
         });
       case 'list':
         return React.createElement(
-          block.ordered ? 'ol' : 'ul',
-          { className: block.ordered ? 'conversed-ol' : 'conversed-ul' },
+          'div',
+          {
+            className: `conversed-list ${block.ordered ? 'conversed-list-ordered' : 'conversed-list-unordered'}`,
+            role: 'list'
+          },
           block.items.map((item: string, idx: number) =>
-            React.createElement('li', { key: idx, dangerouslySetInnerHTML: { __html: item } })
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-list-row', role: 'listitem' },
+              React.createElement(
+                'span',
+                { className: 'conversed-list-marker', 'aria-hidden': true },
+                block.ordered ? `${idx + 1}` : ''
+              ),
+              React.createElement('span', {
+                className: 'conversed-list-content',
+                dangerouslySetInnerHTML: { __html: item }
+              })
+            )
           )
+        );
+      case 'details':
+        return React.createElement(
+          'details',
+          { className: 'conversed-details', open: block.open },
+          React.createElement('summary', {
+            className: 'conversed-details-summary',
+            dangerouslySetInnerHTML: { __html: block.summary }
+          }),
+          React.createElement('div', {
+            className: 'conversed-details-body',
+            dangerouslySetInnerHTML: { __html: block.html }
+          })
+        );
+      case 'steps':
+        return React.createElement(
+          'div',
+          { className: 'conversed-steps' },
+          block.items.map((step, idx: number) =>
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-step' },
+              React.createElement('span', { className: 'conversed-step-index', 'aria-hidden': true }, `${idx + 1}`),
+              React.createElement(
+                'div',
+                { className: 'conversed-step-content' },
+                step.title &&
+                  React.createElement('div', {
+                    className: 'conversed-step-title',
+                    dangerouslySetInnerHTML: { __html: step.title }
+                  }),
+                React.createElement('div', {
+                  className: 'conversed-step-body',
+                  dangerouslySetInnerHTML: { __html: step.html }
+                })
+              )
+            )
+          )
+        );
+      case 'timeline':
+        return React.createElement(
+          'div',
+          { className: 'conversed-timeline' },
+          block.items.map((entry, idx: number) =>
+            React.createElement(
+              'div',
+              { key: idx, className: 'conversed-timeline-item' },
+              React.createElement('span', { className: 'conversed-timeline-dot', 'aria-hidden': true }),
+              React.createElement(
+                'div',
+                { className: 'conversed-timeline-content' },
+                entry.time &&
+                  React.createElement('span', { className: 'conversed-timeline-time' }, entry.time),
+                entry.title &&
+                  React.createElement('div', {
+                    className: 'conversed-timeline-title',
+                    dangerouslySetInnerHTML: { __html: entry.title }
+                  }),
+                React.createElement('div', {
+                  className: 'conversed-timeline-body',
+                  dangerouslySetInnerHTML: { __html: entry.html }
+                })
+              )
+            )
+          )
+        );
+      case 'media':
+        return React.createElement(
+          'figure',
+          { className: 'conversed-media' },
+          React.createElement('img', {
+            className: 'conversed-media-img',
+            src: block.src,
+            alt: block.alt || '',
+            loading: 'lazy'
+          }),
+          block.caption &&
+            React.createElement('figcaption', { className: 'conversed-media-caption' }, block.caption)
         );
       case 'code':
         return React.createElement(

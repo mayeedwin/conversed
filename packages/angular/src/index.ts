@@ -21,6 +21,10 @@ import {
   ChartBlock,
   FollowUpBlock,
   ListBlock,
+  DetailsBlock,
+  StepsBlock,
+  TimelineBlock,
+  MediaBlock,
   HeadingBlock,
   ParagraphBlock,
   AgentActionEvent,
@@ -365,6 +369,250 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
 }
 
 /**
+ * <conversed-list>
+ * iOS-inspired grouped list rendered with <div> rows (no semantic ul/ol),
+ * matching the flat table/callout aesthetic.
+ */
+@Component({
+  selector: 'conversed-list',
+  standalone: true,
+  template: `
+    <div
+      class="conversed-list"
+      [class.conversed-list-ordered]="block?.ordered"
+      [class.conversed-list-unordered]="!block?.ordered"
+      role="list"
+    >
+      @for (item of block?.items || items; track $index) {
+        <div class="conversed-list-row" role="listitem">
+          <span class="conversed-list-marker" aria-hidden="true">
+            {{ block?.ordered ? $index + 1 : '' }}
+          </span>
+          <span class="conversed-list-content" [innerHTML]="item"></span>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --card-bg: var(--conversed-card-bg, transparent);
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-list { display: flex; flex-direction: column; margin: 0.35rem 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
+    .conversed-list-row { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.8rem; line-height: 1.45; border-bottom: 1px solid var(--border); }
+    .conversed-list-row:last-child { border-bottom: none; }
+    .conversed-list-marker { flex: none; min-width: 1.1rem; font-size: 0.72rem; font-weight: 600; color: var(--primary); text-align: right; }
+    .conversed-list-unordered .conversed-list-marker::before { content: '•'; color: var(--primary); }
+    .conversed-list-content { flex: 1; min-width: 0; }
+  `]
+})
+export class ConversedListComponent {
+  @Input() block?: ListBlock;
+  @Input() items: string[] = [];
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-details>
+ * Collapsible disclosure built on the native <details>/<summary> element.
+ */
+@Component({
+  selector: 'conversed-details',
+  standalone: true,
+  template: `
+    <details class="conversed-details" [open]="block?.open ?? open">
+      <summary class="conversed-details-summary" [innerHTML]="block?.summary || summary"></summary>
+      <div class="conversed-details-body" [innerHTML]="block?.html || html"></div>
+    </details>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --card-bg: var(--conversed-card-bg, transparent);
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-details { margin: 0.35rem 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
+    .conversed-details-summary { cursor: pointer; list-style: none; padding: 0.45rem 0.6rem; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .conversed-details-summary::-webkit-details-marker { display: none; }
+    .conversed-details-summary::before { content: '›'; color: var(--primary); font-weight: 700; transition: transform 0.15s ease; }
+    .conversed-details[open] .conversed-details-summary::before { transform: rotate(90deg); }
+    .conversed-details-body { padding: 0 0.6rem 0.5rem 1.4rem; font-size: 0.75rem; line-height: 1.45; }
+  `]
+})
+export class ConversedDetailsComponent {
+  @Input() block?: DetailsBlock;
+  @Input() summary = 'Details';
+  @Input() html = '';
+  @Input() open = false;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-steps>
+ * Numbered sequential steps with a badge and connector line.
+ */
+@Component({
+  selector: 'conversed-steps',
+  standalone: true,
+  template: `
+    <div class="conversed-steps">
+      @for (step of block?.items || items; track $index) {
+        <div class="conversed-step">
+          <span class="conversed-step-index" aria-hidden="true">{{ $index + 1 }}</span>
+          <div class="conversed-step-content">
+            @if (step.title) {
+              <div class="conversed-step-title" [innerHTML]="step.title"></div>
+            }
+            <div class="conversed-step-body" [innerHTML]="step.html"></div>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --border: var(--conversed-border-color, #e5e5ea);
+      display: block;
+    }
+    .conversed-steps { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.35rem 0; }
+    .conversed-step { display: flex; gap: 0.55rem; position: relative; }
+    .conversed-step:not(:last-child)::before { content: ''; position: absolute; left: 0.68rem; top: 1.4rem; bottom: -0.5rem; width: 1px; background: var(--border); }
+    .conversed-step-index { flex: none; width: 1.35rem; height: 1.35rem; border-radius: 50%; background: var(--primary); color: #fff; font-size: 0.68rem; font-weight: 600; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .conversed-step-content { flex: 1; min-width: 0; padding-top: 0.1rem; }
+    .conversed-step-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.05rem; }
+    .conversed-step-body { font-size: 0.75rem; line-height: 1.45; }
+  `]
+})
+export class ConversedStepsComponent {
+  @Input() block?: StepsBlock;
+  @Input() items: StepsBlock['items'] = [];
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-timeline>
+ * Vertical timeline of events with a dot marker and connector line.
+ */
+@Component({
+  selector: 'conversed-timeline',
+  standalone: true,
+  template: `
+    <div class="conversed-timeline">
+      @for (entry of block?.items || items; track $index) {
+        <div class="conversed-timeline-item">
+          <span class="conversed-timeline-dot" aria-hidden="true"></span>
+          <div class="conversed-timeline-content">
+            @if (entry.time) {
+              <span class="conversed-timeline-time">{{ entry.time }}</span>
+            }
+            @if (entry.title) {
+              <div class="conversed-timeline-title" [innerHTML]="entry.title"></div>
+            }
+            <div class="conversed-timeline-body" [innerHTML]="entry.html"></div>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --card-bg: var(--conversed-card-bg, #ffffff);
+      --border: var(--conversed-border-color, #e5e5ea);
+      display: block;
+    }
+    .conversed-timeline { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.35rem 0; padding-left: 0.1rem; }
+    .conversed-timeline-item { display: flex; gap: 0.55rem; position: relative; }
+    .conversed-timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 0.28rem; top: 0.85rem; bottom: -0.5rem; width: 1px; background: var(--border); }
+    .conversed-timeline-dot { flex: none; width: 0.6rem; height: 0.6rem; margin-top: 0.28rem; border-radius: 50%; background: var(--card-bg); border: 2px solid var(--primary); z-index: 1; }
+    .conversed-timeline-content { flex: 1; min-width: 0; }
+    .conversed-timeline-time { display: block; font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.65; }
+    .conversed-timeline-title { font-size: 0.78rem; font-weight: 600; }
+    .conversed-timeline-body { font-size: 0.75rem; line-height: 1.45; }
+  `]
+})
+export class ConversedTimelineComponent {
+  @Input() block?: TimelineBlock;
+  @Input() items: TimelineBlock['items'] = [];
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-media>
+ * Image block with an optional caption and flat rounded border.
+ */
+@Component({
+  selector: 'conversed-media',
+  standalone: true,
+  template: `
+    <figure class="conversed-media">
+      <img class="conversed-media-img" [src]="block?.src || src" [alt]="block?.alt || alt || ''" loading="lazy" />
+      @if (block?.caption || caption) {
+        <figcaption class="conversed-media-caption">{{ block?.caption || caption }}</figcaption>
+      }
+    </figure>
+  `,
+  styles: [`
+    :host {
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-media { margin: 0.35rem 0; }
+    .conversed-media-img { display: block; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+    .conversed-media-caption { margin-top: 0.25rem; font-size: 0.66rem; opacity: 0.7; text-align: center; }
+  `]
+})
+export class ConversedMediaComponent {
+  @Input() block?: MediaBlock;
+  @Input() src = '';
+  @Input() alt?: string;
+  @Input() caption?: string;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
  * <conversed-block>
  * Polymorphic block router for Conversed AST blocks.
  */
@@ -376,7 +624,12 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
     ConversedTableComponent,
     ConversedCalloutComponent,
     ConversedFollowupsComponent,
-    ConversedChartComponent
+    ConversedChartComponent,
+    ConversedListComponent,
+    ConversedDetailsComponent,
+    ConversedStepsComponent,
+    ConversedTimelineComponent,
+    ConversedMediaComponent
   ],
   template: `
     @switch (block.type) {
@@ -387,11 +640,19 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
         <div [class]="'conversed-h conversed-h' + block.level" [innerHTML]="block.html"></div>
       }
       @case ('list') {
-        <ul [class.conversed-ol]="block.ordered" [class.conversed-ul]="!block.ordered">
-          @for (item of block.items; track $index) {
-            <li [innerHTML]="item"></li>
-          }
-        </ul>
+        <conversed-list [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-list>
+      }
+      @case ('details') {
+        <conversed-details [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-details>
+      }
+      @case ('steps') {
+        <conversed-steps [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-steps>
+      }
+      @case ('timeline') {
+        <conversed-timeline [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-timeline>
+      }
+      @case ('media') {
+        <conversed-media [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-media>
       }
       @case ('code') {
         <div class="conversed-code-wrapper">

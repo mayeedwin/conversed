@@ -114,6 +114,51 @@ Tones: `info`, `warning`, `success`, `critical`, `neutral`.
 </ul>
 ```
 
+### Details (collapsible)
+
+```html
+<details open>
+  <summary>How the egg count is measured</summary>
+  <p>Counts are recorded at the morning and evening collection.</p>
+</details>
+```
+
+Omit `open` to render the disclosure collapsed by default.
+
+### Steps
+
+Tag an ordered list with `data-steps`. A leading `<strong>` becomes the step title; the rest is the body.
+
+```html
+<ol data-steps>
+  <li><strong>Collect</strong> Gather eggs from all coops.</li>
+  <li><strong>Weigh</strong> Record the total on the scale.</li>
+  <li>Log the count in the tracker.</li>
+</ol>
+```
+
+### Timeline
+
+Tag a list with `data-timeline`. Use `data-time` for the timestamp and a leading `<strong>` for the entry title.
+
+```html
+<ul data-timeline>
+  <li data-time="06:00"><strong>Morning collection</strong> 72 eggs.</li>
+  <li data-time="18:00"><strong>Evening collection</strong> 56 eggs.</li>
+</ul>
+```
+
+### Media (image)
+
+```html
+<figure>
+  <img src="https://example.com/coop.jpg" alt="North coop" />
+  <figcaption>North coop, spring 2026</figcaption>
+</figure>
+```
+
+A bare `<img>` also works; the `<figcaption>` is optional.
+
 ### Divider
 
 ```html

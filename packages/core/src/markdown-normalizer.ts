@@ -51,7 +51,7 @@ export const normalizeMarkdownToHtml = (rawText: string): string => {
   });
 
   // 4. Wrap unwrapped lines in paragraph tags if no block tags present
-  if (!/<(p|h[1-6]|ul|ol|table|blockquote|pre|dl|figure|hr)/i.test(html)) {
+  if (!/<(p|h[1-6]|ul|ol|table|blockquote|pre|dl|figure|hr|details|img)/i.test(html)) {
     html = html
       .split(/\n\n+/)
       .map((p) => `<p>${p.trim().replace(/\n/g, '<br/>')}</p>`)

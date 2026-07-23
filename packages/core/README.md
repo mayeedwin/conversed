@@ -28,7 +28,7 @@ const debugBlocks = parseMessageBlocks(rawAiText, { debug: true });
 
 The parser emits these `ConversedContentBlock` variants:
 
-`paragraph`, `heading`, `list`, `table`, `code`, `stats`, `callout`, `chart`, `followups`, `divider`, `custom`.
+`paragraph`, `heading`, `list`, `details`, `steps`, `timeline`, `media`, `table`, `code`, `stats`, `callout`, `chart`, `followups`, `divider`, `custom`.
 
 ## Theming
 
