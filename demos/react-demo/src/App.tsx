@@ -137,6 +137,44 @@ export function App() {
     };
     setActions((prev) => [record, ...prev].slice(0, 50));
 
+    // Command actions update the row UI live (no navigation) — the button and
+    // status change in place to reflect the new state.
+    if (
+      action.type === 'custom-command' &&
+      action.target &&
+      (action.actionId === 'task-start' || action.actionId === 'task-complete')
+    ) {
+      const target = action.target;
+      const complete = action.actionId === 'task-complete';
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (!m.blocks) return m;
+          let touched = false;
+          const blocks = m.blocks.map((b) => {
+            if (b.type !== 'table') return b;
+            const rows = b.rows.map((row) => {
+              if (!row.actions?.some((a) => a.action.target === target)) return row;
+              touched = true;
+              const cells = row.cells.slice();
+              if (cells.length > 1) cells[1] = complete ? 'Done ✓' : 'In progress';
+              const actions = complete
+                ? [
+                    {
+                      label: 'Completed',
+                      variant: 'primary' as const,
+                      action: { type: 'custom-command' as const, actionId: 'task-done', target }
+                    }
+                  ]
+                : (row.actions || []).filter((a) => a.action.actionId !== 'task-start');
+              return { ...row, cells, actions };
+            });
+            return { ...b, rows };
+          });
+          return touched ? { ...m, blocks } : m;
+        })
+      );
+    }
+
     // A follow-up chip is a real prompt — run it so the demo stays conversational.
     if (action.type === 'prompt-submit' && action.target) {
       void handleSend(action.target);
