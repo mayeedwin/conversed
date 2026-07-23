@@ -92,6 +92,16 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
     setTimeout(() => setCopied((c) => (c === label ? null : c)), 1200);
   };
 
+  const downloadRaw = () => {
+    const blob = new Blob([RAW_INSTRUCTION], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'conversed-system-prompt.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="guide-backdrop" onClick={onClose}>
       <div
@@ -179,14 +189,17 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
               </div>
             </div>
             <div className="guide-step">
-              <span className="guide-step-label">No TypeScript? Copy the raw instruction</span>
-              <div className="guide-code">
-                <button className="guide-copy" onClick={() => copy('prompt-raw', RAW_INSTRUCTION)}>
-                  {copied === 'prompt-raw' ? 'Copied' : 'Copy'}
+              <span className="guide-step-label">No TypeScript? Grab the raw instruction</span>
+              <div className="guide-actions-row">
+                <button className="guide-btn" onClick={() => copy('prompt-raw', RAW_INSTRUCTION)}>
+                  {copied === 'prompt-raw' ? 'Copied' : 'Copy text'}
                 </button>
-                <pre>
-                  <code>{RAW_INSTRUCTION}</code>
-                </pre>
+                <button className="guide-btn" onClick={downloadRaw}>
+                  Download .txt
+                </button>
+                <span className="guide-hint-inline">
+                  Paste into any system prompt — {RAW_INSTRUCTION.length.toLocaleString()} chars
+                </span>
               </div>
             </div>
             <p className="guide-note">

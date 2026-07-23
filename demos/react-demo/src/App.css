@@ -3,6 +3,7 @@
   flex-direction: column;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   background: var(--paper);
 }
 
@@ -321,6 +322,36 @@
 
 .guide-copy:hover {
   background: rgba(255, 255, 255, 0.16);
+}
+
+.guide-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guide-btn {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clay-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.guide-btn:hover {
+  border-color: var(--clay);
+  background: color-mix(in srgb, var(--clay-soft) 45%, #fff);
+}
+
+.guide-hint-inline {
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 
 .guide-lead code,
