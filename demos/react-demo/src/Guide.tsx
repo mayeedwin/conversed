@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 
 type Framework = 'react' | 'angular';
+type Tab = 'how' | Framework;
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'how', label: 'How it works' },
+  { id: 'react', label: 'React' },
+  { id: 'angular', label: 'Angular' }
+];
 
 const INSTALL: Record<Framework, string> = {
   react: 'pnpm add @conversed/react @conversed/core',
@@ -53,7 +60,7 @@ const SNIPPET: Record<Framework, string> = {
 };
 
 export function Guide({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [tab, setTab] = useState<Framework>('react');
+  const [tab, setTab] = useState<Tab>('how');
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,88 +84,96 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
         className="guide"
         role="dialog"
         aria-modal="true"
-        aria-label="How to use conversed"
+        aria-label="How to use Conversed"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="guide-head">
-          <h2 className="guide-title">Use conversed in your app</h2>
+          <h2 className="guide-title">Use Conversed in your app</h2>
           <button className="guide-close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </header>
 
-        <p className="guide-lead">
-          <strong>conversed</strong> turns an LLM’s reply into structured, interactive UI. It parses
-          HTML or Markdown into a typed block AST, renders each block in your framework, and emits an
-          event when someone clicks an actionable part. You keep your own chat shell — conversed only
-          fills the message content.
+        <p className="guide-sub">
+          Turn any LLM reply into structured, interactive UI blocks.
         </p>
 
-        <ol className="guide-flow" aria-label="How it works">
-          <li className="flow-step">
-            <span className="flow-n">1</span>
-            <span className="flow-t">Model reply</span>
-            <span className="flow-d">HTML / Markdown</span>
-          </li>
-          <li className="flow-arrow" aria-hidden="true">→</li>
-          <li className="flow-step">
-            <span className="flow-n">2</span>
-            <span className="flow-t">parseMessageBlocks</span>
-            <span className="flow-d">typed AST blocks</span>
-          </li>
-          <li className="flow-arrow" aria-hidden="true">→</li>
-          <li className="flow-step">
-            <span className="flow-n">3</span>
-            <span className="flow-t">ConversedContent</span>
-            <span className="flow-d">renders blocks</span>
-          </li>
-          <li className="flow-arrow" aria-hidden="true">→</li>
-          <li className="flow-step">
-            <span className="flow-n">4</span>
-            <span className="flow-t">onAction</span>
-            <span className="flow-d">click events</span>
-          </li>
-        </ol>
-
-        <h3 className="guide-subhead">Add it to your app</h3>
-
         <div className="guide-tabs" role="tablist">
-          {(['react', 'angular'] as Framework[]).map((f) => (
+          {TABS.map((t) => (
             <button
-              key={f}
+              key={t.id}
               role="tab"
-              aria-selected={tab === f}
-              className={`guide-tab ${tab === f ? 'active' : ''}`}
-              onClick={() => setTab(f)}
+              aria-selected={tab === t.id}
+              className={`guide-tab ${tab === t.id ? 'active' : ''}`}
+              onClick={() => setTab(t.id)}
             >
-              {f === 'react' ? 'React' : 'Angular'}
+              {t.label}
             </button>
           ))}
         </div>
 
-        <div className="guide-step">
-          <span className="guide-step-label">1 · Install</span>
-          <div className="guide-code">
-            <button className="guide-copy" onClick={() => copy('install', INSTALL[tab])}>
-              {copied === 'install' ? 'Copied' : 'Copy'}
-            </button>
-            <pre>
-              <code>{INSTALL[tab]}</code>
-            </pre>
-          </div>
-        </div>
+        {tab === 'how' ? (
+          <div className="guide-how">
+            <p className="guide-lead">
+              <strong>Conversed</strong> turns an LLM’s reply into structured, interactive UI. It parses
+              HTML or Markdown into a typed block AST, renders each block in your framework, and emits an
+              event when someone clicks an actionable part. You keep your own chat shell — Conversed only
+              fills the message content.
+            </p>
 
-        <div className="guide-step">
-          <span className="guide-step-label">2 · Render a reply</span>
-          <div className="guide-code">
-            <button className="guide-copy" onClick={() => copy('snippet', SNIPPET[tab])}>
-              {copied === 'snippet' ? 'Copied' : 'Copy'}
-            </button>
-            <pre>
-              <code>{SNIPPET[tab]}</code>
-            </pre>
+            <ol className="guide-flow" aria-label="Pipeline">
+              <li className="flow-step">
+                <span className="flow-n">1</span>
+                <span className="flow-t">Model reply</span>
+                <span className="flow-d">HTML / Markdown</span>
+              </li>
+              <li className="flow-arrow" aria-hidden="true">→</li>
+              <li className="flow-step">
+                <span className="flow-n">2</span>
+                <span className="flow-t">parseMessageBlocks</span>
+                <span className="flow-d">typed AST blocks</span>
+              </li>
+              <li className="flow-arrow" aria-hidden="true">→</li>
+              <li className="flow-step">
+                <span className="flow-n">3</span>
+                <span className="flow-t">ConversedContent</span>
+                <span className="flow-d">renders blocks</span>
+              </li>
+              <li className="flow-arrow" aria-hidden="true">→</li>
+              <li className="flow-step">
+                <span className="flow-n">4</span>
+                <span className="flow-t">onAction</span>
+                <span className="flow-d">click events</span>
+              </li>
+            </ol>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="guide-step">
+              <span className="guide-step-label">1 · Install</span>
+              <div className="guide-code">
+                <button className="guide-copy" onClick={() => copy('install', INSTALL[tab])}>
+                  {copied === 'install' ? 'Copied' : 'Copy'}
+                </button>
+                <pre>
+                  <code>{INSTALL[tab]}</code>
+                </pre>
+              </div>
+            </div>
+
+            <div className="guide-step">
+              <span className="guide-step-label">2 · Render a reply</span>
+              <div className="guide-code">
+                <button className="guide-copy" onClick={() => copy('snippet', SNIPPET[tab])}>
+                  {copied === 'snippet' ? 'Copied' : 'Copy'}
+                </button>
+                <pre>
+                  <code>{SNIPPET[tab]}</code>
+                </pre>
+              </div>
+            </div>
+          </>
+        )}
 
         <p className="guide-foot">
           Full guides in the{' '}

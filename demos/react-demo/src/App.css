@@ -175,8 +175,15 @@
   color: var(--ink);
 }
 
+.guide-sub {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .guide-lead {
-  margin: 0.4rem 0 1rem;
+  margin: 0 0 1rem;
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--muted);
@@ -228,16 +235,6 @@
   align-self: center;
   color: var(--faint-ink);
   font-size: 0.85rem;
-}
-
-.guide-subhead {
-  font-family: var(--sans);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--faint-ink);
-  margin: 0 0 0.6rem;
 }
 
 .guide-tabs {
