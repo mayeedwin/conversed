@@ -10,70 +10,135 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export interface ConsoleLogEntry {
+/** A single Action Protocol event captured by the inspector. */
+export interface ActionRecord {
   id: string;
-  type: 'info' | 'action' | 'parser' | 'stream';
-  message: string;
-  data?: unknown;
+  type: string;
+  actionId: string;
+  target?: string;
+  params?: Record<string, unknown>;
+  blockType?: string;
   timestamp: string;
 }
 
-export const DEMO_PRESET_PROMPTS = [
+export interface DemoPreset {
+  id: string;
+  title: string;
+  userText: string;
+  markdown: string;
+}
+
+// A tiny self-contained pasture illustration (no network needed) for the media block.
+const PASTURE_SVG =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='200'%3E" +
+  "%3Crect width='640' height='200' fill='%23eaeadb'/%3E" +
+  "%3Ccircle cx='526' cy='54' r='28' fill='%23e0a94b'/%3E" +
+  "%3Cpath d='M0 150 Q160 104 320 140 T640 132 V200 H0 Z' fill='%23a7bd86'/%3E" +
+  "%3Cpath d='M0 172 Q200 138 420 170 T640 166 V200 H0 Z' fill='%23829a5e'/%3E" +
+  "%3C/svg%3E";
+
+export const DEMO_PRESET_PROMPTS: DemoPreset[] = [
   {
-    id: 'market-report',
-    title: '📊 Market Intelligence Report',
-    userText: 'Generate a Q3 market report with actionable financial tables.',
+    id: 'herd-overview',
+    title: 'Herd overview',
+    userText: 'Give me an overview of my herd.',
     markdown: [
-      '# 📊 Q3 Market Intelligence Summary',
-      '',
-      'Here is the real-time breakdown across strategic investment portfolios:',
-      '',
-      '> [!NOTE]',
-      '> Parsed in real-time by `@conversed/core` AST engine without provider lock-in.',
-      '',
-      '### Portfolio Allocation & Risk Breakdown',
-      '',
-      '| Asset Class | Q3 Allocation | Yield | Status | Action |',
-      '| --- | --- | --- | --- | --- |',
-      '| Green Tech Index | $1.45M | +18.4% | Low Risk | <button data-action-type="navigate" data-action-id="rebalance-green" data-action-target="/portfolio/green">Rebalance</button> |',
-      '| Cloud AI Compute | $2.80M | +32.1% | Medium Risk | <button data-action-type="custom-command" data-action-id="buy-dip">Buy Dip</button> |',
-      '| Solid-State Battery | $850K | +9.2% | High Risk | <button data-action-type="prompt-submit" data-action-id="deep-dive">Deep Dive</button> |',
-      '',
-      '> [!TIP]',
-      '> Click any action button directly within the table to emit client-side **Action Protocol** events!',
-      '',
-      '### Strategic Takeaways',
-      '- **Expand GPU Capacity**: Scale cloud nodes prior to Q4.',
-      '- **Hedge High Yields**: Transfer profits to green tech reserves.'
+      '<h2>Herd overview</h2>',
+      '<p>You have <strong>18 healthy animals</strong> across two paddocks. Here are the ones that need attention first.</p>',
+      '<ul>',
+      '  <li><strong>Babu</strong> — French-Alpine · 4y 11m</li>',
+      '  <li><strong>Bessie</strong> — Local-mixed · 1y 3m</li>',
+      '  <li><strong>Nyanya</strong> — French-Alpine · 2y 5m</li>',
+      '  <li><strong>Tobias</strong> — Merino sheep · 2y 5m</li>',
+      '</ul>',
+      '<dl>',
+      '  <dt>Total animals</dt><dd data-delta="+3" data-trend="up">18</dd>',
+      '  <dt>Paddocks</dt><dd>2</dd>',
+      '  <dt>Due for checkup</dt>',
+      '  <dd data-action-type="navigate" data-action-id="open-checkups" data-action-target="/health/checkups" data-delta="2" data-trend="down">2</dd>',
+      '</dl>',
+      '<p>Tap the <strong>Due for checkup</strong> card to open the health queue.</p>',
+      '<ul data-followups>',
+      '  <li>Show milk yield this week</li>',
+      '  <li>Which animals are due for vaccination?</li>',
+      '</ul>'
     ].join('\n')
   },
   {
-    id: 'system-diagnostics',
-    title: '⚡ Cluster Health Diagnostics',
-    userText: 'Run full system health scan on worker fleet Alpha & Beta.',
+    id: 'financials',
+    title: 'Financial summary',
+    userText: 'Show my financial summary.',
     markdown: [
-      '# 🛡️ Agent Infrastructure Diagnostic Scan',
-      '',
-      'Automated diagnostic sweep completed across multi-region compute clusters.',
-      '',
+      '<h2>Financial summary</h2>',
+      '<p>Revenue of <strong>523,500 KES</strong> against <strong>253,000 KES</strong> in expenses — a net income of <strong>270,500 KES</strong>.</p>',
+      '<dl>',
+      '  <dt>Total revenue</dt><dd data-delta="+18%" data-trend="up">523,500 KES</dd>',
+      '  <dt>Total expenses</dt><dd data-delta="-4%" data-trend="down">253,000 KES</dd>',
+      '  <dt>Net income</dt><dd data-delta="+270,500" data-trend="up">270,500 KES</dd>',
+      '</dl>',
+      '<p>Income is driven by livestock sales. Tap a row to inspect the entry.</p>',
+      '<table>',
+      '  <thead><tr><th>Date</th><th>Category</th><th>Amount</th></tr></thead>',
+      '  <tbody>',
+      '    <tr data-action-type="navigate" data-action-id="open-entry" data-action-target="/ledger/1001" data-action-params=\'{"amount":380000,"category":"Livestock Sale"}\'><td>Jun 26</td><td>Livestock Sale</td><td>380,000 KES</td></tr>',
+      '    <tr data-action-type="navigate" data-action-id="open-entry" data-action-target="/ledger/1002" data-action-params=\'{"amount":77000,"category":"Livestock Sale"}\'><td>Jun 26</td><td>Livestock Sale</td><td>77,000 KES</td></tr>',
+      '    <tr data-action-type="navigate" data-action-id="open-entry" data-action-target="/ledger/1003" data-action-params=\'{"amount":17000,"category":"Milk"}\'><td>May 22</td><td>Milk</td><td>17,000 KES</td></tr>',
+      '  </tbody>',
+      '</table>',
+      '<figure data-chart="bar" data-labels="Livestock|Milk|Other" data-values="484000|17000|22500" data-series-label="Income (KES)"><figcaption>Income by category</figcaption></figure>',
+      '> [!TIP]',
+      '> Every row and card here emits an Action Protocol event — watch the inspector on the right.',
+      '<ul data-followups>',
+      '  <li>Break down expenses</li>',
+      '  <li>Compare against last month</li>',
+      '</ul>'
+    ].join('\n')
+  },
+  {
+    id: 'vaccination',
+    title: 'Vaccination how-to',
+    userText: 'How do I vaccinate a new animal?',
+    markdown: [
+      '<h2>Vaccination protocol</h2>',
+      '<p>Follow these steps when a new animal joins the herd.</p>',
+      '<ol data-steps>',
+      '  <li><strong>Isolate</strong> the animal from the herd for the first 24 hours.</li>',
+      '  <li><strong>Record</strong> weight and age in the tracker.</li>',
+      '  <li><strong>Administer</strong> the CDT dose based on the weight table below.</li>',
+      '  <li>Log the batch number and schedule the booster.</li>',
+      '</ol>',
+      '<details>',
+      '  <summary>Dosage reference</summary>',
+      '  <p>Under 25kg: 1ml. 25–40kg: 1.5ml. Over 40kg: 2ml. Store vaccine at 2–8°C.</p>',
+      '</details>',
       '> [!WARNING]',
-      '> High memory utilization detected on **Worker Fleet Beta (us-east-4)**.',
-      '',
-      '### Cluster Status Summary',
-      '',
-      '<div data-tone="success">',
-      '  <strong>Fleet Alpha:</strong> 128 / 128 Nodes Online (0 Latency Spikes)',
-      '</div>',
-      '',
-      '<div data-tone="warning">',
-      '  <strong>Fleet Beta:</strong> 64 / 64 Nodes Online (High Memory: 91%)',
-      '</div>',
-      '',
-      '### Quick Action Protocol Commands',
-      '',
-      '<button data-action-type="custom-command" data-action-id="autoscale-cluster">Autoscale (+32 Nodes)</button>',
-      '<button data-action-type="prompt-submit" data-action-id="flush-cache">Flush Memory Cache</button>',
-      '<button data-action-type="navigate" data-action-id="open-grafana" data-action-target="/grafana">Open Metrics</button>'
+      '> Never re-use needles between animals — it spreads infection across the herd.',
+      '<dl>',
+      '  <dt>Log vaccination</dt>',
+      '  <dd data-action-type="custom-command" data-action-id="log-vaccination" data-action-params=\'{"vaccine":"CDT"}\'>Start</dd>',
+      '</dl>'
+    ].join('\n')
+  },
+  {
+    id: 'season',
+    title: 'Season timeline',
+    userText: 'What happened this season?',
+    markdown: [
+      '<h2>This season at a glance</h2>',
+      '<ul data-timeline>',
+      '  <li data-time="May 22"><strong>First milk sale</strong> — 17,000 KES to the local co-op.</li>',
+      '  <li data-time="Jun 05"><strong>Sold manure</strong> — 17,500 KES.</li>',
+      '  <li data-time="Jun 26"><strong>Livestock sale</strong> — 3 goats for 380,000 KES.</li>',
+      '  <li data-time="Jul 17"><strong>Restocked</strong> — added 20 layers to Paddock B.</li>',
+      '</ul>',
+      '<figure>',
+      `  <img src="${PASTURE_SVG}" alt="Illustration of a green pasture at sunset" />`,
+      '  <figcaption>Paddock B after the July restock</figcaption>',
+      '</figure>',
+      '<ul data-followups>',
+      '  <li>Project next month’s income</li>',
+      '  <li>Show the herd overview</li>',
+      '</ul>'
     ].join('\n')
   }
 ];
