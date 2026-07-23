@@ -18,6 +18,17 @@ Standard AI chat interfaces render static text or basic Markdown. When models ge
 
 ---
 
+## Screenshots
+
+Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
+
+- [Livestock table](docs/screenshots/01-livestock-table.png) — a `table` block rendering row data
+- [Financial summary](docs/screenshots/02-financial-summary.png) — `stats` cards, `followups` chips, and an income breakdown `table`
+- [Charts](docs/screenshots/03-charts.png) — bar and pie `chart` blocks via Chart.js
+- [Expense breakdown](docs/screenshots/04-expense-breakdown.png) — `stats` cards with an expense breakdown `table`
+
+---
+
 ## Packages
 
 | Package | Version | Description |
