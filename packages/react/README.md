@@ -36,7 +36,7 @@ import { ConversedBlock } from '@conversed/react';
 export const DashboardWidget = ({ block }) => (
   <ConversedBlock
     block={block}
-    primaryColor="#6366f1"
+    primaryColor="#0071e3"
     onAction={(e) => console.log('Action:', e.action)}
   />
 );
@@ -55,13 +55,19 @@ import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
 export const AssistantBubble = ({ rawAiResponse }: { rawAiResponse: string }) => (
   <div className="my-chat-bubble assistant">
     <ConversedContent
-      blocks={parseMessageBlocks(rawAiResponse)}
-      primaryColor="#6366f1"
+      blocks={parseMessageBlocks(rawAiResponse, { debug: true })}
+      primaryColor="#0071e3"
+      debug
       onAction={(e: AgentActionEvent) => console.log('Action:', e.action)}
     />
   </div>
 );
 ```
+
+`ConversedContent` props: `blocks`, `primaryColor?` (defaults to `#0071e3`),
+`theme?`, `onAction?`, and `debug?` (logs emitted actions when `true`).
+`ConversedBlock` renders a single block. Chart blocks render via **Chart.js**
+(bundled dependency).
 
 ## Documentation
 

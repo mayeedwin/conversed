@@ -10,9 +10,11 @@ Standard AI chat interfaces render static text or basic Markdown. When models ge
 
 ### Key Capabilities
 - **Interactive Action Protocol**: Attach custom action triggers (e.g. `view-detail`, `approve-transaction`) directly to table rows, metric cards, and prompt chips.
+- **Native Charts**: Render bar, line, and pie charts (via Chart.js) directly from model output — no manual chart wiring.
 - **Standalone Component Rendering**: Render individual rich blocks anywhere in custom application layouts (dashboards, side drawers, modals) without being constrained to a chat feed container.
 - **Provider-Agnostic Engine**: Works with OpenAI, Anthropic Claude, Google Gemini, Firebase Vertex AI, or local models via standard HTML/Markdown parsing.
 - **Zero-Config Theming**: Theme components using a single `primaryColor` prop or custom CSS variables.
+- **Built-in Debug Mode**: Pass `debug` to log the raw text, parsed blocks, and emitted actions to the console (silent by default).
 
 ---
 
@@ -58,6 +60,8 @@ ${getSystemPromptInstruction()}
 ### React
 
 ```tsx
+// Import the stylesheet once at your app root (React ships CSS separately).
+import '@conversed/react/styles.css';
 import { ConversedContent } from '@conversed/react';
 import { parseMessageBlocks } from '@conversed/core';
 
@@ -69,8 +73,9 @@ export const AssistantBubble = ({ rawAiResponse }: { rawAiResponse: string }) =>
     <div className="my-chat-bubble assistant">
       <ConversedContent
         blocks={blocks}
-        primaryColor="#6366f1"
+        primaryColor="#0071e3"
         onAction={(e) => console.log('Action:', e.action)}
+        debug
       />
     </div>
   );
@@ -93,7 +98,8 @@ import { parseMessageBlocks, AgentActionEvent } from '@conversed/core';
     <div class="my-chat-bubble assistant">
       <conversed-content
         [blocks]="blocks()"
-        primaryColor="#6366f1"
+        primaryColor="#0071e3"
+        [debug]="true"
         (action)="onAction($event)">
       </conversed-content>
     </div>

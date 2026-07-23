@@ -20,12 +20,12 @@ The stylesheet is fully driven by the `--conversed-*` variables below, so a `pri
 
 ```tsx
 // React
-<ConversedBlock block={block} primaryColor="#10b981" />
+<ConversedBlock block={block} primaryColor="#0071e3" />
 ```
 
 ```html
 <!-- Angular -->
-<conversed-block [block]="block" primaryColor="#10b981"></conversed-block>
+<conversed-block [block]="block" primaryColor="#0071e3"></conversed-block>
 ```
 
 ---
@@ -36,7 +36,7 @@ Defaults are light-mode safe. Override any of them on `:root` (or any ancestor) 
 
 ```css
 :root {
-  --conversed-primary: #6366f1;
+  --conversed-primary: #0071e3;         /* WCAG-AA safe as text */
   --conversed-text: inherit;
   --conversed-text-muted: #8e8e93;      /* gray-600 */
   --conversed-card-bg: transparent;
@@ -45,6 +45,11 @@ Defaults are light-mode safe. Override any of them on `:root` (or any ancestor) 
   --conversed-font-family: inherit;
 }
 ```
+
+The full `--conversed-gray-50` … `--conversed-gray-900` ramp (see below) is defined
+alongside these. Two alpha tints are derived from the primary color automatically —
+`--conversed-primary-alpha15` and `--conversed-primary-alpha30` — for subtle fills and
+hover states; they update whenever `--conversed-primary` changes.
 
 ---
 
@@ -83,17 +88,52 @@ const hairline = CONVERSED_GRAY[200]; // "#e5e5ea"
 
 ## 5. Full Theme Object
 
-Pass a `theme` object to override multiple tokens at once (takes precedence over `primaryColor`):
+Pass a `theme` object to override multiple tokens at once (takes precedence over `primaryColor`). Every field maps to a `ConversedThemeTokens` property:
 
 ```tsx
 <ConversedBlock
   block={block}
   theme={{
-    primaryColor: '#10b981',
-    borderColor: '#d1d1d6',   // gray-300
-    borderRadius: '10px',
+    primaryColor: '#10b981',    // custom brand color
+    textColor: 'inherit',
+    textMutedColor: '#8e8e93',  // gray-600
     cardBg: '#ffffff',
-    textMutedColor: '#8e8e93'
+    borderColor: '#d1d1d6',     // gray-300
+    borderRadius: '10px',
+    fontFamily: 'inherit'
   }}
 />
+```
+
+Generate the resolved CSS from a theme (or the defaults) with
+`generateCssVariables(theme?)` from `@conversed/core`.
+
+---
+
+## 6. Chart Colors
+
+Chart blocks derive their series colors from `--conversed-primary` plus the
+`CHART_SERIES_COLORS` palette, so charts pick up your brand color automatically. Set a
+`primaryColor` (or override `--conversed-primary`) and the first series follows it;
+additional series cycle through `CHART_SERIES_COLORS`. Charts render via Chart.js, which
+is bundled — build a Chart.js config directly with `toChartJsConfig(block, { primaryColor })`.
+
+---
+
+## 7. Debug Logging (dev-facing)
+
+Both the parser and the render components can log what they see to the console while you
+develop. Both are silent by default:
+
+```tsx
+// Parser: logs the raw text + the parsed blocks (styled)
+const blocks = parseMessageBlocks(rawAiResponse, { debug: true });
+
+// Component: logs the blocks it renders
+<ConversedContent blocks={blocks} debug />
+```
+
+```html
+<!-- Angular -->
+<conversed-content [blocks]="blocks()" [debug]="true"></conversed-content>
 ```

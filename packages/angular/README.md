@@ -19,7 +19,7 @@ Render a single AI Metric Card or Table anywhere in your Angular layout:
 ```html
 <conversed-block
   [block]="myBlock"
-  primaryColor="#6366f1"
+  primaryColor="#0071e3"
   (action)="onAction($event)">
 </conversed-block>
 ```
@@ -33,11 +33,19 @@ bubbles. Its only input is `blocks`. Drop `<conversed-content>` inside your own 
 <div class="my-chat-bubble assistant">
   <conversed-content
     [blocks]="blocks()"
-    primaryColor="#6366f1"
+    primaryColor="#0071e3"
+    [debug]="true"
     (action)="onAction($event)">
   </conversed-content>
 </div>
 ```
+
+`ConversedContentComponent` inputs: `[blocks]`, `[primaryColor]`, `[theme]`,
+`[debug]` (defaults to `false`; logs emitted actions when `true`), and the
+`(action)` output. `primaryColor` defaults to `#0071e3`.
+
+Chart blocks render via **Chart.js** (bundled dependency), and all styles are
+inlined — zero CSS setup required.
 
 ```typescript
 import { Component, computed, input } from '@angular/core';
