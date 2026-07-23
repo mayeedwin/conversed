@@ -71,6 +71,194 @@
   border-color: var(--clay);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.use-it {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--clay-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.use-it:hover {
+  border-color: var(--clay);
+  background: color-mix(in srgb, var(--clay-soft) 45%, #fff);
+}
+
+.topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.topbar-links a {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.topbar-links a:hover {
+  color: var(--clay-ink);
+}
+
+/* ---------- Guide modal ---------- */
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: color-mix(in srgb, #22201c 45%, transparent);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.guide {
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem 1.4rem;
+  box-shadow: 0 24px 60px -20px color-mix(in srgb, #22201c 40%, transparent);
+}
+
+.guide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guide-title {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.guide-close {
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.guide-close:hover {
+  color: var(--ink);
+}
+
+.guide-lead {
+  margin: 0.4rem 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.guide-tabs {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.guide-tab {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+
+.guide-tab.active {
+  color: var(--clay-ink);
+  border-bottom-color: var(--clay);
+}
+
+.guide-step {
+  margin-bottom: 1rem;
+}
+
+.guide-step-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint-ink);
+  margin-bottom: 0.4rem;
+}
+
+.guide-code {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #26241f;
+  overflow: hidden;
+}
+
+.guide-code pre {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: #e9e5da;
+}
+
+.guide-copy {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  color: #e9e5da;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.guide-copy:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.guide-foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.guide-foot a {
+  color: var(--clay-ink);
+}
+
 /* ---------- Workspace grid ---------- */
 .workspace {
   flex: 1;
@@ -168,6 +356,72 @@
 .turn.assistant .conversed-content {
   font-family: var(--sans);
   color: var(--ink);
+}
+
+/* Source preview — the markdown/HTML that produced this reply */
+.source {
+  margin-top: 0.4rem;
+}
+
+.source-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0.15rem 0;
+  cursor: pointer;
+}
+
+.source-toggle:hover {
+  color: var(--clay-ink);
+}
+
+.source-toggle .chev {
+  color: var(--faint-ink);
+}
+
+.source-block {
+  position: relative;
+  margin-top: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #26241f;
+  overflow: hidden;
+}
+
+.source-block pre {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #e9e5da;
+  white-space: pre;
+}
+
+.source-copy {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  color: #e9e5da;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  padding: 0.18rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.source-copy:hover {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 /* ---------- Composer ---------- */

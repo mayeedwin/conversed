@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { ConversedContent } from '@conversed/react';
+import { consumeConversedStream } from '@conversed/core';
 import type { AgentActionEvent } from '@conversed/core';
 import '@conversed/react/styles.css';
-import { DEMO_PRESET_PROMPTS, streamConsoleResponse } from './mockAi';
+import { DEMO_PRESET_PROMPTS, mockTokenStream } from './mockAi';
 import type { ChatMessage, ActionRecord } from './mockAi';
+import { Guide } from './Guide';
 import './App.css';
 
 const PRIMARY = '#c96442';
@@ -47,8 +49,25 @@ export function App() {
   const [actions, setActions] = useState<ActionRecord[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [openSource, setOpenSource] = useState<Set<string>>(new Set());
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
 
   const threadEndRef = useRef<HTMLDivElement>(null);
+
+  const toggleSource = (id: string) =>
+    setOpenSource((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const copySource = (id: string, text: string) => {
+    void navigator.clipboard?.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId((c) => (c === id ? null : c)), 1200);
+  };
 
   useEffect(() => {
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -90,10 +109,11 @@ export function App() {
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
     setIsStreaming(true);
 
-    for await (const update of streamConsoleResponse(markdown, 22)) {
+    // Parse the mock token stream with the library's own stream adapter.
+    for await (const update of consumeConversedStream(mockTokenStream(markdown, 22))) {
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === assistantId ? { ...m, text: update.text, blocks: update.blocks } : m
+          m.id === assistantId ? { ...m, text: update.rawText, blocks: update.blocks } : m
         )
       );
     }
@@ -132,14 +152,26 @@ export function App() {
           <span className="brand-sep" aria-hidden="true">·</span>
           <span className="brand-sub">rich, interactive AI replies</span>
         </div>
-        <a
-          className="brand-tag"
-          href="https://github.com/mayeedwin/conversed"
-          target="_blank"
-          rel="noreferrer"
-        >
-          conversed × react
-        </a>
+        <div className="topbar-actions">
+          <button className="use-it" onClick={() => setShowGuide(true)}>
+            Use it
+          </button>
+          <nav className="topbar-links" aria-label="Project links">
+            <a href="https://github.com/mayeedwin/conversed" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            <a href="https://www.npmjs.com/package/@conversed/react" target="_blank" rel="noreferrer">
+              npm
+            </a>
+            <a
+              href="https://github.com/mayeedwin/conversed#documentation"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Docs
+            </a>
+          </nav>
+        </div>
       </header>
 
       <div className="workspace">
@@ -154,11 +186,40 @@ export function App() {
                   {msg.sender === 'user' ? (
                     <div className="user-bubble">{msg.text}</div>
                   ) : msg.blocks && msg.blocks.length > 0 ? (
-                    <ConversedContent
-                      blocks={msg.blocks}
-                      primaryColor={PRIMARY}
-                      onAction={handleAction}
-                    />
+                    <>
+                      <ConversedContent
+                        blocks={msg.blocks}
+                        primaryColor={PRIMARY}
+                        onAction={handleAction}
+                      />
+                      {!msg.isStreaming && msg.text && (
+                        <div className="source">
+                          <button
+                            className="source-toggle"
+                            onClick={() => toggleSource(msg.id)}
+                            aria-expanded={openSource.has(msg.id)}
+                          >
+                            <span className="chev" aria-hidden="true">
+                              {openSource.has(msg.id) ? '▾' : '▸'}
+                            </span>
+                            {openSource.has(msg.id) ? 'Hide source' : 'View source'}
+                          </button>
+                          {openSource.has(msg.id) && (
+                            <div className="source-block">
+                              <button
+                                className="source-copy"
+                                onClick={() => copySource(msg.id, msg.text)}
+                              >
+                                {copiedId === msg.id ? 'Copied' : 'Copy'}
+                              </button>
+                              <pre>
+                                <code>{msg.text}</code>
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="thinking" aria-label="Zao is replying">
                       <span className="caret" />
@@ -256,6 +317,8 @@ export function App() {
           </div>
         </aside>
       </div>
+
+      <Guide open={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }

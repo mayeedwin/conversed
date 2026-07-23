@@ -1,4 +1,3 @@
-import { parseMessageBlocks } from '@conversed/core';
 import type { ConversedContentBlock } from '@conversed/core';
 
 export interface ChatMessage {
@@ -140,28 +139,43 @@ export const DEMO_PRESET_PROMPTS: DemoPreset[] = [
       '  <li>Show the herd overview</li>',
       '</ul>'
     ].join('\n')
+  },
+  {
+    id: 'automate',
+    title: 'Automate reports',
+    userText: 'How do I automate the daily report?',
+    markdown: [
+      '<h2>Automate the daily report</h2>',
+      '<p>Add this cron job on your server to email the herd summary every morning at 6am.</p>',
+      '<pre><code class="language-bash">0 6 * * *  zao export --report daily --email you@farm.co</code></pre>',
+      '<hr>',
+      '<p>Prefer code? Call the API directly:</p>',
+      '<pre><code class="language-ts">await zao.reports.create({ type: \'daily\', delivery: \'email\' });</code></pre>',
+      '> [!NOTE]',
+      '> Each code block shows its language and a copy button — click it to copy the snippet.',
+      '<ul data-followups>',
+      '  <li>Show my financial summary.</li>',
+      '  <li>What happened this season?</li>',
+      '</ul>'
+    ].join('\n')
   }
 ];
 
-export async function* streamConsoleResponse(
+/**
+ * Simulates an LLM token stream: yields `{ text }` deltas the way a provider SDK
+ * would. Feed it to `consumeConversedStream` from `@conversed/core` to get parsed
+ * blocks chunk-by-chunk — the demo uses the real adapter, not a bespoke parser loop.
+ */
+export async function* mockTokenStream(
   markdownText: string,
   delayMs: number = 20
-): AsyncGenerator<{ text: string; blocks: ConversedContentBlock[] }> {
-  let accumulated = '';
+): AsyncGenerator<{ text: string }> {
   const chunkSize = 12;
-  let cursor = 0;
 
-  while (cursor < markdownText.length) {
-    const nextCursor = Math.min(cursor + chunkSize, markdownText.length);
-    accumulated += markdownText.slice(cursor, nextCursor);
-    cursor = nextCursor;
+  for (let cursor = 0; cursor < markdownText.length; cursor += chunkSize) {
+    yield { text: markdownText.slice(cursor, cursor + chunkSize) };
 
-    yield {
-      text: accumulated,
-      blocks: parseMessageBlocks(accumulated)
-    };
-
-    if (cursor < markdownText.length && delayMs > 0) {
+    if (cursor + chunkSize < markdownText.length && delayMs > 0) {
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
