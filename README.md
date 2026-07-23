@@ -37,28 +37,6 @@ See the [demo README](./demos/react-demo/README.md) for build and Firebase Hosti
 
 ---
 
-## Packages
-
-| Package | Version | Description |
-| :--- | :--- | :--- |
-| [`@conversed/core`](./packages/core) | `0.0.1-rc.5` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
-| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.5` | Angular 17+ Signals-based UI components and block renderers |
-| [`@conversed/react`](./packages/react) | `0.0.1-rc.5` | React 18+ JSX components and block renderers |
-
----
-
-## Documentation
-
-- [Architecture & AST Specification](./docs/architecture.md)
-- [Git & Workflow Conventions](./docs/git_workflow.md)
-- [LLM System Prompt Guide](./docs/prompts.md)
-- [Angular & React Integration](./docs/frameworks.md)
-- [Theming & Design Tokens](./docs/theming.md)
-- [Contributing Guide](./CONTRIBUTING.md)
-- [AI Agent Specification](./AGENTS.md)
-
----
-
 ## Quickstart
 
 ### LLM System Prompt
@@ -133,6 +111,18 @@ export class AssistantBubbleComponent {
   }
 }
 ```
+
+---
+
+## Documentation
+
+- [Architecture & AST Specification](./docs/architecture.md)
+- [Git & Workflow Conventions](./docs/git_workflow.md)
+- [LLM System Prompt Guide](./docs/prompts.md)
+- [Angular & React Integration](./docs/frameworks.md)
+- [Theming & Design Tokens](./docs/theming.md)
+- [Contributing Guide](./CONTRIBUTING.md)
+- [AI Agent Specification](./AGENTS.md)
 
 ---
 
