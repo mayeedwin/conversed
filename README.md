@@ -29,6 +29,21 @@ Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
 
 ---
 
+## Demo
+
+A runnable Claude-inspired chat demo lives in [`demos/react-demo`](./demos/react-demo) — it renders
+every block type and shows a live **Action Inspector** for the Action Protocol. This is a **pnpm
+workspace**, so run it with pnpm from the repo root (npm can't resolve the `workspace:` deps):
+
+```bash
+pnpm install
+pnpm --filter @conversed/demo-react dev
+```
+
+See the [demo README](./demos/react-demo/README.md) for build and Firebase Hosting deployment.
+
+---
+
 ## Packages
 
 | Package | Version | Description |
