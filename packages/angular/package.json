@@ -14,7 +14,8 @@
     }
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json"
+    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json",
+    "test": "echo \"No tests specified for angular package yet\""
   },
   "dependencies": {
     "@conversed/core": "0.0.1-rc.3",

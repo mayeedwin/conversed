@@ -17,7 +17,8 @@
   },
   "files": ["dist", "styles.css"],
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest run"
   },
   "dependencies": {
     "@conversed/core": "0.0.1-rc.3",

@@ -8,6 +8,7 @@
     "build:react": "pnpm --filter @conversed/react run build",
     "build:angular": "pnpm --filter @conversed/angular run build",
     "build": "npm run build:core && npm run build:react && npm run build:angular",
+    "test": "pnpm --recursive run test",
     "release": "./scripts/release.sh latest",
     "release:rc": "./scripts/release.sh rc"
   },
