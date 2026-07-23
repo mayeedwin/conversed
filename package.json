@@ -1,7 +1,7 @@
 {
   "name": "conversed-monorepo",
   "private": true,
-  "version": "0.0.1-rc.1",
+  "version": "0.0.1-rc.4",
   "description": "Composable Rich Content UI library for AI Agents and Chat interfaces",
   "scripts": {
     "build:core": "pnpm --filter @conversed/core run build",
@@ -12,7 +12,14 @@
     "release": "./scripts/release.sh latest",
     "release:rc": "./scripts/release.sh rc"
   },
-  "keywords": ["ai", "chat", "agent", "rich-content", "angular", "react"],
+  "keywords": [
+    "ai",
+    "chat",
+    "agent",
+    "rich-content",
+    "angular",
+    "react"
+  ],
   "author": "Maye Edwin",
   "license": "MIT",
   "repository": {
@@ -20,5 +27,9 @@
     "url": "git+https://github.com/mayeedwin/conversed.git"
   },
   "homepage": "https://github.com/mayeedwin/conversed#readme",
-  "bugs": "https://github.com/mayeedwin/conversed/issues"
+  "bugs": "https://github.com/mayeedwin/conversed/issues",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.10"
+  }
 }

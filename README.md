@@ -33,9 +33,9 @@ Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
 
 | Package | Version | Description |
 | :--- | :--- | :--- |
-| [`@conversed/core`](./packages/core) | `0.0.1-rc.1` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
-| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.1` | Angular 17+ Signals-based UI components and block renderers |
-| [`@conversed/react`](./packages/react) | `0.0.1-rc.1` | React 18+ JSX components and block renderers |
+| [`@conversed/core`](./packages/core) | `0.0.1-rc.4` | Pure TypeScript AST definitions, stream parser engine, and Action Protocol |
+| [`@conversed/angular`](./packages/angular) | `0.0.1-rc.4` | Angular 17+ Signals-based UI components and block renderers |
+| [`@conversed/react`](./packages/react) | `0.0.1-rc.4` | React 18+ JSX components and block renderers |
 
 ---
 

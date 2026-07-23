@@ -1,6 +1,6 @@
 {
   "name": "@conversed/react",
-  "version": "0.0.1-rc.3",
+  "version": "0.0.1-rc.4",
   "description": "React 18+ components and hooks for conversed rich AI chat UI",
   "sideEffects": false,
   "main": "dist/index.js",
@@ -15,13 +15,16 @@
     "./styles.css": "./styles.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "styles.css"],
+  "files": [
+    "dist",
+    "styles.css"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run"
   },
   "dependencies": {
-    "@conversed/core": "0.0.1-rc.3",
+    "@conversed/core": "0.0.1-rc.4",
     "chart.js": "^4.4.0"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@conversed/angular",
-  "version": "0.0.1-rc.3",
+  "version": "0.0.1-rc.4",
   "description": "Angular 17+ Signals-based UI components and block renderers for conversed",
   "sideEffects": false,
   "main": "dist/fesm2022/conversed-angular.mjs",
@@ -18,7 +18,7 @@
     "test": "echo \"No tests specified for angular package yet\""
   },
   "dependencies": {
-    "@conversed/core": "0.0.1-rc.3",
+    "@conversed/core": "0.0.1-rc.4",
     "chart.js": "^4.4.0",
     "tslib": "^2.6.0"
   },
