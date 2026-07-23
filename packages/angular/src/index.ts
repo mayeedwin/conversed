@@ -27,6 +27,7 @@ import {
   AgentActionPayload,
   ConversedThemeTokens,
   toChartJsConfig,
+  logConversedAction,
   generateCssVariables
 } from '@conversed/core';
 
@@ -461,7 +462,7 @@ export class ConversedBlockComponent {
           [block]="block"
           [theme]="theme"
           [primaryColor]="primaryColor"
-          (action)="action.emit($event)"
+          (action)="emitAction($event)"
         ></conversed-block>
       }
     </div>
@@ -475,5 +476,11 @@ export class ConversedContentComponent {
   @Input() blocks: ConversedContentBlock[] = [];
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
+  @Input() debug = false;
   @Output() action = new EventEmitter<AgentActionEvent>();
+
+  emitAction(event: AgentActionEvent) {
+    if (this.debug) logConversedAction(event);
+    this.action.emit(event);
+  }
 }

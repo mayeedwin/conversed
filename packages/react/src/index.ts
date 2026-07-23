@@ -1,7 +1,7 @@
 import React from 'react';
 import { Chart, registerables } from 'chart.js';
 import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
-import { generateCssVariables, toChartJsConfig } from '@conversed/core';
+import { generateCssVariables, toChartJsConfig, logConversedAction } from '@conversed/core';
 
 Chart.register(...registerables);
 
@@ -200,18 +200,24 @@ export interface ConversedContentProps {
   primaryColor?: string;
   theme?: ConversedThemeTokens;
   onAction?: (event: AgentActionEvent) => void;
+  debug?: boolean;
 }
 
 export const ConversedContent: React.FC<ConversedContentProps> = (props: ConversedContentProps) => {
-  const { blocks, primaryColor, theme, onAction } = props;
+  const { blocks, primaryColor, theme, onAction, debug } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
+
+  const handleAction = (event: AgentActionEvent) => {
+    if (debug) logConversedAction(event);
+    onAction?.(event);
+  };
 
   return React.createElement(
     'div',
     { className: 'conversed-content', style: styleVars },
     blocks.map((block: ConversedContentBlock, idx: number) =>
-      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, onAction })
+      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, onAction: handleAction })
     )
   );
 };

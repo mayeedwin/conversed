@@ -306,30 +306,43 @@ const parseNode = (node: Node, blocks: ConversedContentBlock[]) => {
 };
 
 import { normalizeMarkdownToHtml } from './markdown-normalizer.js';
+import { logConversedPipeline } from './debug.js';
 
-export const parseMessageBlocks = (rawHtml: string): ConversedContentBlock[] => {
+export interface ParseOptions {
+  /** When true, logs the raw text and the parsed blocks to the console. */
+  debug?: boolean;
+}
+
+export const parseMessageBlocks = (
+  rawHtml: string,
+  options?: ParseOptions
+): ConversedContentBlock[] => {
   if (!rawHtml || !rawHtml.trim()) return [];
 
   const html = normalizeMarkdownToHtml(rawHtml);
+  let blocks: ConversedContentBlock[];
 
   if (typeof DOMParser === 'undefined') {
     // Basic fallback for environments without DOMParser
-    return [{ type: 'paragraph', html: rawHtml.trim() }];
+    blocks = [{ type: 'paragraph', html: rawHtml.trim() }];
+  } else {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+    const container = doc.querySelector('div');
+    if (!container) {
+      blocks = [{ type: 'paragraph', html: html.trim() }];
+    } else {
+      blocks = [];
+      for (const node of Array.from(container.childNodes)) {
+        parseNode(node, blocks);
+      }
+      if (!blocks.length) {
+        blocks.push({ type: 'paragraph', html: rawHtml.trim() });
+      }
+    }
   }
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-  const container = doc.querySelector('div');
-  if (!container) return [{ type: 'paragraph', html: html.trim() }];
-
-  const blocks: ConversedContentBlock[] = [];
-  for (const node of Array.from(container.childNodes)) {
-    parseNode(node, blocks);
-  }
-
-  if (!blocks.length) {
-    blocks.push({ type: 'paragraph', html: rawHtml.trim() });
-  }
+  if (options?.debug) logConversedPipeline(rawHtml, blocks);
 
   return blocks;
 };
