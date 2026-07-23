@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
+import { getSystemPromptInstruction } from '@conversed/core';
 
 type Framework = 'react' | 'angular';
 type Tab = 'how' | 'prompt' | Framework;
+
+// The raw, framework-agnostic instruction — paste into any system prompt.
+const RAW_INSTRUCTION = getSystemPromptInstruction();
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'how', label: 'How it works' },
@@ -164,13 +168,24 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
               returns the HTML/Markdown shapes Conversed knows how to render.
             </p>
             <div className="guide-step">
-              <span className="guide-step-label">Add to your system prompt</span>
+              <span className="guide-step-label">TypeScript — call the helper</span>
               <div className="guide-code">
                 <button className="guide-copy" onClick={() => copy('prompt', PROMPT_SNIPPET)}>
                   {copied === 'prompt' ? 'Copied' : 'Copy'}
                 </button>
                 <pre>
                   <code>{PROMPT_SNIPPET}</code>
+                </pre>
+              </div>
+            </div>
+            <div className="guide-step">
+              <span className="guide-step-label">No TypeScript? Copy the raw instruction</span>
+              <div className="guide-code">
+                <button className="guide-copy" onClick={() => copy('prompt-raw', RAW_INSTRUCTION)}>
+                  {copied === 'prompt-raw' ? 'Copied' : 'Copy'}
+                </button>
+                <pre>
+                  <code>{RAW_INSTRUCTION}</code>
                 </pre>
               </div>
             </div>
