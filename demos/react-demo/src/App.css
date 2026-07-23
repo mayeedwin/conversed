@@ -1,0 +1,391 @@
+:root {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.console-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0d1117;
+}
+
+/* Header */
+.console-header {
+  height: 50px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  font-size: 1.2rem;
+}
+
+.brand-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f0f6fc;
+}
+
+.brand-badge {
+  background: rgba(56, 139, 253, 0.15);
+  color: #58a6ff;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 139, 253, 0.3);
+}
+
+.header-view-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.view-tab {
+  background: none;
+  border: none;
+  color: #8b949e;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.view-tab:hover {
+  color: #c9d1d9;
+  background: #21262d;
+}
+
+.view-tab.active {
+  background: #21262d;
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+/* Console Body */
+.console-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stage-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+/* Chat Layout */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages-scroll {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-bubble-row {
+  display: flex;
+  gap: 12px;
+  max-width: 900px;
+}
+
+.chat-bubble-row.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-bubble-row.assistant {
+  align-self: flex-start;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #8b949e;
+}
+
+.chat-bubble-row.user .avatar {
+  background: #1f6feb;
+  color: #fff;
+  border: none;
+}
+
+.bubble-content {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 280px;
+  max-width: 700px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 4px;
+}
+
+.meta .name {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #58a6ff;
+}
+
+.meta .time {
+  font-size: 0.7rem;
+  color: #8b949e;
+}
+
+.body {
+  font-size: 0.88rem;
+  color: #c9d1d9;
+}
+
+.body p {
+  margin: 0 0 8px;
+}
+
+.stream-loading {
+  color: #8b949e;
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+/* Input bar */
+.chat-input-bar {
+  background: #161b22;
+  border-top: 1px solid #30363d;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preset-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.preset-chips button {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.preset-chips button:hover:not(:disabled) {
+  border-color: #58a6ff;
+  color: #58a6ff;
+}
+
+.input-field-group {
+  display: flex;
+  gap: 8px;
+}
+
+.input-field-group input {
+  flex: 1;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #f0f6fc;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.input-field-group input:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.input-field-group button {
+  background: #238636;
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.input-field-group button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* AST Inspector */
+.ast-inspector-view {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.ast-inspector-view h3 {
+  margin: 0 0 4px;
+  color: #f0f6fc;
+}
+
+.ast-inspector-view .sub {
+  color: #8b949e;
+  font-size: 0.82rem;
+  margin-bottom: 16px;
+}
+
+.json-tree {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 16px;
+  color: #79c0ff;
+  font-size: 0.82rem;
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* Bottom Real-time Console Log Drawer */
+.bottom-console {
+  height: 200px;
+  background: #010409;
+  border-top: 2px solid #30363d;
+  display: flex;
+  flex-direction: column;
+}
+
+.console-bar-header {
+  height: 32px;
+  background: #161b22;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #21262d;
+}
+
+.console-bar-header .title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.clear-btn {
+  background: none;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  color: #f0f6fc;
+  border-color: #8b949e;
+}
+
+.console-log-stream {
+  flex: 1;
+  padding: 8px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+
+.log-line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  word-break: break-all;
+}
+
+.log-time {
+  color: #484f58;
+}
+
+.log-tag {
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.type-info .log-tag { background: #1f6feb; color: #fff; }
+.type-action .log-tag { background: #238636; color: #fff; }
+.type-parser .log-tag { background: #8957e5; color: #fff; }
+.type-stream .log-tag { background: #d29922; color: #000; }
+
+.log-msg {
+  color: #c9d1d9;
+}
+
+.log-data {
+  color: #79c0ff;
+}
+
+/* Overrides for conversed elements inside dark console studio */
+.conversed-content {
+  --conversed-primary: #58a6ff;
+}
+
+.conversed-content table {
+  background: #0d1117;
+  border-color: #30363d;
+}
+
+.conversed-content th,
+.conversed-content td {
+  border-color: #30363d;
+  color: #c9d1d9;
+}

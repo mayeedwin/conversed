@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'demos/*'
 
 # Resolve cross-package deps (e.g. @conversed/core) to the local workspace
 # copy during development, even though they're pinned to exact published
