@@ -349,7 +349,6 @@
 /* Table (div grid, not a native <table>) */
 .conversed-table-container {
   overflow-x: auto;
-  margin: 0.35rem 0;
   border: 1px solid var(--conversed-border-color, #e5e5ea);
   border-radius: var(--conversed-radius, 8px);
   background: var(--conversed-card-bg, transparent);
