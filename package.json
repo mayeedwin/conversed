@@ -14,5 +14,11 @@
   },
   "keywords": ["ai", "chat", "agent", "rich-content", "angular", "react"],
   "author": "Maye Edwin",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayeedwin/conversed.git"
+  },
+  "homepage": "https://github.com/mayeedwin/conversed#readme",
+  "bugs": "https://github.com/mayeedwin/conversed/issues"
 }

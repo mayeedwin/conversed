@@ -39,5 +39,13 @@
     "conversed",
     "components"
   ],
-  "license": "MIT"
+  "author": "Maye Edwin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayeedwin/conversed.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/mayeedwin/conversed#readme",
+  "bugs": "https://github.com/mayeedwin/conversed/issues"
 }
