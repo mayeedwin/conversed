@@ -48,6 +48,10 @@ Use the following specifications for rich blocks:
 
 5. **Code Snippets**:
 <pre><code class="language-typescript">const x = 10;</code></pre>
+
+6. **Charts** (bar, line, or pie — pipe-separated labels and values):
+<figure data-chart="bar" data-labels="Mon|Tue|Wed" data-values="12|18|15" data-series-label="Eggs"><figcaption>Weekly eggs</figcaption></figure>
+<figure data-chart="pie" data-labels="Hens|Roosters|Chicks" data-values="40|10|25"><figcaption>Flock breakdown</figcaption></figure>
 `;
 
 export const getSystemPromptInstruction = (options?: SystemPromptOptions): string => {

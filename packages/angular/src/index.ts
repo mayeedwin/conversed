@@ -1,5 +1,17 @@
-import { Component, Input, Output, EventEmitter, HostBinding } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
+import { Chart, registerables } from 'chart.js';
 import {
   ConversedContentBlock,
   StatsBlock,
@@ -14,8 +26,11 @@ import {
   AgentActionEvent,
   AgentActionPayload,
   ConversedThemeTokens,
+  toChartJsConfig,
   generateCssVariables
 } from '@conversed/core';
+
+Chart.register(...registerables);
 
 /**
  * <conversed-stats>
@@ -284,6 +299,71 @@ export class ConversedFollowupsComponent {
 }
 
 /**
+ * <conversed-chart>
+ * Renders a ChartBlock as a Chart.js bar/line/pie chart on a canvas.
+ */
+@Component({
+  selector: 'conversed-chart',
+  standalone: true,
+  template: `
+    <figure class="conversed-chart">
+      @if (block.title) {
+        <figcaption class="conversed-chart-title">{{ block.title }}</figcaption>
+      }
+      <div class="conversed-chart-canvas">
+        <canvas #canvas></canvas>
+      </div>
+    </figure>
+  `,
+  styles: [`
+    :host { display: block; }
+    .conversed-chart { margin: 0.5rem 0; }
+    .conversed-chart-title { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .conversed-chart-canvas { position: relative; height: 200px; width: 100%; }
+  `]
+})
+export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDestroy {
+  @Input({ required: true }) block!: ChartBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @ViewChild('canvas') canvasRef?: ElementRef<HTMLCanvasElement>;
+
+  private _chart?: Chart;
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+
+  ngAfterViewInit() {
+    this.renderChart();
+  }
+
+  ngOnChanges() {
+    if (this.canvasRef) this.renderChart();
+  }
+
+  ngOnDestroy() {
+    this._chart?.destroy();
+  }
+
+  private renderChart() {
+    const canvas = this.canvasRef?.nativeElement;
+    if (!canvas) return;
+    this._chart?.destroy();
+    const config = toChartJsConfig(this.block, { primaryColor: this.resolvePrimary(canvas) });
+    this._chart = new Chart(canvas, config as never);
+  }
+
+  private resolvePrimary(canvas: HTMLElement) {
+    if (this.primaryColor) return this.primaryColor;
+    const resolved = getComputedStyle(canvas).getPropertyValue('--conversed-primary').trim();
+    return resolved || '#0071e3';
+  }
+}
+
+/**
  * <conversed-block>
  * Polymorphic block router for Conversed AST blocks.
  */
@@ -294,7 +374,8 @@ export class ConversedFollowupsComponent {
     ConversedStatsComponent,
     ConversedTableComponent,
     ConversedCalloutComponent,
-    ConversedFollowupsComponent
+    ConversedFollowupsComponent,
+    ConversedChartComponent
   ],
   template: `
     @switch (block.type) {
@@ -333,6 +414,9 @@ export class ConversedFollowupsComponent {
       }
       @case ('followups') {
         <conversed-followups [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-followups>
+      }
+      @case ('chart') {
+        <conversed-chart [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-chart>
       }
       @case ('divider') {
         <hr class="conversed-divider" />

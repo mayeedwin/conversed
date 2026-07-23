@@ -1,6 +1,35 @@
 import React from 'react';
-import type { ConversedContentBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
-import { generateCssVariables } from '@conversed/core';
+import { Chart, registerables } from 'chart.js';
+import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, StatItem, ConversedThemeTokens } from '@conversed/core';
+import { generateCssVariables, toChartJsConfig } from '@conversed/core';
+
+Chart.register(...registerables);
+
+const ConversedChart: React.FC<{ block: ChartBlock; primaryColor?: string }> = ({ block, primaryColor }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const resolved =
+      primaryColor ||
+      getComputedStyle(canvas).getPropertyValue('--conversed-primary').trim() ||
+      '#0071e3';
+    const chart = new Chart(canvas, toChartJsConfig(block, { primaryColor: resolved }) as never);
+    return () => chart.destroy();
+  }, [block, primaryColor]);
+
+  return React.createElement(
+    'figure',
+    { className: 'conversed-chart' },
+    block.title && React.createElement('figcaption', { className: 'conversed-chart-title' }, block.title),
+    React.createElement(
+      'div',
+      { className: 'conversed-chart-canvas' },
+      React.createElement('canvas', { ref: canvasRef })
+    )
+  );
+};
 
 export interface ConversedBlockProps {
   block: ConversedContentBlock;
@@ -154,6 +183,8 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
             )
           )
         );
+      case 'chart':
+        return React.createElement(ConversedChart, { block, primaryColor });
       case 'divider':
         return React.createElement('hr', { className: 'conversed-divider' });
       default:

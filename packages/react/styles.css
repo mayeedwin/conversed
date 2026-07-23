@@ -240,3 +240,18 @@
   background: var(--conversed-primary-alpha15, #0071e314);
   border-color: var(--conversed-primary, #0071e3);
 }
+
+/* Chart */
+.conversed-chart {
+  margin: 0.5rem 0;
+}
+.conversed-chart-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.conversed-chart-canvas {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
