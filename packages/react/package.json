@@ -1,6 +1,6 @@
 {
   "name": "@conversed/react",
-  "version": "0.0.1-rc.4",
+  "version": "0.0.1-rc.5",
   "description": "React 18+ components and hooks for conversed rich AI chat UI",
   "sideEffects": false,
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@conversed/core": "0.0.1-rc.4",
+    "@conversed/core": "0.0.1-rc.5",
     "chart.js": "^4.4.0"
   },
   "peerDependencies": {

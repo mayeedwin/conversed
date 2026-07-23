@@ -1,6 +1,6 @@
 {
   "name": "@conversed/core",
-  "version": "0.0.1-rc.4",
+  "version": "0.0.1-rc.5",
   "description": "Core AST, Parser Engine, and Action Protocol for conversed rich AI chat UI",
   "sideEffects": false,
   "main": "dist/index.js",
