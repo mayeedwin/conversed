@@ -812,7 +812,6 @@
 /* Event card */
 .event {
   border: 1px solid var(--line);
-  border-left: 3px solid var(--faint-ink);
   border-radius: 9px;
   background: var(--surface);
   padding: 0.55rem 0.65rem;
@@ -823,6 +822,20 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.3rem;
+}
+
+.event-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.event-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--faint-ink);
 }
 
 .event-type {
@@ -879,15 +892,15 @@
 }
 
 /* Per-type accents */
-.event.type-navigate { border-left-color: var(--t-navigate); }
+.event.type-navigate .event-dot { background: var(--t-navigate); }
 .event.type-navigate .event-type { color: var(--t-navigate); background: var(--t-navigate-bg); }
-.event.type-custom-command { border-left-color: var(--t-command); }
+.event.type-custom-command .event-dot { background: var(--t-command); }
 .event.type-custom-command .event-type { color: var(--t-command); background: var(--t-command-bg); }
-.event.type-prompt-submit { border-left-color: var(--t-prompt); }
+.event.type-prompt-submit .event-dot { background: var(--t-prompt); }
 .event.type-prompt-submit .event-type { color: var(--t-prompt); background: var(--t-prompt-bg); }
-.event.type-copy-code { border-left-color: var(--t-copy); }
+.event.type-copy-code .event-dot { background: var(--t-copy); }
 .event.type-copy-code .event-type { color: var(--t-copy); background: var(--t-copy-bg); }
-.event.type-external-url { border-left-color: var(--t-link); }
+.event.type-external-url .event-dot { background: var(--t-link); }
 .event.type-external-url .event-type { color: var(--t-link); background: var(--t-link-bg); }
 
 @media (prefers-reduced-motion: no-preference) {
