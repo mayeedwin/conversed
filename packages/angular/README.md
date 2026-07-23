@@ -2,6 +2,8 @@
 
 > Angular 17+ Signals-based UI components and block renderers for **conversed**.
 
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app)
+
 ## Installation
 
 ```bash

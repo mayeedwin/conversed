@@ -2,6 +2,8 @@
 
 > **conversed** is a high-performance, composable Rich Content UI library designed for AI Agents, LLM Chat interfaces, and dynamic conversational experiences.
 
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app)
+
 Instead of outputting plain text or static markdown bubbles, **conversed** parses model responses into a structured **Content Block AST (Abstract Syntax Tree)** featuring interactive tables with custom row actions, metric cards, native charts (bar / line / pie via Chart.js), callouts, and prompt follow-up chips.
 
 conversed **renders content, not conversations** — components take a `blocks` array and render rich blocks _inside_ your app's own message bubble. Your host app still owns roles, avatars, and the message feed. Pass `debug` to any renderer to log the raw text, parsed blocks, and emitted actions to the console (silent by default).

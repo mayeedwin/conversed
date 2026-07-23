@@ -2,6 +2,8 @@
 
 > Pure TypeScript AST definitions, parser engine, theming tokens, and Action Protocol for **conversed**. Framework-agnostic with zero framework dependencies.
 
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app)
+
 ## Installation
 
 ```bash

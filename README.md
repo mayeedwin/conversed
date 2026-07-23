@@ -2,6 +2,8 @@
 
 A high-performance, composable Rich Content UI library for AI Agents and LLM chat interfaces.
 
+▶ **Live playground (React):** [conversed-web.web.app](https://conversed-web.web.app) — try the blocks and the Action Inspector in a live chat console.
+
 ## Overview
 
 Standard AI chat interfaces render static text or basic Markdown. When models generate structured data like tables, metric cards, callouts, or charts, plain text renderers fail to provide interactive UX.
@@ -31,9 +33,11 @@ Conversed blocks rendered in a demo chat UI (iOS-inspired flat theme):
 
 ## Demo
 
-A runnable Claude-inspired chat demo lives in [`demos/react-demo`](./demos/react-demo) — it renders
-every block type and shows a live **Action Inspector** for the Action Protocol. This is a **pnpm
-workspace**, so run it with pnpm from the repo root (npm can't resolve the `workspace:` deps):
+Play with it live at **[conversed-web.web.app](https://conversed-web.web.app)**.
+
+A React chat demo lives in [`demos/react-demo`](./demos/react-demo) — it renders every block type
+and shows a live **Action Inspector** for the Action Protocol. This is a **pnpm workspace**, so run
+it with pnpm from the repo root (npm can't resolve the `workspace:` deps):
 
 ```bash
 pnpm install

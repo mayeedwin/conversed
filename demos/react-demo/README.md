@@ -1,6 +1,8 @@
 # Conversed React demo — “Zao”
 
-A Claude-inspired chat that showcases [`@conversed/react`](../../packages/react). Every assistant
+▶ **Live:** [conversed-web.web.app](https://conversed-web.web.app)
+
+A chat UI that showcases [`@conversed/react`](../../packages/react). Every assistant
 reply is rendered from parsed AST blocks, and a live **Action Inspector** captures each
 `onAction` event as you click table rows, stat cards, and follow-up chips.
 
@@ -38,17 +40,19 @@ Output goes to `demos/react-demo/dist/`.
 
 ## Deploy (Firebase Hosting)
 
-Hosting is configured at the repo root in [`firebase.json`](../../firebase.json), targeting a
-dedicated site (`conversed-zao-demo`) so it never overwrites another site. The `predeploy` hook
-rebuilds the demo automatically.
+Live at **[conversed-web.web.app](https://conversed-web.web.app)**.
+
+Hosting is configured at the repo root in [`firebase.json`](../../firebase.json) and deploys to the
+`conversed-web` project's default site. The `predeploy` hook rebuilds the demo automatically, and the
+default project is set in [`.firebaserc`](../../.firebaserc).
 
 ```bash
-# one-time, per Firebase project:
-firebase hosting:sites:create conversed-zao-demo --project <your-project-id>
-
-# deploy:
-firebase deploy --only hosting --project <your-project-id>
+# from the repo root:
+pnpm release:demo
 ```
+
+To deploy to a different project, pass its id (`pnpm release:demo <project-id>`) or set
+`FIREBASE_PROJECT=<id>`.
 
 ## Anatomy
 

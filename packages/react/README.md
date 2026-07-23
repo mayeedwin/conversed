@@ -2,6 +2,8 @@
 
 > React 18+ components and hooks for **conversed** rich AI chat UI.
 
+▶ **Live playground:** [conversed-web.web.app](https://conversed-web.web.app) — built with this package.
+
 ## Installation
 
 ```bash
