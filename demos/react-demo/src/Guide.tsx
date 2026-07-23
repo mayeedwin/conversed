@@ -88,9 +88,39 @@ export function Guide({ open, onClose }: { open: boolean; onClose: () => void })
         </header>
 
         <p className="guide-lead">
-          Parse the assistant’s reply into blocks, then render them. The host owns the chat — conversed
-          only fills the message content.
+          <strong>conversed</strong> turns an LLM’s reply into structured, interactive UI. It parses
+          HTML or Markdown into a typed block AST, renders each block in your framework, and emits an
+          event when someone clicks an actionable part. You keep your own chat shell — conversed only
+          fills the message content.
         </p>
+
+        <ol className="guide-flow" aria-label="How it works">
+          <li className="flow-step">
+            <span className="flow-n">1</span>
+            <span className="flow-t">Model reply</span>
+            <span className="flow-d">HTML / Markdown</span>
+          </li>
+          <li className="flow-arrow" aria-hidden="true">→</li>
+          <li className="flow-step">
+            <span className="flow-n">2</span>
+            <span className="flow-t">parseMessageBlocks</span>
+            <span className="flow-d">typed AST blocks</span>
+          </li>
+          <li className="flow-arrow" aria-hidden="true">→</li>
+          <li className="flow-step">
+            <span className="flow-n">3</span>
+            <span className="flow-t">ConversedContent</span>
+            <span className="flow-d">renders blocks</span>
+          </li>
+          <li className="flow-arrow" aria-hidden="true">→</li>
+          <li className="flow-step">
+            <span className="flow-n">4</span>
+            <span className="flow-t">onAction</span>
+            <span className="flow-d">click events</span>
+          </li>
+        </ol>
+
+        <h3 className="guide-subhead">Add it to your app</h3>
 
         <div className="guide-tabs" role="tablist">
           {(['react', 'angular'] as Framework[]).map((f) => (

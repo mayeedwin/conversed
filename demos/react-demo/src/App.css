@@ -182,11 +182,78 @@
   color: var(--muted);
 }
 
+.guide-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0 0 1.1rem;
+  padding: 0;
+}
+
+.flow-step {
+  flex: 1 1 0;
+  min-width: 96px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--paper) 60%, #fff);
+  padding: 0.45rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.flow-n {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--clay-ink);
+}
+
+.flow-t {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.flow-d {
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+
+.flow-arrow {
+  align-self: center;
+  color: var(--faint-ink);
+  font-size: 0.85rem;
+}
+
+.guide-subhead {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--faint-ink);
+  margin: 0 0 0.6rem;
+}
+
 .guide-tabs {
   display: flex;
   gap: 0.3rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--line);
+}
+
+@media (max-width: 520px) {
+  .flow-arrow {
+    display: none;
+  }
+  .flow-step {
+    flex-basis: 42%;
+  }
 }
 
 .guide-tab {
