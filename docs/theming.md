@@ -28,7 +28,8 @@ Defaults are light-mode safe; override on `:root` (or any ancestor):
   --conversed-primary: #0071e3;         /* WCAG-AA safe as text */
   --conversed-text: inherit;
   --conversed-text-muted: #8e8e93;
-  --conversed-card-bg: transparent;
+  --conversed-card-bg: transparent;     /* flat/border-only by default */
+  --conversed-surface: #f9f9fb;         /* fill used by the `filled` variant (auto-flips in dark mode) */
   --conversed-border-color: #e5e5ea;    /* gray-200, default border */
   --conversed-radius: 8px;
   --conversed-font-family: inherit;
@@ -36,6 +37,18 @@ Defaults are light-mode safe; override on `:root` (or any ancestor):
 ```
 
 Two alpha tints are derived from the primary automatically — `--conversed-primary-alpha15` and `--conversed-primary-alpha30` — updating whenever `--conversed-primary` changes.
+
+## Surface Variant
+
+Blocks are **flat** by default — transparent, border-only cards that sit cleanly inside your own chat bubble. Opt into filled surfaces with the `variant` prop (React), without picking a per-block color:
+
+```tsx
+<ConversedContent blocks={blocks} variant="filled" />   {/* 'flat' (default) | 'filled' */}
+```
+
+`filled` sets each card-like block's background to `--conversed-surface`. When you don't set `surface`/`cardBg` in the theme, the stylesheet supplies a light default that **auto-flips in dark mode** via `prefers-color-scheme`; pass `surface` (or override `--conversed-surface`) to customize it. Explicitly setting `cardBg` always wins over the variant.
+
+> Callouts render with a **tone-colored status dot** at the top-left (info/success/warning/critical/neutral) rather than a left border.
 
 ## iOS Gray Scale (50 → 900)
 
@@ -72,6 +85,7 @@ Pass a `theme` object to override multiple `ConversedThemeTokens` at once (takes
   textColor: 'inherit',
   textMutedColor: '#8e8e93',
   cardBg: '#ffffff',
+  surface: '#ffffff',        // fill for the `filled` variant
   borderColor: '#d1d1d6',
   borderRadius: '10px',
   fontFamily: 'inherit'

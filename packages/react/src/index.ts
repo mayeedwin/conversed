@@ -1,9 +1,21 @@
 import React from 'react';
 import { Chart, registerables } from 'chart.js';
-import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, RowAction, StatItem, ConversedThemeTokens } from '@conversed/core';
+import type { ConversedContentBlock, ChartBlock, AgentActionEvent, AgentActionPayload, TableRow, RowAction, StatItem, ProgressItem, ConversedThemeTokens } from '@conversed/core';
 import { generateCssVariables, toChartJsConfig, logConversedAction } from '@conversed/core';
 
 Chart.register(...registerables);
+
+/** Surface treatment for card-like blocks. `flat` (default) is border-only/transparent. */
+export type ConversedVariant = 'flat' | 'filled';
+
+const variantClass = (variant?: ConversedVariant): string =>
+  variant && variant !== 'flat' ? ` conversed-${variant}` : '';
+
+// Bar fill fraction as a clamped 0–100 percentage.
+const progressPercent = (item: ProgressItem): number => {
+  const raw = item.max && item.max > 0 ? (item.value / item.max) * 100 : item.value;
+  return Math.max(0, Math.min(100, raw));
+};
 
 const ConversedChart: React.FC<{ block: ChartBlock; primaryColor?: string }> = ({ block, primaryColor }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -35,11 +47,13 @@ export interface ConversedBlockProps {
   block: ConversedContentBlock;
   primaryColor?: string;
   theme?: ConversedThemeTokens;
+  /** Surface treatment: `flat` (default, border-only) or `filled` (adds a surface). */
+  variant?: ConversedVariant;
   onAction?: (event: AgentActionEvent) => void;
 }
 
 export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBlockProps) => {
-  const { block, primaryColor, theme, onAction } = props;
+  const { block, primaryColor, theme, variant, onAction } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
@@ -229,6 +243,41 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
             )
           )
         );
+      case 'progress':
+        return React.createElement(
+          'div',
+          { className: 'conversed-progress' },
+          block.title &&
+            React.createElement('div', { className: 'conversed-progress-title' }, block.title),
+          block.items.map((item: ProgressItem, idx: number) => {
+            const pct = progressPercent(item);
+            const readout = item.display || `${Math.round(pct)}%`;
+            return React.createElement(
+              'div',
+              {
+                key: idx,
+                className: `conversed-progress-item ${item.action ? 'interactive' : ''}`,
+                ...(item.action
+                  ? { onClick: () => handleAction(item.action), role: 'button', tabIndex: 0 }
+                  : {})
+              },
+              React.createElement(
+                'div',
+                { className: 'conversed-progress-head' },
+                React.createElement('span', { className: 'conversed-progress-label' }, item.label),
+                React.createElement('span', { className: 'conversed-progress-value' }, readout)
+              ),
+              React.createElement(
+                'div',
+                { className: 'conversed-progress-track' },
+                React.createElement('div', {
+                  className: `conversed-progress-bar conversed-tone-${item.tone || 'primary'}`,
+                  style: { width: `${pct}%` }
+                })
+              )
+            );
+          })
+        );
       case 'table': {
         const hasRowActions = block.rows.some(
           (r: TableRow) => !!r.actions && r.actions.length > 0
@@ -324,19 +373,25 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
     }
   };
 
-  return React.createElement('div', { className: 'conversed-block-wrapper', style: styleVars }, renderContent());
+  return React.createElement(
+    'div',
+    { className: `conversed-block-wrapper${variantClass(variant)}`, style: styleVars },
+    renderContent()
+  );
 };
 
 export interface ConversedContentProps {
   blocks: ConversedContentBlock[];
   primaryColor?: string;
   theme?: ConversedThemeTokens;
+  /** Surface treatment applied to every block: `flat` (default) or `filled`. */
+  variant?: ConversedVariant;
   onAction?: (event: AgentActionEvent) => void;
   debug?: boolean;
 }
 
 export const ConversedContent: React.FC<ConversedContentProps> = (props: ConversedContentProps) => {
-  const { blocks, primaryColor, theme, onAction, debug } = props;
+  const { blocks, primaryColor, theme, variant, onAction, debug } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
@@ -347,9 +402,9 @@ export const ConversedContent: React.FC<ConversedContentProps> = (props: Convers
 
   return React.createElement(
     'div',
-    { className: 'conversed-content', style: styleVars },
+    { className: `conversed-content${variantClass(variant)}`, style: styleVars },
     blocks.map((block: ConversedContentBlock, idx: number) =>
-      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, onAction: handleAction })
+      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, variant, onAction: handleAction })
     )
   );
 };

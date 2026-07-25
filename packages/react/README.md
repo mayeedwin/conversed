@@ -33,7 +33,7 @@ import { parseMessageBlocks } from '@conversed/core';
 />;
 ```
 
-- `<ConversedContent>` props: `blocks`, `primaryColor?` (`#0071e3`), `theme?`, `onAction?`, `debug?`.
+- `<ConversedContent>` props: `blocks`, `primaryColor?` (`#0071e3`), `theme?`, `variant?` (`'flat'` \| `'filled'`), `onAction?`, `debug?`.
 - `<ConversedBlock block />` renders a single block anywhere (dashboard, drawer, modal).
 - Charts render via **Chart.js** (a dependency, installed automatically).
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ConversedContent } from '@conversed/react';
+import type { ConversedVariant } from '@conversed/react';
 import { consumeConversedStream } from '@conversed/core';
 import type { AgentActionEvent } from '@conversed/core';
 import '@conversed/react/styles.css';
@@ -52,6 +53,7 @@ export function App() {
   const [openSource, setOpenSource] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [variant, setVariant] = useState<ConversedVariant>('filled');
 
   const threadEndRef = useRef<HTMLDivElement>(null);
 
@@ -192,6 +194,18 @@ export function App() {
           <span className="brand-sub">rich, interactive AI replies</span>
         </div>
         <div className="topbar-actions">
+          <div className="surface-toggle" role="group" aria-label="Block surface">
+            {(['flat', 'filled'] as ConversedVariant[]).map((v) => (
+              <button
+                key={v}
+                className={`surface-opt ${variant === v ? 'active' : ''}`}
+                onClick={() => setVariant(v)}
+                aria-pressed={variant === v}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
           <button className="use-it" onClick={() => setShowGuide(true)}>
             Use it
           </button>
@@ -229,6 +243,8 @@ export function App() {
                       <ConversedContent
                         blocks={msg.blocks}
                         primaryColor={PRIMARY}
+                        theme={{ primaryColor: PRIMARY, surface: '#ffffff' }}
+                        variant={variant}
                         onAction={handleAction}
                       />
                       {!msg.isStreaming && msg.text && (

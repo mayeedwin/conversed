@@ -12,8 +12,13 @@ export interface ConversedThemeTokens {
   textColor?: string;
   /** Secondary subtle text color */
   textMutedColor?: string;
-  /** Component card/container background */
+  /** Component card/container background. Defaults to `transparent` (flat, border-only). */
   cardBg?: string;
+  /**
+   * Filled surface color used by the `filled`/`elevated` variants. When omitted, a
+   * light default is used that auto-flips in dark mode via the stylesheet.
+   */
+  surface?: string;
   /** Component border color */
   borderColor?: string;
   /** Component border radius (e.g. "12px", "0.75rem") */
@@ -87,7 +92,14 @@ export const generateCssVariables = (theme?: ConversedThemeTokens): Record<strin
     '--conversed-gray-900': CONVERSED_GRAY[900],
     '--conversed-text': theme?.textColor || 'inherit',
     '--conversed-text-muted': theme?.textMutedColor || CONVERSED_GRAY[600],
-    '--conversed-card-bg': theme?.cardBg || 'transparent',
+    // Only emit --conversed-card-bg when explicitly themed. Emitting it inline
+    // unconditionally would beat the `.conversed-filled`/`.conversed-elevated`
+    // class rules (inline > class), so the filled variant would never show.
+    // Blocks fall back to `var(--conversed-card-bg, transparent)` when unset.
+    ...(theme?.cardBg ? { '--conversed-card-bg': theme.cardBg } : {}),
+    // Same reasoning for the surface override, so the stylesheet's light/dark
+    // defaults (and their prefers-color-scheme flip) stay in effect.
+    ...(theme?.surface ? { '--conversed-surface': theme.surface } : {}),
     '--conversed-border-color': theme?.borderColor || CONVERSED_GRAY[200],
     '--conversed-radius': theme?.borderRadius || '8px',
     '--conversed-font-family': theme?.fontFamily || 'inherit',
