@@ -37,6 +37,9 @@ import {
 
 Chart.register(...registerables);
 
+/** Surface treatment for card-like blocks. `flat` (default) is border-only/transparent. */
+export type ConversedVariant = 'flat' | 'filled';
+
 /**
  * <conversed-stats>
  * iOS-inspired flat metric grid with clean borders (no box shadows).
@@ -767,7 +770,7 @@ export class ConversedBlockComponent {
   standalone: true,
   imports: [ConversedBlockComponent],
   template: `
-    <div class="conversed-content">
+    <div class="conversed-content" [class.conversed-filled]="variant === 'filled'">
       @for (block of blocks; track $index) {
         <conversed-block
           [block]="block"
@@ -781,6 +784,18 @@ export class ConversedBlockComponent {
   styles: [`
     :host { display: block; }
     .conversed-content { display: flex; flex-direction: column; gap: 0.3rem; }
+    /*
+     * Surface token for the opt-in \`filled\` variant. Default is light-safe and
+     * auto-flips in dark mode; a theme's \`surface\` token overrides it. Custom
+     * properties inherit past Angular's emulated encapsulation, so setting them
+     * on the content wrapper cascades into every leaf block.
+     */
+    .conversed-content { --conversed-surface: var(--conversed-gray-50, #f9f9fb); }
+    @media (prefers-color-scheme: dark) {
+      .conversed-content { --conversed-surface: #2c2c2e; }
+    }
+    /* \`filled\` gives card-like blocks a real surface (vs. the default transparent). */
+    .conversed-content.conversed-filled { --conversed-card-bg: var(--conversed-surface); }
   `]
 })
 export class ConversedContentComponent {
@@ -796,6 +811,8 @@ export class ConversedContentComponent {
 
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
+  /** Surface treatment applied to every block: `flat` (default) or `filled`. */
+  @Input() variant?: ConversedVariant;
   @Input() debug = false;
   @Output() action = new EventEmitter<AgentActionEvent>();
 
