@@ -40,10 +40,16 @@ Two alpha tints are derived from the primary automatically — `--conversed-prim
 
 ## Surface Variant
 
-Blocks are **flat** by default — transparent, border-only cards that sit cleanly inside your own chat bubble. Opt into filled surfaces with the `variant` prop (React), without picking a per-block color:
+Blocks are **flat** by default — transparent, border-only cards that sit cleanly inside your own chat bubble. Opt into filled surfaces with the `variant` prop, without picking a per-block color:
 
 ```tsx
+// React
 <ConversedContent blocks={blocks} variant="filled" />   {/* 'flat' (default) | 'filled' */}
+```
+
+```html
+<!-- Angular -->
+<conversed-content [blocks]="blocks()" variant="filled"></conversed-content>
 ```
 
 `filled` sets each card-like block's background to `--conversed-surface`. When you don't set `surface`/`cardBg` in the theme, the stylesheet supplies a light default that **auto-flips in dark mode** via `prefers-color-scheme`; pass `surface` (or override `--conversed-surface`) to customize it. Explicitly setting `cardBg` always wins over the variant.

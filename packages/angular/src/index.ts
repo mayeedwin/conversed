@@ -25,6 +25,8 @@ import {
   StepsBlock,
   TimelineBlock,
   MediaBlock,
+  ProgressBlock,
+  ProgressItem,
   HeadingBlock,
   ParagraphBlock,
   AgentActionEvent,
@@ -36,6 +38,9 @@ import {
 } from '@conversed/core';
 
 Chart.register(...registerables);
+
+/** Surface treatment for card-like blocks. `flat` (default) is border-only/transparent. */
+export type ConversedVariant = 'flat' | 'filled';
 
 /**
  * <conversed-stats>
@@ -228,7 +233,8 @@ export class ConversedTableComponent {
 
 /**
  * <conversed-callout>
- * iOS-inspired callout block with solid left accent and zero box shadow.
+ * iOS-inspired callout block with a full border and a tone-colored status dot
+ * at the top-left (no left accent bar), matching zero box shadow.
  */
 @Component({
   selector: 'conversed-callout',
@@ -252,14 +258,30 @@ export class ConversedTableComponent {
       display: block;
     }
     .conversed-callout {
-      padding: 0.5rem 0.65rem;
+      position: relative;
+      padding: 0.5rem 0.65rem 0.5rem 1.4rem;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--primary);
       background: var(--card-bg);
       margin: 0.35rem 0;
       box-shadow: none;
     }
+    .conversed-callout::before {
+      content: '';
+      position: absolute;
+      top: 0.72rem;
+      left: 0.55rem;
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      background: var(--conversed-callout-accent, var(--primary));
+    }
+    /* Tone accents drive the dot color */
+    .conversed-callout-info { --conversed-callout-accent: var(--primary); }
+    .conversed-callout-success { --conversed-callout-accent: #34c759; }
+    .conversed-callout-warning { --conversed-callout-accent: #ff9f0a; }
+    .conversed-callout-critical { --conversed-callout-accent: #ff3b30; }
+    .conversed-callout-neutral { --conversed-callout-accent: var(--conversed-gray-500, #aeaeb2); }
     .conversed-callout-badge { font-size: 0.58rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; display: block; margin-bottom: 0.1rem; }
     .conversed-callout-title { font-weight: 600; font-size: 0.75rem; display: block; margin-bottom: 0.1rem; }
     .conversed-callout-body { font-size: 0.72rem; line-height: 1.4; }
@@ -655,6 +677,94 @@ export class ConversedMediaComponent {
 }
 
 /**
+ * <conversed-progress>
+ * Labelled meters / completion bars. Each item's bar fills `value` as a
+ * percentage, or `value / max` when `max` is set, and can carry a tone.
+ */
+@Component({
+  selector: 'conversed-progress',
+  standalone: true,
+  template: `
+    <div class="conversed-progress">
+      @if (block?.title || title) {
+        <div class="conversed-progress-title">{{ block?.title || title }}</div>
+      }
+      @for (item of block?.items || items; track $index) {
+        <div
+          class="conversed-progress-item"
+          [class.interactive]="!!item.action"
+          [attr.role]="item.action ? 'button' : null"
+          [attr.tabindex]="item.action ? 0 : null"
+          (click)="handleAction(item.action)"
+        >
+          <div class="conversed-progress-head">
+            <span class="conversed-progress-label">{{ item.label }}</span>
+            <span class="conversed-progress-value">{{ item.display || readout(item) }}</span>
+          </div>
+          <div class="conversed-progress-track">
+            <div
+              [class]="'conversed-progress-bar conversed-tone-' + (item.tone || 'primary')"
+              [style.width.%]="percent(item)"
+            ></div>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      display: block;
+    }
+    .conversed-progress { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.35rem 0; }
+    .conversed-progress-title { font-size: 0.75rem; font-weight: 600; }
+    .conversed-progress-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .conversed-progress-item.interactive { cursor: pointer; }
+    .conversed-progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; font-size: 0.72rem; }
+    .conversed-progress-label { font-weight: 500; }
+    .conversed-progress-value { font-size: 0.66rem; font-weight: 600; opacity: 0.75; font-variant-numeric: tabular-nums; flex: none; }
+    .conversed-progress-item.interactive:hover .conversed-progress-label { color: var(--primary); }
+    .conversed-progress-track { height: 0.4rem; border-radius: 999px; background: var(--conversed-gray-100, #f2f2f7); overflow: hidden; }
+    .conversed-progress-bar { height: 100%; border-radius: inherit; background: var(--primary); transition: width 0.35s ease; }
+    .conversed-progress-bar.conversed-tone-primary { background: var(--primary); }
+    .conversed-progress-bar.conversed-tone-success { background: #34c759; }
+    .conversed-progress-bar.conversed-tone-warning { background: #ff9f0a; }
+    .conversed-progress-bar.conversed-tone-critical { background: #ff3b30; }
+    .conversed-progress-bar.conversed-tone-neutral { background: var(--conversed-gray-500, #aeaeb2); }
+  `]
+})
+export class ConversedProgressComponent {
+  @Input() block?: ProgressBlock;
+  @Input() title?: string;
+  @Input() items: ProgressItem[] = [];
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @Output() action = new EventEmitter<AgentActionEvent>();
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+
+  /** Bar fill fraction as a clamped 0–100 percentage. */
+  percent(item: ProgressItem): number {
+    const raw = item.max && item.max > 0 ? (item.value / item.max) * 100 : item.value;
+    return Math.max(0, Math.min(100, raw));
+  }
+
+  /** Default readout when the item has no custom `display`. */
+  readout(item: ProgressItem): string {
+    return `${Math.round(this.percent(item))}%`;
+  }
+
+  handleAction(payload?: AgentActionPayload) {
+    if (!payload) return;
+    this.action.emit({ action: payload, defaultPrevented: false });
+  }
+}
+
+/**
  * <conversed-block>
  * Polymorphic block router for Conversed AST blocks.
  */
@@ -671,7 +781,8 @@ export class ConversedMediaComponent {
     ConversedDetailsComponent,
     ConversedStepsComponent,
     ConversedTimelineComponent,
-    ConversedMediaComponent
+    ConversedMediaComponent,
+    ConversedProgressComponent
   ],
   template: `
     @switch (block.type) {
@@ -712,6 +823,9 @@ export class ConversedMediaComponent {
       }
       @case ('stats') {
         <conversed-stats [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-stats>
+      }
+      @case ('progress') {
+        <conversed-progress [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-progress>
       }
       @case ('table') {
         <conversed-table [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-table>
@@ -767,7 +881,7 @@ export class ConversedBlockComponent {
   standalone: true,
   imports: [ConversedBlockComponent],
   template: `
-    <div class="conversed-content">
+    <div class="conversed-content" [class.conversed-filled]="variant === 'filled'">
       @for (block of blocks; track $index) {
         <conversed-block
           [block]="block"
@@ -781,6 +895,18 @@ export class ConversedBlockComponent {
   styles: [`
     :host { display: block; }
     .conversed-content { display: flex; flex-direction: column; gap: 0.3rem; }
+    /*
+     * Surface token for the opt-in \`filled\` variant. Default is light-safe and
+     * auto-flips in dark mode; a theme's \`surface\` token overrides it. Custom
+     * properties inherit past Angular's emulated encapsulation, so setting them
+     * on the content wrapper cascades into every leaf block.
+     */
+    .conversed-content { --conversed-surface: var(--conversed-gray-50, #f9f9fb); }
+    @media (prefers-color-scheme: dark) {
+      .conversed-content { --conversed-surface: #2c2c2e; }
+    }
+    /* \`filled\` gives card-like blocks a real surface (vs. the default transparent). */
+    .conversed-content.conversed-filled { --conversed-card-bg: var(--conversed-surface); }
   `]
 })
 export class ConversedContentComponent {
@@ -796,6 +922,8 @@ export class ConversedContentComponent {
 
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
+  /** Surface treatment applied to every block: `flat` (default) or `filled`. */
+  @Input() variant?: ConversedVariant;
   @Input() debug = false;
   @Output() action = new EventEmitter<AgentActionEvent>();
 

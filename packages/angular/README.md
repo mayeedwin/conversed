@@ -21,6 +21,7 @@ Conversed renders **content, not conversations** — parse the reply and drop `<
   <conversed-content
     [blocks]="blocks()"
     primaryColor="#0071e3"
+    variant="filled"
     (action)="onAction($event)">
   </conversed-content>
 </div>
@@ -30,7 +31,7 @@ Conversed renders **content, not conversations** — parse the reply and drop `<
 blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 ```
 
-- `<conversed-content>` inputs: `[blocks]`, `[primaryColor]` (`#0071e3`), `[theme]`, `[debug]`; output `(action)`.
+- `<conversed-content>` inputs: `[blocks]`, `[primaryColor]` (`#0071e3`), `[theme]`, `[variant]` (`'flat'` | `'filled'`), `[debug]`; output `(action)`.
 - `<conversed-block [block]>` renders a single block anywhere.
 
 ## Docs
