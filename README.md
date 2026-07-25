@@ -35,7 +35,7 @@ Angular: `<conversed-content [blocks] primaryColor (action)>`. Give the model th
 
 ## Blocks
 
-`paragraph` · `heading` · `list` · `table` · `stats` · `callout` · `chart` · `code` · `details` · `steps` · `timeline` · `media` · `followups` · `divider`
+`paragraph` · `heading` · `list` · `table` · `stats` · `progress` · `callout` · `chart` · `code` · `details` · `steps` · `timeline` · `media` · `followups` · `divider`
 
 ## Action protocol
 

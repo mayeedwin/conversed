@@ -8,7 +8,6 @@
         "--filter",
         "@conversed/demo-react",
         "dev",
-        "--",
         "--port",
         "5177",
         "--strictPort"

@@ -94,6 +94,27 @@ export const DEMO_PRESET_PROMPTS: DemoPreset[] = [
     ].join('\n')
   },
   {
+    id: 'readiness',
+    title: 'Season readiness',
+    userText: 'How ready are we for the dry season?',
+    markdown: [
+      '<h2>Season readiness</h2>',
+      '<p>Where the farm stands heading into the dry season — each bar is a live meter.</p>',
+      '<ul data-progress data-title="Readiness by area">',
+      '  <li data-value="82" data-tone="success">Vaccination coverage</li>',
+      '  <li data-value="18" data-max="24" data-display="18 / 24 paddocks">Grazing rotation</li>',
+      '  <li data-value="64" data-tone="primary">Feed stockpiled</li>',
+      '  <li data-value="46" data-tone="warning" data-action-type="navigate" data-action-id="open-budget" data-action-target="/budget" data-display="46% used">Feed budget</li>',
+      '  <li data-value="9" data-max="20" data-tone="critical" data-display="9 / 20 done">Water points serviced</li>',
+      '</ul>',
+      '<p>Tap the <strong>Feed budget</strong> bar — a tappable meter emits an Action Protocol event.</p>',
+      '<ul data-followups>',
+      '  <li>Show my financial summary.</li>',
+      '  <li>What tasks are pending?</li>',
+      '</ul>'
+    ].join('\n')
+  },
+  {
     id: 'vaccination',
     title: 'Vaccination how-to',
     userText: 'How do I vaccinate a new animal?',

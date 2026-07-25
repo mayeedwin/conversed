@@ -107,6 +107,40 @@
   background: color-mix(in srgb, var(--clay-soft) 45%, #fff);
 }
 
+.surface-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.15rem;
+  background: color-mix(in srgb, var(--line) 30%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.surface-opt {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  padding: 0.28rem 0.6rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.surface-opt:hover {
+  color: var(--clay-ink);
+}
+
+.surface-opt.active {
+  color: var(--clay-ink);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .topbar-links {
   display: flex;
   align-items: center;

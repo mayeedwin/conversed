@@ -78,6 +78,13 @@ For per-row buttons, add a final cell marked data-row-actions containing one or 
 
 10. **Media** (an image with optional caption — a <figure> WITHOUT data-chart):
 <figure><img src="https://.../scan.jpg" alt="Ultrasound scan" /><figcaption>Pregnancy scan — day 45</figcaption></figure>
+
+11. **Progress / Meters** (labelled bars for coverage, completion, or budget usage). Each <li> needs data-value (a percentage 0–100, or a raw number paired with data-max). Optional data-tone ("primary" | "success" | "warning" | "critical" | "neutral"), data-display for a custom readout, and action attributes to make a bar tappable. Add data-title on the list for an optional heading:
+<ul data-progress data-title="Season readiness">
+  <li data-value="82" data-tone="success">Vaccination coverage</li>
+  <li data-value="18" data-max="24" data-display="18 / 24 paddocks">Grazing rotation</li>
+  <li data-value="46" data-tone="warning" data-action-type="navigate" data-action-target="/budget">Feed budget used</li>
+</ul>
 `;
 
 export const getSystemPromptInstruction = (options?: SystemPromptOptions): string => {

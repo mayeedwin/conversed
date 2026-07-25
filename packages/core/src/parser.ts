@@ -7,6 +7,8 @@ import {
   RowAction,
   StatItem,
   StatTrend,
+  ProgressItem,
+  ProgressTone,
   StepItem,
   TableBlock,
   TableRow,
@@ -40,7 +42,12 @@ const RESERVED_ACTION_ATTRS = new Set([
   'data-steps',
   'data-timeline',
   'data-row-actions',
-  'data-variant'
+  'data-variant',
+  'data-progress',
+  'data-value',
+  'data-max',
+  'data-display',
+  'data-title'
 ]);
 
 const toCamelCase = (dashed: string): string =>
@@ -331,6 +338,43 @@ const parseTimelineBlock = (element: Element): ConversedContentBlock | null => {
   return { type: 'timeline', items };
 };
 
+const PROGRESS_TONES = new Set(['primary', 'success', 'warning', 'critical', 'neutral']);
+
+const resolveProgressTone = (raw: string | null): ProgressTone | undefined =>
+  raw && PROGRESS_TONES.has(raw) ? (raw as ProgressTone) : undefined;
+
+// Progress bars: <ul data-progress> with one <li data-value data-max? data-tone? data-display?>
+// per meter. The li text is the label; a leading <strong> is unwrapped so authors can bold it.
+const parseProgressBlock = (element: Element): ConversedContentBlock | null => {
+  const items: ProgressItem[] = Array.from(element.querySelectorAll(':scope > li'))
+    .map((listItem): ProgressItem | null => {
+      const value = Number(listItem.getAttribute('data-value'));
+      if (Number.isNaN(value)) return null;
+      const label = (listItem.textContent ?? '').trim();
+      if (!label) return null;
+
+      const rawMax = Number(listItem.getAttribute('data-max'));
+      const max = !Number.isNaN(rawMax) && rawMax > 0 ? rawMax : undefined;
+      const tone = resolveProgressTone(listItem.getAttribute('data-tone'));
+      const display = listItem.getAttribute('data-display')?.trim() || undefined;
+      const action = parseActionFromElement(listItem);
+
+      return {
+        label,
+        value,
+        ...(max ? { max } : {}),
+        ...(tone ? { tone } : {}),
+        ...(display ? { display } : {}),
+        ...(action ? { action } : {})
+      };
+    })
+    .filter((item): item is ProgressItem => item !== null);
+
+  if (!items.length) return null;
+  const title = element.getAttribute('data-title')?.trim() || undefined;
+  return { type: 'progress', ...(title ? { title } : {}), items };
+};
+
 const parseMediaBlock = (element: Element): ConversedContentBlock | null => {
   const isImg = element.tagName.toLowerCase() === 'img';
   const imgElement = isImg ? element : element.querySelector('img');
@@ -395,6 +439,12 @@ const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => 
   if ((tag === 'ul' || tag === 'ol') && element.hasAttribute('data-timeline')) {
     const timelineBlock = parseTimelineBlock(element);
     if (timelineBlock) blocks.push(timelineBlock);
+    return;
+  }
+
+  if ((tag === 'ul' || tag === 'ol') && element.hasAttribute('data-progress')) {
+    const progressBlock = parseProgressBlock(element);
+    if (progressBlock) blocks.push(progressBlock);
     return;
   }
 

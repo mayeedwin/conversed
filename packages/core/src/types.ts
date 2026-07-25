@@ -108,6 +108,26 @@ export type StatsBlock = {
   items: StatItem[];
 };
 
+export type ProgressTone = 'primary' | 'success' | 'warning' | 'critical' | 'neutral';
+
+export type ProgressItem = {
+  label: string;
+  /** Filled amount. Interpreted as a percentage (0–100) unless `max` is set. */
+  value: number;
+  /** Optional scale ceiling; when set, the bar fills `value / max`. */
+  max?: number;
+  /** Optional custom readout (e.g. "18 / 24" or "on track"). Falls back to a percentage. */
+  display?: string;
+  tone?: ProgressTone;
+  action?: AgentActionPayload;
+};
+
+export type ProgressBlock = {
+  type: 'progress';
+  title?: string;
+  items: ProgressItem[];
+};
+
 export type CalloutTone = 'info' | 'warning' | 'success' | 'critical' | 'neutral';
 
 export type CalloutBlock = {
@@ -163,6 +183,7 @@ export type ConversedContentBlock =
   | TableBlock
   | CodeBlock
   | StatsBlock
+  | ProgressBlock
   | CalloutBlock
   | ChartBlock
   | HeadingBlock
