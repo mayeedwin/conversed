@@ -13,7 +13,7 @@ model HTML  ->  parseMessageBlocks()  ->  ConversedContentBlock[]  ->  framework
 
 ## Block Types & Source HTML
 
-`type` is one of: paragraph, heading, list, table, code, stats, callout, chart, followups, divider, details, steps, timeline, media, custom.
+`type` is one of: paragraph, heading, list, table, code, stats, progress, callout, chart, followups, divider, details, steps, timeline, media, custom.
 
 | Block | Source HTML |
 | --- | --- |
@@ -23,6 +23,7 @@ model HTML  ->  parseMessageBlocks()  ->  ConversedContentBlock[]  ->  framework
 | table | `<table><thead><tbody>` (`headers[]`, `rows[]`) |
 | code | `<pre><code>` (`language?`, `content`) |
 | stats | `<dl><dt><dd data-delta data-trend>` |
+| progress | `<ul data-progress><li data-value data-max? data-tone? data-display?>Label</li></ul>` |
 | callout | `<blockquote data-tone><strong>title</strong>…</blockquote>` (`tone`: info/warning/success/critical/neutral) |
 | chart | `<figure data-chart="bar\|line\|pie" data-labels="A\|B\|C" data-values="1\|2\|3" data-series-label="X">` |
 | followups | `<ul data-followups>` |
@@ -33,7 +34,11 @@ model HTML  ->  parseMessageBlocks()  ->  ConversedContentBlock[]  ->  framework
 | media | `<figure><img src alt><figcaption></figcaption></figure>` or bare `<img>` |
 | custom | app-defined (`customType`, `payload`) |
 
-> `<figure>` → `chart` only with a `data-chart` attribute, else `media`. `<ol>`/`<ul>` become `steps`/`timeline`/`followups` when tagged with the matching `data-*`, else a plain list.
+> `<figure>` → `chart` only with a `data-chart` attribute, else `media`. `<ol>`/`<ul>` become `steps`/`timeline`/`followups`/`progress` when tagged with the matching `data-*`, else a plain list.
+
+### Progress items
+
+Each `<li>` in a `data-progress` list becomes a `ProgressItem`: `value` is a percentage (0–100) unless `data-max` is set, in which case the bar fills `value / max`. Optional `data-display` overrides the readout text, `data-tone` (`primary` \| `success` \| `warning` \| `critical` \| `neutral`) sets the bar color, and `data-action-*` attributes make a bar tappable (emitting the Action Protocol event below).
 
 ## Charts
 

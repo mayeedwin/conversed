@@ -20,7 +20,7 @@ import { parseMessageBlocks } from '@conversed/core';
 const blocks = parseMessageBlocks(rawAiText);   // { debug: true } logs the pipeline
 ```
 
-Block types: `paragraph`, `heading`, `list`, `table`, `code`, `stats`, `callout`, `chart`, `followups`, `divider`, `details`, `steps`, `timeline`, `media`, `custom`.
+Block types: `paragraph`, `heading`, `list`, `table`, `code`, `stats`, `progress`, `callout`, `chart`, `followups`, `divider`, `details`, `steps`, `timeline`, `media`, `custom`.
 
 ## Stream
 

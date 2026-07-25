@@ -39,8 +39,15 @@ ${getSystemPromptInstruction({
   <dt>Total eggs</dt><dd data-delta="+12%" data-trend="up">128</dd>
 </dl>
 
+<ul data-progress data-title="Coop readiness">
+  <li data-value="82" data-tone="success">Vaccination coverage</li>
+  <li data-value="18" data-max="24" data-display="18 / 24 nests">Nesting boxes ready</li>
+</ul>
+<!-- data-value: percent 0–100 (or raw with data-max); data-tone: primary|success|warning|critical|neutral -->
+<!-- add data-display for a custom readout and data-action-* to make a bar tappable -->
+
 <blockquote data-tone="warning"><strong>Low feed</strong> Reorder within 2 days.</blockquote>
-<!-- tones: info | warning | success | critical | neutral -->
+<!-- tones: info | warning | success | critical | neutral; renders with a tone-colored status dot -->
 
 <ul data-followups><li>Show egg trend</li><li>Compare coops</li></ul>
 
