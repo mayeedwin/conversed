@@ -141,6 +141,33 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
+.list-style-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.list-style-picker select {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--clay-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 0.32rem 0.55rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.list-style-picker select:hover {
+  border-color: var(--clay);
+}
+
 .topbar-links {
   display: flex;
   align-items: center;

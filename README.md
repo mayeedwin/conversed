@@ -37,6 +37,8 @@ Angular: `<conversed-content [blocks] primaryColor (action)>`. Give the model th
 
 `paragraph` · `heading` · `list` · `table` · `stats` · `progress` · `callout` · `chart` · `code` · `details` · `steps` · `timeline` · `media` · `followups` · `divider`
 
+Blocks are **flat** by default; opt into filled surfaces with `variant="filled"`. Lists render in four presentations via `listStyle` (`plain` · `card` · `grouped` · `directory`). See [theming](docs/theming.md).
+
 ## Action protocol
 
 Interactive parts — table rows & inline row buttons, stat cards, follow-up chips, code copy buttons — emit an `AgentActionEvent` to your `onAction` handler: `{ type, actionId, target?, params? }`.

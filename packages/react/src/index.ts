@@ -8,8 +8,24 @@ Chart.register(...registerables);
 /** Surface treatment for card-like blocks. `flat` (default) is border-only/transparent. */
 export type ConversedVariant = 'flat' | 'filled';
 
+/**
+ * Presentation for list blocks. `plain` (default) is borderless clean rows;
+ * `card` gives each item its own outlined card; `grouped` is the iOS-style
+ * bordered box with row dividers; `directory` adds a leading initial avatar.
+ */
+export type ConversedListStyle = 'plain' | 'card' | 'grouped' | 'directory';
+
 const variantClass = (variant?: ConversedVariant): string =>
   variant && variant !== 'flat' ? ` conversed-${variant}` : '';
+
+const listStyleClass = (style?: ConversedListStyle): string =>
+  style && style !== 'plain' ? ` conversed-list-${style}` : '';
+
+// First visible character of a list item, used as the `directory` avatar glyph.
+const listInitial = (html: string): string => {
+  const text = html.replace(/<[^>]*>/g, '').trim();
+  return text ? text[0].toUpperCase() : '•';
+};
 
 // Bar fill fraction as a clamped 0–100 percentage.
 const progressPercent = (item: ProgressItem): number => {
@@ -49,11 +65,13 @@ export interface ConversedBlockProps {
   theme?: ConversedThemeTokens;
   /** Surface treatment: `flat` (default, border-only) or `filled` (adds a surface). */
   variant?: ConversedVariant;
+  /** List presentation: `plain` (default), `card`, `grouped`, or `directory`. */
+  listStyle?: ConversedListStyle;
   onAction?: (event: AgentActionEvent) => void;
 }
 
 export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBlockProps) => {
-  const { block, primaryColor, theme, variant, onAction } = props;
+  const { block, primaryColor, theme, variant, listStyle, onAction } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
@@ -81,7 +99,7 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
         return React.createElement(
           'div',
           {
-            className: `conversed-list ${block.ordered ? 'conversed-list-ordered' : 'conversed-list-unordered'}`,
+            className: `conversed-list ${block.ordered ? 'conversed-list-ordered' : 'conversed-list-unordered'}${listStyleClass(listStyle)}`,
             role: 'list'
           },
           block.items.map((item: string, idx: number) =>
@@ -91,7 +109,11 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
               React.createElement(
                 'span',
                 { className: 'conversed-list-marker', 'aria-hidden': true },
-                block.ordered ? `${idx + 1}` : ''
+                block.ordered
+                  ? `${idx + 1}`
+                  : listStyle === 'directory'
+                    ? listInitial(item)
+                    : ''
               ),
               React.createElement('span', {
                 className: 'conversed-list-content',
@@ -386,12 +408,14 @@ export interface ConversedContentProps {
   theme?: ConversedThemeTokens;
   /** Surface treatment applied to every block: `flat` (default) or `filled`. */
   variant?: ConversedVariant;
+  /** List presentation applied to every list block: `plain` (default), `card`, `grouped`, or `directory`. */
+  listStyle?: ConversedListStyle;
   onAction?: (event: AgentActionEvent) => void;
   debug?: boolean;
 }
 
 export const ConversedContent: React.FC<ConversedContentProps> = (props: ConversedContentProps) => {
-  const { blocks, primaryColor, theme, variant, onAction, debug } = props;
+  const { blocks, primaryColor, theme, variant, listStyle, onAction, debug } = props;
   const activeTheme = theme || (primaryColor ? { primaryColor } : undefined);
   const styleVars = activeTheme ? generateCssVariables(activeTheme) : {};
 
@@ -404,7 +428,7 @@ export const ConversedContent: React.FC<ConversedContentProps> = (props: Convers
     'div',
     { className: `conversed-content${variantClass(variant)}`, style: styleVars },
     blocks.map((block: ConversedContentBlock, idx: number) =>
-      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, variant, onAction: handleAction })
+      React.createElement(ConversedBlock, { key: idx, block, primaryColor, theme, variant, listStyle, onAction: handleAction })
     )
   );
 };
