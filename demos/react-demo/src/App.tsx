@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ConversedContent } from '@conversed/react';
-import type { ConversedVariant } from '@conversed/react';
+import type { ConversedVariant, ConversedListStyle } from '@conversed/react';
 import { consumeConversedStream } from '@conversed/core';
 import type { AgentActionEvent } from '@conversed/core';
 import '@conversed/react/styles.css';
@@ -54,6 +54,7 @@ export function App() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [variant, setVariant] = useState<ConversedVariant>('filled');
+  const [listStyle, setListStyle] = useState<ConversedListStyle>('plain');
 
   const threadEndRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +207,19 @@ export function App() {
               </button>
             ))}
           </div>
+          <label className="list-style-picker">
+            <span>List</span>
+            <select
+              value={listStyle}
+              onChange={(e) => setListStyle(e.target.value as ConversedListStyle)}
+              aria-label="List presentation"
+            >
+              <option value="plain">Plain</option>
+              <option value="card">Card</option>
+              <option value="grouped">Grouped</option>
+              <option value="directory">Directory</option>
+            </select>
+          </label>
           <button className="use-it" onClick={() => setShowGuide(true)}>
             Use it
           </button>
@@ -245,6 +259,7 @@ export function App() {
                         primaryColor={PRIMARY}
                         theme={{ primaryColor: PRIMARY, surface: '#ffffff' }}
                         variant={variant}
+                        listStyle={listStyle}
                         onAction={handleAction}
                       />
                       {!msg.isStreaming && msg.text && (

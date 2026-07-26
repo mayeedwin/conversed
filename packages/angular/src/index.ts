@@ -43,6 +43,19 @@ Chart.register(...registerables);
 export type ConversedVariant = 'flat' | 'filled';
 
 /**
+ * Presentation for list blocks. `plain` (default) is borderless clean rows;
+ * `card` gives each item its own outlined card; `grouped` is the iOS-style
+ * bordered box with row dividers; `directory` adds a leading initial avatar.
+ */
+export type ConversedListStyle = 'plain' | 'card' | 'grouped' | 'directory';
+
+// First visible character of a list item, used as the `directory` avatar glyph.
+export const conversedListInitial = (html: string): string => {
+  const text = html.replace(/<[^>]*>/g, '').trim();
+  return text ? text[0].toUpperCase() : '•';
+};
+
+/**
  * <conversed-stats>
  * iOS-inspired flat metric grid with clean borders (no box shadows).
  */
@@ -434,8 +447,9 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
 
 /**
  * <conversed-list>
- * iOS-inspired grouped list rendered with <div> rows (no semantic ul/ol),
- * matching the flat table/callout aesthetic.
+ * One markup, four presentations selected via `listStyle`: plain (default,
+ * borderless clean rows), card, grouped (iOS-style bordered box), directory
+ * (leading initial avatar).
  */
 @Component({
   selector: 'conversed-list',
@@ -445,12 +459,15 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
       class="conversed-list"
       [class.conversed-list-ordered]="block?.ordered"
       [class.conversed-list-unordered]="!block?.ordered"
+      [class.conversed-list-card]="listStyle === 'card'"
+      [class.conversed-list-grouped]="listStyle === 'grouped'"
+      [class.conversed-list-directory]="listStyle === 'directory'"
       role="list"
     >
       @for (item of block?.items || items; track $index) {
         <div class="conversed-list-row" role="listitem">
           <span class="conversed-list-marker" aria-hidden="true">
-            {{ block?.ordered ? $index + 1 : '' }}
+            {{ markerText(item, $index) }}
           </span>
           <span class="conversed-list-content" [innerHTML]="item"></span>
         </div>
@@ -460,17 +477,34 @@ export class ConversedChartComponent implements AfterViewInit, OnChanges, OnDest
   styles: [`
     :host {
       --primary: var(--conversed-primary, #0071e3);
+      --primary-alpha15: var(--conversed-primary-alpha15, rgba(0, 113, 227, 0.15));
       --card-bg: var(--conversed-card-bg, transparent);
       --border: var(--conversed-border-color, #e5e5ea);
       --radius: var(--conversed-radius, 8px);
       display: block;
     }
-    .conversed-list { display: flex; flex-direction: column; margin: 0.35rem 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
-    .conversed-list-row { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.8rem; line-height: 1.45; border-bottom: 1px solid var(--border); }
-    .conversed-list-row:last-child { border-bottom: none; }
-    .conversed-list-marker { flex: none; min-width: 1.1rem; font-size: 0.72rem; font-weight: 600; color: var(--primary); text-align: right; }
+    .conversed-list { display: flex; flex-direction: column; gap: 0.1rem; margin: 0.4rem 0; }
+    .conversed-list-row { display: flex; align-items: baseline; gap: 0.55rem; padding: 0.15rem 0.1rem; font-size: 0.8rem; line-height: 1.5; }
+    .conversed-list-marker { flex: none; min-width: 0.9rem; font-size: 0.72rem; font-weight: 600; color: var(--primary); text-align: right; }
     .conversed-list-unordered .conversed-list-marker::before { content: '•'; color: var(--primary); }
     .conversed-list-content { flex: 1; min-width: 0; }
+
+    /* A · grouped — iOS-style bordered box with hairline row dividers */
+    .conversed-list-grouped { gap: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
+    .conversed-list-grouped .conversed-list-row { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
+    .conversed-list-grouped .conversed-list-row:last-child { border-bottom: none; }
+    .conversed-list-grouped.conversed-list-unordered .conversed-list-marker { display: none; }
+
+    /* C · card — each item is its own outlined, tappable-looking card */
+    .conversed-list-card { gap: 0.4rem; }
+    .conversed-list-card .conversed-list-row { padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); }
+    .conversed-list-card.conversed-list-unordered .conversed-list-marker { display: none; }
+
+    /* D · directory — leading initial avatar + content, for named entities */
+    .conversed-list-directory { gap: 0.15rem; }
+    .conversed-list-directory .conversed-list-row { align-items: center; gap: 0.6rem; padding: 0.25rem 0.1rem; }
+    .conversed-list-directory .conversed-list-marker { min-width: 0; width: 1.55rem; height: 1.55rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--primary-alpha15); color: var(--primary); font-size: 0.68rem; text-align: center; }
+    .conversed-list-directory.conversed-list-unordered .conversed-list-marker::before { content: none; }
   `]
 })
 export class ConversedListComponent {
@@ -478,6 +512,13 @@ export class ConversedListComponent {
   @Input() items: string[] = [];
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
+  /** List presentation: `plain` (default), `card`, `grouped`, or `directory`. */
+  @Input() listStyle?: ConversedListStyle;
+
+  markerText(item: string, index: number): string {
+    if (this.block?.ordered) return `${index + 1}`;
+    return this.listStyle === 'directory' ? conversedListInitial(item) : '';
+  }
 
   @HostBinding('style')
   get styleBindings() {
@@ -793,7 +834,7 @@ export class ConversedProgressComponent {
         <div [class]="'conversed-h conversed-h' + block.level" [innerHTML]="block.html"></div>
       }
       @case ('list') {
-        <conversed-list [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-list>
+        <conversed-list [block]="block" [theme]="theme" [primaryColor]="primaryColor" [listStyle]="listStyle"></conversed-list>
       }
       @case ('details') {
         <conversed-details [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-details>
@@ -854,6 +895,8 @@ export class ConversedBlockComponent {
   @Input() block!: ConversedContentBlock;
   @Input() primaryColor?: string;
   @Input() theme?: ConversedThemeTokens;
+  /** List presentation forwarded to list blocks: `plain` (default), `card`, `grouped`, or `directory`. */
+  @Input() listStyle?: ConversedListStyle;
   @Output() action = new EventEmitter<AgentActionEvent>();
 
   copyCode(content: string, language?: string) {
@@ -887,6 +930,7 @@ export class ConversedBlockComponent {
           [block]="block"
           [theme]="theme"
           [primaryColor]="primaryColor"
+          [listStyle]="listStyle"
           (action)="emitAction($event)"
         ></conversed-block>
       }
@@ -924,6 +968,8 @@ export class ConversedContentComponent {
   @Input() theme?: ConversedThemeTokens;
   /** Surface treatment applied to every block: `flat` (default) or `filled`. */
   @Input() variant?: ConversedVariant;
+  /** List presentation applied to every list block: `plain` (default), `card`, `grouped`, or `directory`. */
+  @Input() listStyle?: ConversedListStyle;
   @Input() debug = false;
   @Output() action = new EventEmitter<AgentActionEvent>();
 

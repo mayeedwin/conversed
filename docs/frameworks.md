@@ -6,10 +6,12 @@ Both renderers take a `blocks` array and render inside your own chat bubble — 
 | --- | --- | --- |
 | Install | `npm i @conversed/react @conversed/core` | `npm i @conversed/angular @conversed/core` |
 | CSS | import `@conversed/react/styles.css` once at app root (else unstyled) | inline styles, zero setup |
-| Content | `<ConversedContent blocks primaryColor onAction debug />` | `<conversed-content [blocks] primaryColor [debug] (action)>` |
-| Single block | `<ConversedBlock block primaryColor onAction />` | `<conversed-block [block] primaryColor (action)>` |
+| Content | `<ConversedContent blocks primaryColor variant listStyle onAction debug />` | `<conversed-content [blocks] primaryColor variant listStyle [debug] (action)>` |
+| Single block | `<ConversedBlock block primaryColor variant listStyle onAction />` | `<conversed-block [block] primaryColor variant listStyle (action)>` |
 
 `debug` (component prop / `{ debug: true }` on `parseMessageBlocks`) logs raw text + parsed blocks. Silent by default.
+
+`variant` (`'flat'` default / `'filled'`) and `listStyle` (`'plain'` default / `'card'` / `'grouped'` / `'directory'`) control block surface and list presentation — see [theming.md](theming.md).
 
 ## React
 

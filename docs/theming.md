@@ -56,6 +56,31 @@ Blocks are **flat** by default — transparent, border-only cards that sit clean
 
 > Callouts render with a **tone-colored status dot** at the top-left (info/success/warning/critical/neutral) rather than a left border.
 
+## List Style
+
+List blocks render one markup in four presentations, selected with the `listStyle` prop. It applies to every list block in the content and composes with `variant` (a `filled` surface fills the `card`/`grouped` backgrounds).
+
+```tsx
+// React
+<ConversedContent blocks={blocks} listStyle="card" />   {/* 'plain' (default) | 'card' | 'grouped' | 'directory' */}
+```
+
+```html
+<!-- Angular -->
+<conversed-content [blocks]="blocks()" listStyle="card"></conversed-content>
+```
+
+| `listStyle`  | Looks like                                                        | Best for |
+| ------------ | ----------------------------------------------------------------- | -------- |
+| `plain` *(default)* | Borderless clean rows — a small primary bullet, then the item. | Any list; the lightest, most chat-native default. |
+| `card`       | Each item in its own outlined card (no bullet).                   | Lists whose items are discrete, tappable objects. |
+| `grouped`    | iOS-style bordered box with hairline row dividers (no bullet).    | Dense, settings-style groupings. |
+| `directory`  | Leading circular initial avatar (first letter of the item) + content. | Lists of named entities — people, animals, files. |
+
+Notes:
+- Ordered lists always show their number as the marker; the `card`, `grouped`, and `directory` styles only replace the **unordered** bullet.
+- The `directory` avatar tint uses `--conversed-primary-alpha15` (the primary color at 15%); the initial is derived from the item's first visible character.
+
 ## iOS Gray Scale (50 → 900)
 
 Each shade is a `--conversed-gray-*` variable; the full ramp also exports from `@conversed/core` as `CONVERSED_GRAY`. **Gray-200 (`#e5e5ea`) is the default border shade.**
@@ -102,7 +127,46 @@ Generate resolved CSS from a theme (or defaults) with `generateCssVariables(them
 
 ## Chart Colors
 
-Chart series derive from `--conversed-primary` plus the `CHART_SERIES_COLORS` palette — the first series follows your brand color, others cycle the palette. Build a Chart.js config directly with `toChartJsConfig(block, { primaryColor })`.
+Chart series derive from `--conversed-primary` plus the `CHART_SERIES_COLORS` palette — the first series follows your brand color, others cycle the palette:
+
+```ts
+import { CHART_SERIES_COLORS } from '@conversed/core';
+// ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff2d55', '#5ac8fa']
+```
+
+A `chart` block already renders on a canvas inside `<ConversedContent>` — you don't need to do anything. Reach for `toChartJsConfig` only when you want to draw the chart yourself (a standalone canvas, a custom wrapper, or a non-Conversed surface).
+
+`toChartJsConfig(block, { primaryColor })` turns a `ChartBlock` into a ready Chart.js config `{ type, data, options }`. Canvas can't read CSS variables, so pass a **resolved hex** for `primaryColor` (not `var(--conversed-primary)`); omit it to fall back to the palette's first color.
+
+```ts
+import { toChartJsConfig } from '@conversed/core';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
+// `block` is a ChartBlock (e.g. from parseMessageBlocks, or hand-built)
+const config = toChartJsConfig(block, { primaryColor: '#c96442' });
+
+const chart = new Chart(canvasEl, config);
+// …later
+chart.destroy();
+```
+
+The returned config is a plain object, so you can tweak it before handing it to Chart.js — e.g. merge extra `options`:
+
+```ts
+const config = toChartJsConfig(block, { primaryColor: '#c96442' });
+config.options = { ...config.options, plugins: { legend: { display: true } } };
+new Chart(canvasEl, config);
+```
+
+To resolve the primary color from a themed DOM node at runtime (mirroring what the components do internally):
+
+```ts
+const primaryColor =
+  getComputedStyle(canvasEl).getPropertyValue('--conversed-primary').trim() || '#0071e3';
+const config = toChartJsConfig(block, { primaryColor });
+```
 
 ## Debug Logging (dev)
 
