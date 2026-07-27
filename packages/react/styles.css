@@ -587,6 +587,57 @@
   color: var(--conversed-primary-contrast, #fff);
 }
 
+/* CTA status — driven by updateAction(); `idle` renders as the base button. */
+.conversed-row-action[disabled] {
+  cursor: default;
+}
+.conversed-row-action.conversed-status-pending {
+  opacity: 0.75;
+}
+.conversed-row-action.conversed-status-done {
+  color: var(--conversed-success, #34c759);
+  border-color: var(--conversed-success, #34c759);
+  background: transparent;
+}
+.conversed-row-action.conversed-status-done.primary {
+  color: var(--conversed-primary-contrast, #fff);
+  background: var(--conversed-success, #34c759);
+}
+.conversed-row-action.conversed-status-failed {
+  color: var(--conversed-critical, #ff3b30);
+  border-color: var(--conversed-critical, #ff3b30);
+  background: transparent;
+}
+/* Leading status glyph */
+.conversed-action-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  line-height: 0.7rem;
+  text-align: center;
+  font-size: 0.66rem;
+}
+.conversed-action-icon-done::before {
+  content: '✓';
+}
+.conversed-action-icon-failed::before {
+  content: '!';
+  font-weight: 700;
+}
+.conversed-action-icon-pending {
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: conversed-spin 0.6s linear infinite;
+}
+@keyframes conversed-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Follow-up chips */
 .conversed-followups {
   display: flex;

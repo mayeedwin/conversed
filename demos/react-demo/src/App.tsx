@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ConversedContent } from '@conversed/react';
 import type { ConversedVariant, ConversedListStyle } from '@conversed/react';
-import { consumeConversedStream } from '@conversed/core';
-import type { AgentActionEvent } from '@conversed/core';
+import { consumeConversedStream, updateAction } from '@conversed/core';
+import type { AgentActionEvent, ActionSelector, ActionPatch } from '@conversed/core';
 import '@conversed/react/styles.css';
 import { DEMO_PRESET_PROMPTS, mockTokenStream } from './mockAi';
 import type { ChatMessage, ActionRecord } from './mockAi';
@@ -127,6 +127,18 @@ export function App() {
     setIsStreaming(false);
   };
 
+  // Apply a CTA status/label/cell patch across the thread. updateAction returns
+  // the same array reference for untouched messages, so only the affected reply
+  // re-renders.
+  const patchAction = (selector: ActionSelector, patch: ActionPatch) =>
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (!m.blocks) return m;
+        const next = updateAction(m.blocks, selector, patch);
+        return next === m.blocks ? m : { ...m, blocks: next };
+      })
+    );
+
   const handleAction = (event: AgentActionEvent) => {
     const { action } = event;
     const record: ActionRecord = {
@@ -140,42 +152,28 @@ export function App() {
     };
     setActions((prev) => [record, ...prev].slice(0, 50));
 
-    // Command actions update the row UI live (no navigation) — the button and
-    // status change in place to reflect the new state.
+    // Command actions update the CTA in place — the library's updateAction
+    // helper returns new blocks, so the chat re-renders to reflect the status.
     if (
       action.type === 'custom-command' &&
       action.target &&
       (action.actionId === 'task-start' || action.actionId === 'task-complete')
     ) {
-      const target = action.target;
       const complete = action.actionId === 'task-complete';
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (!m.blocks) return m;
-          let touched = false;
-          const blocks = m.blocks.map((b) => {
-            if (b.type !== 'table') return b;
-            const rows = b.rows.map((row) => {
-              if (!row.actions?.some((a) => a.action.target === target)) return row;
-              touched = true;
-              const cells = row.cells.slice();
-              if (cells.length > 1) cells[1] = complete ? 'Done ✓' : 'In progress';
-              const actions = complete
-                ? [
-                    {
-                      label: 'Completed',
-                      variant: 'primary' as const,
-                      action: { type: 'custom-command' as const, actionId: 'task-done', target }
-                    }
-                  ]
-                : (row.actions || []).filter((a) => a.action.actionId !== 'task-start');
-              return { ...row, cells, actions };
-            });
-            return { ...b, rows };
-          });
-          return touched ? { ...m, blocks } : m;
-        })
-      );
+      const selector: ActionSelector = { actionId: action.actionId, target: action.target };
+
+      // 1) optimistic: the CTA goes to `pending` (spinner) immediately.
+      patchAction(selector, { status: 'pending', label: complete ? 'Completing…' : 'Starting…' });
+
+      // 2) once the "work" resolves, settle to `done` and update the row cell.
+      window.setTimeout(() => {
+        patchAction(
+          selector,
+          complete
+            ? { status: 'done', label: 'Completed', variant: 'primary', cells: { 1: 'Done ✓' } }
+            : { status: 'done', label: 'Started', cells: { 1: 'In progress' } }
+        );
+      }, 800);
     }
 
     // A follow-up chip is a real prompt — run it so the demo stays conversational.

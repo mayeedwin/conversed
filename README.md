@@ -53,6 +53,8 @@ Interactive parts — table rows & inline row buttons, stat cards, follow-up chi
 
 Declare actions on elements with `data-action-type` / `data-action-id` / `data-action-target` / `data-action-params`. See [architecture](docs/architecture.md#action-protocol).
 
+CTA buttons carry a lifecycle `status` (`idle` → `pending` → `done` / `failed`) so the chat reflects an action's progress live — transition it with the pure `updateAction(blocks, selector, patch)` helper, which returns new blocks. See [CTA status](docs/architecture.md#cta-status-live-updates).
+
 ## Docs
 
 - [Architecture & AST](docs/architecture.md)
