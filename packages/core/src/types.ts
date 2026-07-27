@@ -69,9 +69,17 @@ export type MediaBlock = {
   caption?: string;
 };
 
+/**
+ * Lifecycle status of an interactive CTA. Drives its visual state and, for
+ * `pending`/`done`, whether it still responds to clicks. Defaults to `idle`.
+ */
+export type ActionStatus = 'idle' | 'pending' | 'done' | 'failed';
+
 export type RowAction = {
   label: string;
   variant?: 'default' | 'primary';
+  /** Lifecycle status of this CTA. Defaults to `idle`. Update it live with `updateAction`. */
+  status?: ActionStatus;
   action: AgentActionPayload;
 };
 

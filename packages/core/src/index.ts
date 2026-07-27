@@ -6,4 +6,5 @@ export * from './stream.js';
 export * from './markdown-normalizer.js';
 export * from './registry.js';
 export * from './chart.js';
+export * from './actions.js';
 export * from './debug.js';

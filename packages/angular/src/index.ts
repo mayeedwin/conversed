@@ -160,8 +160,24 @@ export class ConversedStatsComponent {
                       type="button"
                       class="conversed-row-action"
                       [class.primary]="rowAction.variant === 'primary'"
+                      [class.conversed-status-pending]="rowAction.status === 'pending'"
+                      [class.conversed-status-done]="rowAction.status === 'done'"
+                      [class.conversed-status-failed]="rowAction.status === 'failed'"
+                      [attr.aria-busy]="rowAction.status === 'pending' ? true : null"
+                      [disabled]="rowAction.status === 'pending' || rowAction.status === 'done'"
                       (click)="handleRowAction(rowAction.action, $event)"
-                    >{{ rowAction.label }}</button>
+                    >
+                      @if (rowAction.status && rowAction.status !== 'idle') {
+                        <span
+                          class="conversed-action-icon"
+                          [class.conversed-action-icon-pending]="rowAction.status === 'pending'"
+                          [class.conversed-action-icon-done]="rowAction.status === 'done'"
+                          [class.conversed-action-icon-failed]="rowAction.status === 'failed'"
+                          aria-hidden="true"
+                        ></span>
+                      }
+                      {{ rowAction.label }}
+                    </button>
                   }
                 </div>
               }
@@ -213,6 +229,16 @@ export class ConversedStatsComponent {
     }
     .conversed-row-action:hover { border-color: var(--primary); }
     .conversed-row-action.primary { background: var(--primary); border-color: var(--primary); color: var(--conversed-primary-contrast, #fff); }
+    .conversed-row-action[disabled] { cursor: default; }
+    .conversed-row-action.conversed-status-pending { opacity: 0.75; }
+    .conversed-row-action.conversed-status-done { color: var(--conversed-success, #34c759); border-color: var(--conversed-success, #34c759); background: transparent; }
+    .conversed-row-action.conversed-status-done.primary { color: var(--conversed-primary-contrast, #fff); background: var(--conversed-success, #34c759); }
+    .conversed-row-action.conversed-status-failed { color: var(--conversed-critical, #ff3b30); border-color: var(--conversed-critical, #ff3b30); background: transparent; }
+    .conversed-action-icon { display: inline-block; vertical-align: middle; margin-right: 0.3rem; width: 0.7rem; height: 0.7rem; line-height: 0.7rem; text-align: center; font-size: 0.66rem; }
+    .conversed-action-icon-done::before { content: '✓'; }
+    .conversed-action-icon-failed::before { content: '!'; font-weight: 700; }
+    .conversed-action-icon-pending { border: 1.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: conversed-spin 0.6s linear infinite; }
+    @keyframes conversed-spin { to { transform: rotate(360deg); } }
   `]
 })
 export class ConversedTableComponent {

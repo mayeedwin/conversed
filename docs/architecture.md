@@ -66,6 +66,32 @@ interface AgentActionPayload<T = unknown> {
 
 Declared via data attributes: `data-action-type` → `type`, `data-action-id` → `actionId`, `data-action-target` → `target`, `data-action-params` (JSON) → `params`. Any non-reserved `data-*` becomes a camelCased param (`data-record-kind` → `params.recordKind`). Fallback: `data-link-type` / `data-link-id` map to a `navigate` action.
 
+### CTA status (live updates)
+
+A CTA button (`RowAction`) carries an optional lifecycle `status` so the chat can reflect an action's progress in place — a task going `idle → pending → done`, or `failed`:
+
+```typescript
+type ActionStatus = 'idle' | 'pending' | 'done' | 'failed';
+```
+
+The renderers style each status (a spinner for `pending`, a check for `done`, the critical tone for `failed`) and stop responding to clicks while `pending` or `done`. `idle` (the default) renders as the plain button.
+
+Transition it with the pure `updateAction` helper from `@conversed/core`, which returns **new blocks** (the original array is returned unchanged when nothing matches, so it's cheap to call every render):
+
+```typescript
+import { updateAction } from '@conversed/core';
+
+// Mark the task-complete CTA on row `t-101` done, and update its status cell.
+const next = updateAction(
+  blocks,
+  { actionId: 'task-complete', target: 't-101' },   // selector: matches by actionId and/or target
+  { status: 'done', label: 'Completed', variant: 'primary', cells: { 1: 'Done ✓' } }
+);
+setMessages(/* store `next` */);
+```
+
+Because the consumer owns the blocks state, the update is reactive: store the returned array and the reply re-renders. `status`/`label`/`variant` apply to the matched button; `cells` patches the containing table row by column index. See the demo's `handleAction` for an optimistic `pending → done` flow.
+
 ## Streaming
 
 `consumeConversedStream(stream, onBlockUpdate?)` buffers chunked LLM tokens (Genkit, OpenAI, Anthropic, Web ReadableStream) and yields `{ rawText, blocks }` without DOM flicker.

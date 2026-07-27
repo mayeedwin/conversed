@@ -347,21 +347,34 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
                     React.createElement(
                       'div',
                       { key: 'actions', className: 'conversed-cell actions-cell' },
-                      (row.actions || []).map((rowAction: RowAction, aIdx: number) =>
-                        React.createElement(
+                      (row.actions || []).map((rowAction: RowAction, aIdx: number) => {
+                        const status =
+                          rowAction.status && rowAction.status !== 'idle' ? rowAction.status : null;
+                        const locked = status === 'pending' || status === 'done';
+                        return React.createElement(
                           'button',
                           {
                             key: aIdx,
                             type: 'button',
-                            className: `conversed-row-action ${rowAction.variant === 'primary' ? 'primary' : ''}`,
-                            onClick: (e: { stopPropagation: () => void }) => {
-                              e.stopPropagation();
-                              handleAction(rowAction.action);
-                            }
+                            className: `conversed-row-action ${rowAction.variant === 'primary' ? 'primary' : ''}${status ? ` conversed-status-${status}` : ''}`,
+                            disabled: locked,
+                            'aria-busy': status === 'pending' || undefined,
+                            onClick: locked
+                              ? undefined
+                              : (e: { stopPropagation: () => void }) => {
+                                  e.stopPropagation();
+                                  handleAction(rowAction.action);
+                                }
                           },
+                          status &&
+                            React.createElement('span', {
+                              key: 'icon',
+                              className: `conversed-action-icon conversed-action-icon-${status}`,
+                              'aria-hidden': true
+                            }),
                           rowAction.label
-                        )
-                      )
+                        );
+                      })
                     )
                 )
               )
