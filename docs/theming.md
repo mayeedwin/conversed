@@ -33,6 +33,8 @@ Defaults are light-mode safe; override on `:root` (or any ancestor):
   --conversed-border-color: #e5e5ea;    /* gray-200, default border */
   --conversed-radius: 8px;
   --conversed-font-family: inherit;
+  --conversed-success: #34c759;         /* CTA `done` status */
+  --conversed-critical: #ff3b30;        /* CTA `failed` status */
 }
 ```
 
