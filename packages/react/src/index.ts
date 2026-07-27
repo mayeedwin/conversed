@@ -33,6 +33,46 @@ const progressPercent = (item: ProgressItem): number => {
   return Math.max(0, Math.min(100, raw));
 };
 
+// Props that make a non-button element behave as an accessible button: click and
+// Enter/Space activation, focusable, and announced as a button. Returns {} when
+// there is no action so plain rows/cards stay inert and out of the tab order.
+const interactiveProps = (
+  payload: AgentActionPayload | undefined,
+  handle: (p?: AgentActionPayload) => void
+): Record<string, unknown> =>
+  payload
+    ? {
+        onClick: () => handle(payload),
+        onKeyDown: (e: { key: string; preventDefault: () => void }) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handle(payload);
+          }
+        },
+        role: 'button',
+        tabIndex: 0
+      }
+    : {};
+
+// ARIA gauge semantics for a progress track so assistive tech announces the fill.
+// Reports on the raw value/max scale when `max` is set, else the 0–100 percent;
+// `aria-valuetext` carries the custom readout (e.g. "18 / 24", "on track").
+const progressAriaProps = (
+  item: ProgressItem,
+  pct: number,
+  readout: string
+): Record<string, unknown> => {
+  const hasMax = !!(item.max && item.max > 0);
+  return {
+    role: 'progressbar',
+    'aria-label': item.label,
+    'aria-valuenow': Math.round(hasMax ? item.value : pct),
+    'aria-valuemin': 0,
+    'aria-valuemax': hasMax ? item.max : 100,
+    'aria-valuetext': readout
+  };
+};
+
 const ConversedChart: React.FC<{ block: ChartBlock; primaryColor?: string }> = ({ block, primaryColor }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
@@ -252,7 +292,7 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
               {
                 key: idx,
                 className: `conversed-stat-card ${item.action ? 'interactive' : ''}`,
-                onClick: () => handleAction(item.action)
+                ...interactiveProps(item.action, handleAction)
               },
               React.createElement('span', { className: 'conversed-stat-label' }, item.label),
               React.createElement('span', { className: 'conversed-stat-value' }, item.value),
@@ -279,9 +319,7 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
               {
                 key: idx,
                 className: `conversed-progress-item ${item.action ? 'interactive' : ''}`,
-                ...(item.action
-                  ? { onClick: () => handleAction(item.action), role: 'button', tabIndex: 0 }
-                  : {})
+                ...interactiveProps(item.action, handleAction)
               },
               React.createElement(
                 'div',
@@ -291,7 +329,7 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
               ),
               React.createElement(
                 'div',
-                { className: 'conversed-progress-track' },
+                { className: 'conversed-progress-track', ...progressAriaProps(item, pct, readout) },
                 React.createElement('div', {
                   className: `conversed-progress-bar conversed-tone-${item.tone || 'primary'}`,
                   style: { width: `${pct}%` }
@@ -334,7 +372,7 @@ export const ConversedBlock: React.FC<ConversedBlockProps> = (props: ConversedBl
                   {
                     key: rIdx,
                     className: `conversed-table-row ${row.action ? 'interactive' : ''}`,
-                    onClick: () => handleAction(row.action)
+                    ...interactiveProps(row.action, handleAction)
                   },
                   row.cells.map((cell: string, cIdx: number) =>
                     React.createElement('div', {
