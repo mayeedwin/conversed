@@ -68,7 +68,10 @@ export const conversedListInitial = (html: string): string => {
         <div
           class="conversed-stat-card"
           [class.interactive]="!!item.action"
+          [attr.role]="item.action ? 'button' : null"
+          [attr.tabindex]="item.action ? 0 : null"
           (click)="handleAction(item.action)"
+          (keydown)="onActivate($event, item.action)"
         >
           <span class="conversed-stat-label">{{ item.label }}</span>
           <span class="conversed-stat-value">{{ item.value }}</span>
@@ -125,6 +128,14 @@ export class ConversedStatsComponent {
     if (!payload) return;
     this.action.emit({ action: payload, defaultPrevented: false });
   }
+
+  onActivate(event: KeyboardEvent, payload?: AgentActionPayload) {
+    if (!payload) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.handleAction(payload);
+    }
+  }
 }
 
 /**
@@ -149,7 +160,7 @@ export class ConversedStatsComponent {
         }
         <div class="conversed-table-body">
           @for (row of (block?.rows || rows); track $index) {
-            <div class="conversed-table-row" [class.interactive]="!!row.action" (click)="handleAction(row.action)">
+            <div class="conversed-table-row" [class.interactive]="!!row.action" [attr.role]="row.action ? 'button' : null" [attr.tabindex]="row.action ? 0 : null" (click)="handleAction(row.action)" (keydown)="onActivate($event, row.action)">
               @for (cell of row.cells; track $index) {
                 <div class="conversed-cell td-cell" [innerHTML]="cell"></div>
               }
@@ -267,6 +278,14 @@ export class ConversedTableComponent {
   handleRowAction(payload: AgentActionPayload, event: Event) {
     event.stopPropagation();
     this.action.emit({ action: payload, defaultPrevented: false });
+  }
+
+  onActivate(event: KeyboardEvent, payload?: AgentActionPayload) {
+    if (!payload) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.handleAction(payload);
+    }
   }
 }
 
@@ -763,12 +782,21 @@ export class ConversedMediaComponent {
           [attr.role]="item.action ? 'button' : null"
           [attr.tabindex]="item.action ? 0 : null"
           (click)="handleAction(item.action)"
+          (keydown)="onActivate($event, item.action)"
         >
           <div class="conversed-progress-head">
             <span class="conversed-progress-label">{{ item.label }}</span>
             <span class="conversed-progress-value">{{ item.display || readout(item) }}</span>
           </div>
-          <div class="conversed-progress-track">
+          <div
+            class="conversed-progress-track"
+            role="progressbar"
+            [attr.aria-label]="item.label"
+            [attr.aria-valuenow]="ariaValueNow(item)"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="item.max && item.max > 0 ? item.max : 100"
+            [attr.aria-valuetext]="item.display || readout(item)"
+          >
             <div
               [class]="'conversed-progress-bar conversed-tone-' + (item.tone || 'primary')"
               [style.width.%]="percent(item)"
@@ -825,9 +853,23 @@ export class ConversedProgressComponent {
     return `${Math.round(this.percent(item))}%`;
   }
 
+  /** `aria-valuenow` on the raw value/max scale when `max` is set, else percent. */
+  ariaValueNow(item: ProgressItem): number {
+    const hasMax = !!(item.max && item.max > 0);
+    return Math.round(hasMax ? item.value : this.percent(item));
+  }
+
   handleAction(payload?: AgentActionPayload) {
     if (!payload) return;
     this.action.emit({ action: payload, defaultPrevented: false });
+  }
+
+  onActivate(event: KeyboardEvent, payload?: AgentActionPayload) {
+    if (!payload) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.handleAction(payload);
+    }
   }
 }
 
