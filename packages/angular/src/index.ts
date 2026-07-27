@@ -966,14 +966,23 @@ export class ConversedBlockComponent {
     :host { display: block; }
     .conversed-content { display: flex; flex-direction: column; gap: 0.3rem; }
     /*
-     * Surface token for the opt-in \`filled\` variant. Default is light-safe and
-     * auto-flips in dark mode; a theme's \`surface\` token overrides it. Custom
-     * properties inherit past Angular's emulated encapsulation, so setting them
-     * on the content wrapper cascades into every leaf block.
+     * Surface token for the opt-in \`filled\` variant.
+     *
+     * Defaults to a light-safe fill and, deliberately, does NOT follow the OS
+     * color scheme — a component library must inherit the host app's theme, not
+     * the machine's, or an app in light mode on a dark-OS device would get dark
+     * surfaces it never asked for. Precedence: the theme's \`surface\` token wins;
+     * else \`data-conversed-color-scheme="dark"\` on any ancestor follows the app's
+     * own dark mode; \`="auto"\` opts back into OS-driven dark. Custom properties
+     * inherit past Angular's emulated encapsulation, so setting them on the
+     * content wrapper cascades into every leaf block.
      */
     .conversed-content { --conversed-surface: var(--conversed-gray-50, #f9f9fb); }
+    /* App-controlled dark, independent of the OS (:host-context sees ancestors). */
+    :host-context([data-conversed-color-scheme='dark']) .conversed-content { --conversed-surface: #2c2c2e; }
+    /* Opt-in: follow the OS color scheme. */
     @media (prefers-color-scheme: dark) {
-      .conversed-content { --conversed-surface: #2c2c2e; }
+      :host-context([data-conversed-color-scheme='auto']) .conversed-content { --conversed-surface: #2c2c2e; }
     }
     /* \`filled\` gives card-like blocks a real surface (vs. the default transparent). */
     .conversed-content.conversed-filled { --conversed-card-bg: var(--conversed-surface); }

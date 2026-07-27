@@ -29,7 +29,7 @@ Defaults are light-mode safe; override on `:root` (or any ancestor):
   --conversed-text: inherit;
   --conversed-text-muted: #8e8e93;
   --conversed-card-bg: transparent;     /* flat/border-only by default */
-  --conversed-surface: #f9f9fb;         /* fill used by the `filled` variant (auto-flips in dark mode) */
+  --conversed-surface: #f9f9fb;         /* fill used by the `filled` variant (light-safe; see Dark mode below) */
   --conversed-border-color: #e5e5ea;    /* gray-200, default border */
   --conversed-radius: 8px;
   --conversed-font-family: inherit;
@@ -54,9 +54,24 @@ Blocks are **flat** by default — transparent, border-only cards that sit clean
 <conversed-content [blocks]="blocks()" variant="filled"></conversed-content>
 ```
 
-`filled` sets each card-like block's background to `--conversed-surface`. When you don't set `surface`/`cardBg` in the theme, the stylesheet supplies a light default that **auto-flips in dark mode** via `prefers-color-scheme`; pass `surface` (or override `--conversed-surface`) to customize it. Explicitly setting `cardBg` always wins over the variant.
+`filled` sets each card-like block's background to `--conversed-surface`. When you don't set `surface`/`cardBg` in the theme, the stylesheet supplies a **light-safe default**; pass `surface` (or override `--conversed-surface`) to customize it. Explicitly setting `cardBg` always wins over the variant.
 
 > Callouts render with a **tone-colored status dot** at the top-left (info/success/warning/critical/neutral) rather than a left border.
+
+## Dark mode
+
+The surface **does not follow the OS color scheme by default** — a component library should inherit *your app's* theme, not the machine's, so an app in light mode on a dark-OS device won't get dark surfaces it never asked for. To colour the surface, in order of precedence:
+
+1. **Theme token** — set `surface` (or `--conversed-surface`) directly. Always wins.
+2. **App-controlled dark** — set `data-conversed-color-scheme="dark"` on any ancestor (e.g. `<html>`) to track your app's own dark toggle, independent of the OS.
+3. **OS-driven** — set `data-conversed-color-scheme="auto"` to opt back into the old `prefers-color-scheme` behavior.
+
+```html
+<!-- Follows your app's dark mode, not the OS -->
+<html data-conversed-color-scheme="dark"> … </html>
+```
+
+The Angular renderer reads the attribute from ancestors via `:host-context()`, so the same markup works in both frameworks.
 
 ## List Style
 

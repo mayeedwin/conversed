@@ -19,16 +19,34 @@
 }
 
 /**
- * Surface token for the opt-in `filled` variant. Default is light-safe and
- * auto-flips in dark mode; a theme can override --conversed-surface.
+ * Surface token for the opt-in `filled` variant.
+ *
+ * Defaults to a light-safe fill and, deliberately, does NOT follow the OS color
+ * scheme — a component library must inherit the *host app's* theme, not the
+ * machine's, otherwise an app running in light mode on a dark-OS device would
+ * get dark surfaces it never asked for.
+ *
+ * To colour the surface, in order of precedence:
+ *   1. Set the theme's `surface` token (or `--conversed-surface`) — always wins.
+ *   2. Set `data-conversed-color-scheme="dark"` on any ancestor (e.g. <html>)
+ *      to follow the app's own dark mode, independent of the OS.
+ *   3. Set `data-conversed-color-scheme="auto"` to opt back into OS-driven dark.
  */
 .conversed-content,
 .conversed-block-wrapper {
   --conversed-surface: var(--conversed-gray-50, #f9f9fb);
 }
+
+/* App-controlled dark, independent of the OS. */
+[data-conversed-color-scheme='dark'] :is(.conversed-content, .conversed-block-wrapper),
+:is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='dark'] {
+  --conversed-surface: #2c2c2e;
+}
+
+/* Opt-in: follow the OS color scheme. */
 @media (prefers-color-scheme: dark) {
-  .conversed-content,
-  .conversed-block-wrapper {
+  [data-conversed-color-scheme='auto'] :is(.conversed-content, .conversed-block-wrapper),
+  :is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='auto'] {
     --conversed-surface: #2c2c2e;
   }
 }
