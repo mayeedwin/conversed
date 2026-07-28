@@ -27,12 +27,12 @@ Use the following specifications for rich blocks:
     </tr>
   </tbody>
 </table>
-For per-row buttons, add a final cell marked data-row-actions containing one or more <button> elements (each with its own data-action-* attributes; add data-variant="primary" to emphasise one). The buttons render in a trailing actions column and are excluded from the row's data cells:
+For per-row buttons, add a final cell marked data-row-actions containing one or more <button> elements (each with its own data-action-* attributes; add data-variant="primary" to emphasise one). Optionally set data-status ("idle" | "pending" | "done" | "failed") to show a button's lifecycle state — "pending" renders a spinner and "done" a check, and both stop responding to clicks. The buttons render in a trailing actions column and are excluded from the row's data cells:
 <tr>
   <td>Feed the goats</td><td>Pending</td>
   <td data-row-actions>
     <button data-action-type="custom-command" data-action-id="task-start" data-action-target="123">Start</button>
-    <button data-action-type="custom-command" data-action-id="task-complete" data-action-target="123" data-variant="primary">Complete</button>
+    <button data-action-type="custom-command" data-action-id="task-complete" data-action-target="123" data-variant="primary" data-status="pending">Complete</button>
   </td>
 </tr>
 

@@ -34,6 +34,23 @@ blocks = computed(() => parseMessageBlocks(this.rawAiResponse()));
 - `<conversed-content>` inputs: `[blocks]`, `[primaryColor]` (`#0071e3`), `[theme]`, `[variant]` (`'flat'` | `'filled'`), `[debug]`; output `(action)`.
 - `<conversed-block [block]>` renders a single block anywhere.
 
+## System prompt
+
+`parseMessageBlocks` only works if the model actually emits conversed content — so teach it at the **prompt level**. Append `getSystemPromptInstruction()` (from `@conversed/core`) to your system prompt, optionally declaring the custom actions the model may trigger:
+
+```typescript
+import { getSystemPromptInstruction } from '@conversed/core';
+
+const systemPrompt = `You are an AI assistant.
+${getSystemPromptInstruction({
+  allowedActions: [
+    { actionId: 'view-detail', description: 'Deep link to item detail', exampleParams: { id: '123' } }
+  ]
+})}`;
+```
+
+Those `allowedActions` come back to you via the `(action)` output. Omit the argument for the base spec.
+
 ## Docs
 
 [github.com/mayeedwin/conversed](https://github.com/mayeedwin/conversed) · [Frameworks guide](../../docs/frameworks.md)

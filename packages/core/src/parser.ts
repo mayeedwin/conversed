@@ -1,4 +1,5 @@
 import {
+  ActionStatus,
   AgentActionPayload,
   CalloutBlock,
   CalloutTone,
@@ -43,12 +44,15 @@ const RESERVED_ACTION_ATTRS = new Set([
   'data-timeline',
   'data-row-actions',
   'data-variant',
+  'data-status',
   'data-progress',
   'data-value',
   'data-max',
   'data-display',
   'data-title'
 ]);
+
+const ACTION_STATUSES = new Set<ActionStatus>(['idle', 'pending', 'done', 'failed']);
 
 const toCamelCase = (dashed: string): string =>
   dashed.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase());
@@ -102,7 +106,9 @@ const parseRowActions = (actionCell: Element): RowAction[] =>
       const label = (element.textContent ?? '').trim();
       if (!action || !label) return null;
       const variant = element.getAttribute('data-variant') === 'primary' ? 'primary' : undefined;
-      return { label, ...(variant ? { variant } : {}), action };
+      const statusAttr = element.getAttribute('data-status') as ActionStatus | null;
+      const status = statusAttr && ACTION_STATUSES.has(statusAttr) ? statusAttr : undefined;
+      return { label, ...(variant ? { variant } : {}), ...(status ? { status } : {}), action };
     })
     .filter((rowAction): rowAction is RowAction => rowAction !== null);
 
