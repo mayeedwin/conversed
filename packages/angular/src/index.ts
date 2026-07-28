@@ -238,13 +238,13 @@ export class ConversedStatsComponent {
       box-shadow: none;
       transition: border-color 0.15s ease, background 0.15s ease;
     }
-    .conversed-row-action:hover { border-color: var(--primary); }
+    .conversed-row-action:not([disabled]):hover { border-color: var(--primary); }
     .conversed-row-action.primary { background: var(--primary); border-color: var(--primary); color: var(--conversed-primary-contrast, #fff); }
     .conversed-row-action[disabled] { cursor: default; }
     .conversed-row-action.conversed-status-pending { opacity: 0.75; }
-    .conversed-row-action.conversed-status-done { color: var(--conversed-success, #34c759); border-color: var(--conversed-success, #34c759); background: transparent; }
-    .conversed-row-action.conversed-status-done.primary { color: var(--conversed-primary-contrast, #fff); background: var(--conversed-success, #34c759); }
-    .conversed-row-action.conversed-status-failed { color: var(--conversed-critical, #ff3b30); border-color: var(--conversed-critical, #ff3b30); background: transparent; }
+    /* Terminal states recede into a quiet, borderless badge (no fill/outline). */
+    .conversed-row-action.conversed-status-done, .conversed-row-action.conversed-status-done.primary { color: var(--conversed-success, #34c759); border-color: transparent; background: transparent; padding-inline: 0.15rem; }
+    .conversed-row-action.conversed-status-failed { color: var(--conversed-critical, #ff3b30); border-color: transparent; background: transparent; padding-inline: 0.15rem; }
     .conversed-action-icon { display: inline-block; vertical-align: middle; margin-right: 0.3rem; width: 0.7rem; height: 0.7rem; line-height: 0.7rem; text-align: center; font-size: 0.66rem; }
     .conversed-action-icon-done::before { content: '✓'; }
     .conversed-action-icon-failed::before { content: '!'; font-weight: 700; }
@@ -1020,11 +1020,13 @@ export class ConversedBlockComponent {
      * content wrapper cascades into every leaf block.
      */
     .conversed-content { --conversed-surface: var(--conversed-gray-50, #f9f9fb); }
-    /* App-controlled dark, independent of the OS (:host-context sees ancestors). */
-    :host-context([data-conversed-color-scheme='dark']) .conversed-content { --conversed-surface: #2c2c2e; }
+    /* App-controlled dark, independent of the OS (:host-context sees ancestors).
+       Semantic status colors also shift to brighter dark-mode variants so a
+       done/failed badge stays legible on a dark surface. */
+    :host-context([data-conversed-color-scheme='dark']) .conversed-content { --conversed-surface: #2c2c2e; --conversed-success: #30d158; --conversed-critical: #ff453a; }
     /* Opt-in: follow the OS color scheme. */
     @media (prefers-color-scheme: dark) {
-      :host-context([data-conversed-color-scheme='auto']) .conversed-content { --conversed-surface: #2c2c2e; }
+      :host-context([data-conversed-color-scheme='auto']) .conversed-content { --conversed-surface: #2c2c2e; --conversed-success: #30d158; --conversed-critical: #ff453a; }
     }
     /* \`filled\` gives card-like blocks a real surface (vs. the default transparent). */
     .conversed-content.conversed-filled { --conversed-card-bg: var(--conversed-surface); }

@@ -92,6 +92,22 @@ setMessages(/* store `next` */);
 
 Because the consumer owns the blocks state, the update is reactive: store the returned array and the reply re-renders. `status`/`label`/`variant` apply to the matched button; `cells` patches the containing table row by column index. See the demo's `handleAction` for an optimistic `pending → done` flow.
 
+Terminal statuses (`done`/`failed`) are non-interactive, so the renderers show them as a quiet, borderless badge (colored glyph + label) rather than a filled button — a completed action recedes instead of competing with live CTAs. The badge colors come from the `--conversed-success` / `--conversed-critical` tokens, which shift to brighter dark-mode variants under `data-conversed-color-scheme="dark"` (see [theming](theming.md)).
+
+### Persisting status across reloads
+
+Because the consumer owns block state, persistence is an app concern — the library never touches storage (that would break SSR / React Native). Persist the **patched blocks**, not the raw reply: re-parsing raw text only restores the model's initial `data-status` and loses every runtime `pending → done` transition. Store the blocks array keyed by chat/message id and rehydrate it on mount:
+
+```typescript
+const KEY = `chat:${chatId}`;
+const [blocks, setBlocks] = useState(
+  () => JSON.parse(localStorage.getItem(KEY) ?? 'null') ?? parseMessageBlocks(reply)
+);
+useEffect(() => localStorage.setItem(KEY, JSON.stringify(blocks)), [blocks]);
+```
+
+The demo's `App.tsx` persists its whole thread this way, so reopening it restores every CTA exactly where the user left it.
+
 ## Streaming
 
 `consumeConversedStream(stream, onBlockUpdate?)` buffers chunked LLM tokens (Genkit, OpenAI, Anthropic, Web ReadableStream) and yields `{ rawText, blocks }` without DOM flicker.

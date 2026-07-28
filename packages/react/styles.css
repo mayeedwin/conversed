@@ -37,10 +37,14 @@
   --conversed-surface: var(--conversed-gray-50, #f9f9fb);
 }
 
-/* App-controlled dark, independent of the OS. */
+/* App-controlled dark, independent of the OS. Semantic status colors also shift
+   to their brighter dark-mode variants so a `done`/`failed` badge stays legible
+   on a dark surface without going muddy. */
 [data-conversed-color-scheme='dark'] :is(.conversed-content, .conversed-block-wrapper),
 :is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='dark'] {
   --conversed-surface: #2c2c2e;
+  --conversed-success: #30d158;
+  --conversed-critical: #ff453a;
 }
 
 /* Opt-in: follow the OS color scheme. */
@@ -48,6 +52,8 @@
   [data-conversed-color-scheme='auto'] :is(.conversed-content, .conversed-block-wrapper),
   :is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='auto'] {
     --conversed-surface: #2c2c2e;
+    --conversed-success: #30d158;
+    --conversed-critical: #ff453a;
   }
 }
 
@@ -596,7 +602,7 @@
   box-shadow: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.conversed-row-action:hover {
+.conversed-row-action:not([disabled]):hover {
   border-color: var(--conversed-primary, #0071e3);
 }
 .conversed-row-action.primary {
@@ -605,26 +611,28 @@
   color: var(--conversed-primary-contrast, #fff);
 }
 
-/* CTA status — driven by updateAction(); `idle` renders as the base button. */
+/* CTA status — driven by updateAction(); `idle` renders as the base button.
+   Terminal states (`done`/`failed`) are no longer actionable, so they recede
+   into a quiet, borderless badge — colored glyph + label, no fill or outline —
+   rather than competing with live CTAs. `pending` stays a dimmed button. */
 .conversed-row-action[disabled] {
   cursor: default;
 }
 .conversed-row-action.conversed-status-pending {
   opacity: 0.75;
 }
-.conversed-row-action.conversed-status-done {
-  color: var(--conversed-success, #34c759);
-  border-color: var(--conversed-success, #34c759);
-  background: transparent;
-}
+.conversed-row-action.conversed-status-done,
 .conversed-row-action.conversed-status-done.primary {
-  color: var(--conversed-primary-contrast, #fff);
-  background: var(--conversed-success, #34c759);
+  color: var(--conversed-success, #34c759);
+  border-color: transparent;
+  background: transparent;
+  padding-inline: 0.15rem;
 }
 .conversed-row-action.conversed-status-failed {
   color: var(--conversed-critical, #ff3b30);
-  border-color: var(--conversed-critical, #ff3b30);
+  border-color: transparent;
   background: transparent;
+  padding-inline: 0.15rem;
 }
 /* Leading status glyph */
 .conversed-action-icon {

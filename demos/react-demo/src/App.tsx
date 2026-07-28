@@ -45,8 +45,26 @@ const TYPE_LABEL: Record<string, string> = {
   'external-url': 'link'
 };
 
+// The whole thread — parsed blocks and any updateAction() patches — is persisted
+// by the app (not the library): conversed owns rendering, the consumer owns state.
+// Persisting the patched blocks (rather than the raw reply) is what survives a
+// reload: re-parsing raw text would only restore the model's initial data-status,
+// losing every runtime pending → done transition the user triggered.
+const STORAGE_KEY = 'conversed:demo:thread';
+
+const loadThread = (): ChatMessage[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as ChatMessage[]) : null;
+    if (Array.isArray(parsed) && parsed.length) return parsed;
+  } catch {
+    // Malformed / unavailable storage — fall back to the welcome message.
+  }
+  return [WELCOME];
+};
+
 export function App() {
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
+  const [messages, setMessages] = useState<ChatMessage[]>(loadThread);
   const [actions, setActions] = useState<ActionRecord[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -57,6 +75,22 @@ export function App() {
   const [listStyle, setListStyle] = useState<ConversedListStyle>('plain');
 
   const threadEndRef = useRef<HTMLDivElement>(null);
+
+  // Latest thread, readable synchronously inside event handlers (to derive a
+  // CTA's current lifecycle stage from what's actually rendered).
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
+  // Persist the thread whenever it settles — skip mid-stream so we never store a
+  // half-parsed reply. Reopening the demo restores blocks and CTA statuses.
+  useEffect(() => {
+    if (isStreaming) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      // Storage full / unavailable — non-fatal for the demo.
+    }
+  }, [messages, isStreaming]);
 
   const toggleSource = (id: string) =>
     setOpenSource((prev) => {
@@ -139,6 +173,24 @@ export function App() {
       })
     );
 
+  // Find a row-action's current state in the rendered thread, so a handler can
+  // tell which lifecycle stage a CTA is in without tracking it separately.
+  const findRowAction = (selector: ActionSelector) => {
+    for (const m of messagesRef.current) {
+      for (const block of m.blocks ?? []) {
+        if (block.type !== 'table') continue;
+        for (const row of block.rows) {
+          for (const ra of row.actions ?? []) {
+            if (ra.action.actionId === selector.actionId && ra.action.target === selector.target) {
+              return ra;
+            }
+          }
+        }
+      }
+    }
+    return undefined;
+  };
+
   const handleAction = (event: AgentActionEvent) => {
     const { action } = event;
     const record: ActionRecord = {
@@ -152,26 +204,28 @@ export function App() {
     };
     setActions((prev) => [record, ...prev].slice(0, 50));
 
-    // Command actions update the CTA in place — the library's updateAction
-    // helper returns new blocks, so the chat re-renders to reflect the status.
-    if (
-      action.type === 'custom-command' &&
-      action.target &&
-      (action.actionId === 'task-start' || action.actionId === 'task-complete')
-    ) {
-      const complete = action.actionId === 'task-complete';
-      const selector: ActionSelector = { actionId: action.actionId, target: action.target };
+    // A single CTA walks its whole lifecycle in place: Start → (idle) Complete →
+    // a quiet "Completed" badge. updateAction returns new blocks, so the chat
+    // re-renders on each transition. The current stage is read from the rendered
+    // blocks (not local state), so it stays correct across a persisted reload.
+    if (action.type === 'custom-command' && action.target && action.actionId === 'task-advance') {
+      const selector: ActionSelector = { actionId: 'task-advance', target: action.target };
+      const current = findRowAction(selector);
+      if (current?.status === 'pending' || current?.status === 'done') return; // in-flight / terminal
+
+      const completing = current?.label === 'Complete';
 
       // 1) optimistic: the CTA goes to `pending` (spinner) immediately.
-      patchAction(selector, { status: 'pending', label: complete ? 'Completing…' : 'Starting…' });
+      patchAction(selector, { status: 'pending', label: completing ? 'Completing…' : 'Starting…' });
 
-      // 2) once the "work" resolves, settle to `done` and update the row cell.
+      // 2) once the "work" resolves: first click settles back to an actionable
+      //    "Complete"; the second settles to the terminal "Completed" badge.
       window.setTimeout(() => {
         patchAction(
           selector,
-          complete
+          completing
             ? { status: 'done', label: 'Completed', variant: 'primary', cells: { 1: 'Done ✓' } }
-            : { status: 'done', label: 'Started', cells: { 1: 'In progress' } }
+            : { status: 'idle', label: 'Complete', variant: 'primary', cells: { 1: 'In progress' } }
         );
       }, 800);
     }
