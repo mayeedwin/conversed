@@ -80,6 +80,29 @@ describe('parseMessageBlocks — actionable table rows', () => {
     ]);
   });
 
+  it('reads a valid data-status onto a row-action button and drops an invalid one', () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr>
+            <td>Feed goats</td>
+            <td data-row-actions>
+              <button data-action-type="custom-command" data-action-id="task-complete" data-action-target="t1" data-status="pending">Complete</button>
+              <button data-action-type="custom-command" data-action-id="task-cancel" data-action-target="t1" data-status="bogus">Cancel</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>`;
+    const table = parseMessageBlocks(html)[0];
+    expect(table.type).toBe('table');
+    if (table.type !== 'table') return;
+    const actions = table.rows[0].actions ?? [];
+    expect(actions[0].status).toBe('pending');
+    // Invalid status is ignored (no status key), and never leaks into action params.
+    expect(actions[1].status).toBeUndefined();
+    expect(actions[1].action.params).toBeUndefined();
+  });
+
   it('folds non-reserved data-* attributes into action params (e.g. data-record-kind)', () => {
     const html = `
       <table>

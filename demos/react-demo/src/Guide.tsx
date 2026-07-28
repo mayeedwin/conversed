@@ -19,7 +19,11 @@ const PROMPT_SNIPPET = [
   '',
   'const systemPrompt = `',
   'You are an AI assistant.',
-  '${getSystemPromptInstruction()}',
+  '${getSystemPromptInstruction({',
+  '  allowedActions: [',
+  "    { actionId: 'view-detail', description: 'Deep link to item detail', exampleParams: { id: '123' } }",
+  '  ]',
+  '})}',
   '`;'
 ].join('\n');
 
@@ -33,7 +37,7 @@ const REACT_SNIPPET = [
   "import { ConversedContent } from '@conversed/react';",
   "import { parseMessageBlocks } from '@conversed/core';",
   '',
-  'function Reply({ text }: { text: string }) {',
+  'const Reply = ({ text }: { text: string }) => {',
   '  const blocks = parseMessageBlocks(text);',
   '  return (',
   '    <ConversedContent',
@@ -42,7 +46,7 @@ const REACT_SNIPPET = [
   '      onAction={(e) => console.log(e.action)}',
   '    />',
   '  );',
-  '}'
+  '};'
 ].join('\n');
 
 const ANGULAR_SNIPPET = [
