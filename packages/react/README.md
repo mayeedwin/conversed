@@ -37,6 +37,23 @@ import { parseMessageBlocks } from '@conversed/core';
 - `<ConversedBlock block />` renders a single block anywhere (dashboard, drawer, modal).
 - Charts render via **Chart.js** (a dependency, installed automatically).
 
+## System prompt
+
+`parseMessageBlocks` only works if the model actually emits conversed content — so teach it at the **prompt level**. Append `getSystemPromptInstruction()` (from `@conversed/core`) to your system prompt, optionally declaring the custom actions the model may trigger:
+
+```typescript
+import { getSystemPromptInstruction } from '@conversed/core';
+
+const systemPrompt = `You are an AI assistant.
+${getSystemPromptInstruction({
+  allowedActions: [
+    { actionId: 'view-detail', description: 'Deep link to item detail', exampleParams: { id: '123' } }
+  ]
+})}`;
+```
+
+Those `allowedActions` come back to you as `e.action` in `onAction`. Omit the argument for the base spec.
+
 ## Docs
 
 [github.com/mayeedwin/conversed](https://github.com/mayeedwin/conversed) · [Frameworks guide](../../docs/frameworks.md)

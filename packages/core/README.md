@@ -40,7 +40,20 @@ Core never imports Chart.js — `toChartJsConfig(block, { primaryColor? })` retu
 
 ## LLM prompt
 
-`CONVERSED_SYSTEM_PROMPT` teaches a model to emit conversed content; `getSystemPromptInstruction(options?)` returns a customizable variant.
+Before conversed can parse a reply, the model has to **emit** conversed content. Append the instruction to your system prompt — `CONVERSED_SYSTEM_PROMPT` is the raw spec, and `getSystemPromptInstruction(options?)` returns it optionally extended with the custom actions the model is allowed to trigger:
+
+```typescript
+import { getSystemPromptInstruction } from '@conversed/core';
+
+const systemPrompt = `You are an AI assistant.
+${getSystemPromptInstruction({
+  allowedActions: [
+    { actionId: 'view-detail', description: 'Deep link to item detail', exampleParams: { id: '123' } }
+  ]
+})}`;
+```
+
+`allowedActions` is optional — omit it (or call `getSystemPromptInstruction()`) for the base spec. Each entry becomes a documented `data-action-id` the model may attach to tables, stats, or buttons, which surface back to you via `onAction` / `(action)` in the framework packages.
 
 ## Docs
 
