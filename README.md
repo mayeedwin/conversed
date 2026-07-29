@@ -1,5 +1,9 @@
 # Conversed
 
+[![npm downloads · core](https://img.shields.io/npm/dm/%40conversed%2Fcore?label=core)](https://www.npmjs.com/package/@conversed/core)
+[![npm downloads · react](https://img.shields.io/npm/dm/%40conversed%2Freact?label=react)](https://www.npmjs.com/package/@conversed/react)
+[![npm downloads · angular](https://img.shields.io/npm/dm/%40conversed%2Fangular?label=angular)](https://www.npmjs.com/package/@conversed/angular)
+
 Rich, interactive UI for AI chat. Parse an LLM reply into typed content blocks, render them in React or Angular, and get a structured event whenever someone interacts.
 
 ▶ **Live playground:** [conversed-web.web.app](https://conversed-web.web.app) — rich blocks + a live **action inspector**.
