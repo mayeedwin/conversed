@@ -69,6 +69,44 @@ export type MediaBlock = {
   caption?: string;
 };
 
+/** Common aspect ratios for image/video blocks. `auto` lets intrinsic size drive layout. */
+export type MediaAspect = '16/9' | '4/3' | '1/1' | '3/4' | '9/16' | 'auto';
+
+export type ImageBlock = {
+  type: 'image';
+  src: string;
+  alt?: string;
+  caption?: string;
+  aspect?: MediaAspect;
+  /** Optional click-through URL; renders the image as a link. */
+  href?: string;
+};
+
+export type GalleryItem = {
+  src: string;
+  alt?: string;
+  caption?: string;
+  href?: string;
+};
+
+export type GalleryBlock = {
+  type: 'gallery';
+  /** `scroll` is a horizontal snap-scrolling strip; `grid` is a responsive auto-fit grid. */
+  layout?: 'scroll' | 'grid';
+  items: GalleryItem[];
+};
+
+export type VideoBlock = {
+  type: 'video';
+  src: string;
+  /** Preview image shown before playback and while loading. */
+  poster?: string;
+  alt?: string;
+  caption?: string;
+  aspect?: MediaAspect;
+  autoplay?: boolean;
+};
+
 /**
  * Lifecycle status of an interactive CTA. Drives its visual state and, for
  * `pending`/`done`, whether it still responds to clicks. Defaults to `idle`.
@@ -175,6 +213,73 @@ export type FollowUpBlock = {
   items: string[];
 };
 
+export type ProductRating = {
+  /** Score, usually 0–5. */
+  value: number;
+  /** Optional total review count for the label (e.g. "342 reviews"). */
+  count?: number;
+  /** Ceiling of the scale — defaults to 5. */
+  max?: number;
+};
+
+export type ProductListItem = Omit<ProductBlock, 'type'>;
+
+export type ProductListBlock = {
+  type: 'products';
+  /** `scroll` (default) is a horizontal snap strip; `grid` is a responsive auto-fill grid. */
+  layout?: 'scroll' | 'grid';
+  items: ProductListItem[];
+};
+
+export type ProductBlock = {
+  type: 'product';
+  title: string;
+  /** Optional short line under the title (brand, seller, or model). */
+  subtitle?: string;
+  /** Preformatted display price (e.g. "$49.99"). */
+  price: string;
+  /** Optional preformatted list/original price for a strike-through. */
+  originalPrice?: string;
+  currency?: string;
+  image?: string;
+  /** Short tag rendered as a corner ribbon (e.g. "Best seller", "-20%"). */
+  badge?: string;
+  rating?: ProductRating;
+  /** One or two CTA buttons for the card (Add to cart, Buy now, etc.). */
+  actions?: RowAction[];
+  /** Optional single-action fallback when a whole-card tap should fire. */
+  action?: AgentActionPayload;
+};
+
+export type CartLine = {
+  title: string;
+  /** Preformatted per-unit or line-total display (e.g. "$19.99" or "$59.97"). */
+  price: string;
+  quantity?: number;
+  image?: string;
+  /** Optional short line under the title (variant, size, color). */
+  note?: string;
+  /** Optional per-line action (Remove, Save for later). */
+  action?: AgentActionPayload;
+};
+
+export type CartSummaryRow = {
+  label: string;
+  value: string;
+  /** Emphasize this row (used for the grand total). */
+  emphasis?: boolean;
+};
+
+export type CartBlock = {
+  type: 'cart';
+  title?: string;
+  items: CartLine[];
+  /** Ordered rows for subtotal, shipping, tax, discount, total, etc. */
+  summary?: CartSummaryRow[];
+  /** CTAs at the bottom (Checkout, Continue shopping). */
+  actions?: RowAction[];
+};
+
 export type CustomBlock = {
   type: 'custom';
   customType: string;
@@ -188,6 +293,9 @@ export type ConversedContentBlock =
   | StepsBlock
   | TimelineBlock
   | MediaBlock
+  | ImageBlock
+  | GalleryBlock
+  | VideoBlock
   | TableBlock
   | CodeBlock
   | StatsBlock
@@ -197,4 +305,7 @@ export type ConversedContentBlock =
   | HeadingBlock
   | DividerBlock
   | FollowUpBlock
+  | ProductBlock
+  | ProductListBlock
+  | CartBlock
   | CustomBlock;

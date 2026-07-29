@@ -59,7 +59,29 @@ Call it bare — `getSystemPromptInstruction()` — for the base spec. Each `all
 
 ## Blocks
 
-`paragraph` · `heading` · `list` · `table` · `stats` · `progress` · `callout` · `chart` · `code` · `details` · `steps` · `timeline` · `media` · `followups` · `divider`
+| Block | What it renders | HTML shape |
+| --- | --- | --- |
+| `paragraph` | Prose | `<p>` |
+| `heading` | h1–h4 titles | `<h1>`…`<h4>` |
+| `list` | Ordered or bulleted list; 4 presentations via `listStyle` | `<ul>` / `<ol>` |
+| `table` | Data table with per-row action + inline row buttons | `<table>` (rows carry `data-action-*`, cells with `data-row-actions` hold buttons) |
+| `stats` | KPI / metric cards with trend + optional tap-through | `<dl>` with `<dt>`/`<dd data-delta data-trend>` |
+| `progress` | Labelled meters with tone and custom readouts | `<ul data-progress>` with `<li data-value data-max?>` |
+| `callout` | Info / warning / success / critical / note banner | `<blockquote data-tone>` (or GFM `> [!NOTE]`) |
+| `chart` | Bar / line / pie chart via chart.js | `<figure data-chart data-labels data-values>` |
+| `code` | Language-tagged code block with copy button | `<pre><code class="language-…">` |
+| `details` | Collapsible disclosure | `<details><summary>` |
+| `steps` | Ordered how-to with bold step titles | `<ol data-steps>` |
+| `timeline` | Chronological entries with `data-time` | `<ul data-timeline>` |
+| `media` | Plain image with caption (backward-compatible) | `<figure><img></figure>` |
+| `image` | Single image with aspect ratio + optional lightbox preview | `<figure data-image data-aspect data-href>` |
+| `gallery` | Horizontal snap-scroll or grid of images; shared lightbox with prev/next | `<figure data-gallery data-layout>` |
+| `video` | HTML5 `<video>` with poster + native controls | `<figure data-aspect><video src poster>` |
+| `product` | Ecommerce card: image, badge, rating, price, CTAs | `<article data-product data-price data-rating>` |
+| `products` | Horizontal scroll or grid of full product cards | `<section data-products data-layout>` |
+| `cart` | Cart summary: line items, totals, checkout CTAs | `<section data-cart>` with `<ul data-items>` + `<ul data-summary>` |
+| `followups` | Suggested reply chips (submit on click) | `<ul data-followups>` |
+| `divider` | Horizontal rule | `<hr>` |
 
 Blocks are **flat** by default; opt into filled surfaces with `variant="filled"`. Lists render in four presentations via `listStyle` (`plain` · `card` · `grouped` · `directory`). See [theming](docs/theming.md).
 
