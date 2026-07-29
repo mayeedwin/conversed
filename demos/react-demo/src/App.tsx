@@ -110,6 +110,20 @@ export function App() {
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Clear the persisted thread from this browser and start fresh. The demo owns
+  // this state, so a "reset" is just dropping the storage key and restoring the
+  // welcome message — nothing server-side to undo.
+  const resetThread = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Storage unavailable — the in-memory reset below still applies.
+    }
+    setMessages([WELCOME]);
+    setActions([]);
+    setOpenSource(new Set());
+  };
+
   const handleSend = async (promptText?: string) => {
     const text = (promptText ?? input).trim();
     if (!text || isStreaming) return;
@@ -272,6 +286,15 @@ export function App() {
               <option value="directory">Directory</option>
             </select>
           </label>
+          {messages.length > 1 && (
+            <button
+              className="reset-thread"
+              onClick={resetThread}
+              title="Clear the saved chat from this browser"
+            >
+              Reset
+            </button>
+          )}
           <button className="use-it" onClick={() => setShowGuide(true)}>
             Use it
           </button>
