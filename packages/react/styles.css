@@ -634,6 +634,19 @@
   background: transparent;
   padding-inline: 0.15rem;
 }
+/* In dark mode the terminal label switches to white for contrast with the dark
+   surface (the glyph keeps its semantic color, set on the icon below). Light
+   mode keeps the colored label. */
+[data-conversed-color-scheme='dark'] :is(.conversed-content, .conversed-block-wrapper) :is(.conversed-status-done, .conversed-status-failed),
+:is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='dark'] :is(.conversed-status-done, .conversed-status-failed) {
+  color: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  [data-conversed-color-scheme='auto'] :is(.conversed-content, .conversed-block-wrapper) :is(.conversed-status-done, .conversed-status-failed),
+  :is(.conversed-content, .conversed-block-wrapper)[data-conversed-color-scheme='auto'] :is(.conversed-status-done, .conversed-status-failed) {
+    color: #fff;
+  }
+}
 /* Leading status glyph */
 .conversed-action-icon {
   display: inline-block;
@@ -645,8 +658,16 @@
   text-align: center;
   font-size: 0.66rem;
 }
+/* The glyph carries the semantic color explicitly, so it stays green/red even
+   when the label switches to white in dark mode. */
+.conversed-action-icon-done {
+  color: var(--conversed-success, #34c759);
+}
 .conversed-action-icon-done::before {
   content: '✓';
+}
+.conversed-action-icon-failed {
+  color: var(--conversed-critical, #ff3b30);
 }
 .conversed-action-icon-failed::before {
   content: '!';

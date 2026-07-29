@@ -246,7 +246,10 @@ export class ConversedStatsComponent {
     .conversed-row-action.conversed-status-done, .conversed-row-action.conversed-status-done.primary { color: var(--conversed-success, #34c759); border-color: transparent; background: transparent; padding-inline: 0.15rem; }
     .conversed-row-action.conversed-status-failed { color: var(--conversed-critical, #ff3b30); border-color: transparent; background: transparent; padding-inline: 0.15rem; }
     .conversed-action-icon { display: inline-block; vertical-align: middle; margin-right: 0.3rem; width: 0.7rem; height: 0.7rem; line-height: 0.7rem; text-align: center; font-size: 0.66rem; }
+    /* The glyph carries the semantic color explicitly, so it stays green/red when the label goes white in dark mode. */
+    .conversed-action-icon-done { color: var(--conversed-success, #34c759); }
     .conversed-action-icon-done::before { content: '✓'; }
+    .conversed-action-icon-failed { color: var(--conversed-critical, #ff3b30); }
     .conversed-action-icon-failed::before { content: '!'; font-weight: 700; }
     .conversed-action-icon-pending { border: 1.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: conversed-spin 0.6s linear infinite; }
     @keyframes conversed-spin { to { transform: rotate(360deg); } }
@@ -1024,9 +1027,12 @@ export class ConversedBlockComponent {
        Semantic status colors also shift to brighter dark-mode variants so a
        done/failed badge stays legible on a dark surface. */
     :host-context([data-conversed-color-scheme='dark']) .conversed-content { --conversed-surface: #2c2c2e; --conversed-success: #30d158; --conversed-critical: #ff453a; }
+    /* Dark mode: the terminal label switches to white for contrast (the glyph keeps its semantic color). */
+    :host-context([data-conversed-color-scheme='dark']) .conversed-content :is(.conversed-status-done, .conversed-status-failed) { color: #fff; }
     /* Opt-in: follow the OS color scheme. */
     @media (prefers-color-scheme: dark) {
       :host-context([data-conversed-color-scheme='auto']) .conversed-content { --conversed-surface: #2c2c2e; --conversed-success: #30d158; --conversed-critical: #ff453a; }
+      :host-context([data-conversed-color-scheme='auto']) .conversed-content :is(.conversed-status-done, .conversed-status-failed) { color: #fff; }
     }
     /* \`filled\` gives card-like blocks a real surface (vs. the default transparent). */
     .conversed-content.conversed-filled { --conversed-card-bg: var(--conversed-surface); }
