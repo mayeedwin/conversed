@@ -89,6 +89,24 @@
   gap: 0.9rem;
 }
 
+.reset-thread {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.reset-thread:hover {
+  color: var(--clay-ink);
+  border-color: var(--line);
+}
+
 .use-it {
   font-family: var(--sans);
   font-size: 0.8rem;
