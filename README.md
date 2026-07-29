@@ -31,7 +31,27 @@ import { parseMessageBlocks } from '@conversed/core';
 />;
 ```
 
-Angular: `<conversed-content [blocks] primaryColor (action)>`. Give the model the block conventions with `getSystemPromptInstruction()`. See the [docs](#docs).
+Angular: `<conversed-content [blocks] primaryColor (action)>`. See the [docs](#docs).
+
+## System prompt
+
+Before `parseMessageBlocks` has anything to parse, the model has to **emit** conversed content — so teach it at the prompt level. `@conversed/core` exports two things:
+
+- `CONVERSED_SYSTEM_PROMPT` — the full instruction string describing every block shape.
+- `getSystemPromptInstruction(options?)` — the same instruction, optionally extended with an `allowedActions` list the model is allowed to trigger.
+
+```typescript
+import { getSystemPromptInstruction } from '@conversed/core';
+
+const systemPrompt = `You are an AI assistant.
+${getSystemPromptInstruction({
+  allowedActions: [
+    { actionId: 'view-detail', description: 'Deep link to item detail', exampleParams: { id: '123' } }
+  ]
+})}`;
+```
+
+Call it bare — `getSystemPromptInstruction()` — for the base spec. Each `allowedActions` entry becomes a documented `data-action-id` the model may attach to tables, stats, or buttons, and comes back to you as `e.action` in `onAction` (React) / the `(action)` output (Angular). See the [LLM prompt guide](docs/prompts.md).
 
 ## Blocks
 
