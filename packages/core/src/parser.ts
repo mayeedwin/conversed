@@ -3,8 +3,13 @@ import {
   AgentActionPayload,
   CalloutBlock,
   CalloutTone,
+  CartLine,
+  CartSummaryRow,
   ChartBlock,
   ConversedContentBlock,
+  GalleryItem,
+  MediaAspect,
+  ProductRating,
   RowAction,
   StatItem,
   StatTrend,
@@ -49,8 +54,38 @@ const RESERVED_ACTION_ATTRS = new Set([
   'data-value',
   'data-max',
   'data-display',
-  'data-title'
+  'data-title',
+  'data-image',
+  'data-gallery',
+  'data-layout',
+  'data-aspect',
+  'data-href',
+  'data-poster',
+  'data-autoplay',
+  'data-product',
+  'data-products',
+  'data-cart',
+  'data-price',
+  'data-original-price',
+  'data-currency',
+  'data-badge',
+  'data-rating',
+  'data-rating-max',
+  'data-rating-count',
+  'data-subtitle',
+  'data-image-src',
+  'data-quantity',
+  'data-note',
+  'data-emphasis',
+  'data-summary'
 ]);
+
+const MEDIA_ASPECTS = new Set<MediaAspect>(['16/9', '4/3', '1/1', '3/4', '9/16', 'auto']);
+
+const resolveAspect = (raw: string | null | undefined): MediaAspect | undefined => {
+  const value = raw?.trim() as MediaAspect | undefined;
+  return value && MEDIA_ASPECTS.has(value) ? value : undefined;
+};
 
 const ACTION_STATUSES = new Set<ActionStatus>(['idle', 'pending', 'done', 'failed']);
 
@@ -400,15 +435,288 @@ const parseMediaBlock = (element: Element): ConversedContentBlock | null => {
   };
 };
 
+const parseImageBlock = (element: Element): ConversedContentBlock | null => {
+  const isImg = element.tagName.toLowerCase() === 'img';
+  const imgElement = isImg ? element : element.querySelector('img');
+  const src = imgElement?.getAttribute('src')?.trim();
+  if (!src) return null;
+
+  const alt = imgElement?.getAttribute('alt')?.trim() || undefined;
+  const caption = isImg
+    ? undefined
+    : element.querySelector('figcaption')?.textContent?.trim() || undefined;
+  const aspect = resolveAspect(
+    element.getAttribute('data-aspect') || imgElement?.getAttribute('data-aspect')
+  );
+  const anchor = isImg ? null : element.querySelector('a[href]');
+  const href =
+    element.getAttribute('data-href')?.trim() ||
+    imgElement?.getAttribute('data-href')?.trim() ||
+    anchor?.getAttribute('href')?.trim() ||
+    undefined;
+
+  return {
+    type: 'image',
+    src,
+    ...(alt ? { alt } : {}),
+    ...(caption ? { caption } : {}),
+    ...(aspect ? { aspect } : {}),
+    ...(href ? { href } : {})
+  };
+};
+
+const parseGalleryBlock = (element: Element): ConversedContentBlock | null => {
+  const items: GalleryItem[] = Array.from(element.querySelectorAll('img'))
+    .map((imgElement): GalleryItem | null => {
+      const src = imgElement.getAttribute('src')?.trim();
+      if (!src) return null;
+      const alt = imgElement.getAttribute('alt')?.trim() || undefined;
+      const parentFigure = imgElement.closest('figure');
+      const caption =
+        parentFigure && element.contains(parentFigure)
+          ? parentFigure.querySelector('figcaption')?.textContent?.trim() || undefined
+          : undefined;
+      const parentAnchor = imgElement.closest('a[href]');
+      const href =
+        imgElement.getAttribute('data-href')?.trim() ||
+        (parentAnchor && element.contains(parentAnchor)
+          ? parentAnchor.getAttribute('href')?.trim() || undefined
+          : undefined);
+      return {
+        src,
+        ...(alt ? { alt } : {}),
+        ...(caption ? { caption } : {}),
+        ...(href ? { href } : {})
+      };
+    })
+    .filter((item): item is GalleryItem => item !== null);
+
+  if (!items.length) return null;
+  const layoutAttr = element.getAttribute('data-layout')?.trim();
+  const layout: 'scroll' | 'grid' = layoutAttr === 'grid' ? 'grid' : 'scroll';
+  return { type: 'gallery', layout, items };
+};
+
+const parseVideoBlock = (element: Element): ConversedContentBlock | null => {
+  const isVideo = element.tagName.toLowerCase() === 'video';
+  const videoElement = isVideo ? element : element.querySelector('video');
+  const src =
+    videoElement?.getAttribute('src')?.trim() ||
+    videoElement?.querySelector('source[src]')?.getAttribute('src')?.trim();
+  if (!src) return null;
+
+  const alt =
+    videoElement?.getAttribute('aria-label')?.trim() ||
+    videoElement?.getAttribute('data-alt')?.trim() ||
+    undefined;
+  const caption = isVideo
+    ? undefined
+    : element.querySelector('figcaption')?.textContent?.trim() || undefined;
+  const poster = videoElement?.getAttribute('poster')?.trim() || undefined;
+  const aspect = resolveAspect(
+    element.getAttribute('data-aspect') || videoElement?.getAttribute('data-aspect')
+  );
+  const autoplay =
+    videoElement?.hasAttribute('autoplay') ||
+    element.getAttribute('data-autoplay') === 'true' ||
+    undefined;
+
+  return {
+    type: 'video',
+    src,
+    ...(poster ? { poster } : {}),
+    ...(alt ? { alt } : {}),
+    ...(caption ? { caption } : {}),
+    ...(aspect ? { aspect } : {}),
+    ...(autoplay ? { autoplay: true } : {})
+  };
+};
+
+const parseCardActions = (element: Element): RowAction[] =>
+  Array.from(element.querySelectorAll('button, a'))
+    .map((el): RowAction | null => {
+      const action = parseActionFromElement(el);
+      const label = (el.textContent ?? '').trim();
+      if (!action || !label) return null;
+      const variant = el.getAttribute('data-variant') === 'primary' ? 'primary' : undefined;
+      const statusAttr = el.getAttribute('data-status') as ActionStatus | null;
+      const status = statusAttr && ACTION_STATUSES.has(statusAttr) ? statusAttr : undefined;
+      return { label, ...(variant ? { variant } : {}), ...(status ? { status } : {}), action };
+    })
+    .filter((a): a is RowAction => a !== null);
+
+const parseProductRating = (element: Element): ProductRating | undefined => {
+  const valueAttr = element.getAttribute('data-rating');
+  if (!valueAttr) return undefined;
+  const value = Number(valueAttr);
+  if (Number.isNaN(value)) return undefined;
+  const rawMax = Number(element.getAttribute('data-rating-max'));
+  const rawCount = Number(element.getAttribute('data-rating-count'));
+  return {
+    value,
+    ...(rawMax > 0 ? { max: rawMax } : {}),
+    ...(rawCount >= 0 && !Number.isNaN(rawCount) && element.hasAttribute('data-rating-count')
+      ? { count: rawCount }
+      : {})
+  };
+};
+
+const parseProductBlock = (element: Element): ConversedContentBlock | null => {
+  const titleEl =
+    element.querySelector(':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > [data-title]') ||
+    element.querySelector('h1, h2, h3, h4');
+  const title = (titleEl?.textContent ?? '').trim();
+  const price =
+    element.getAttribute('data-price')?.trim() ||
+    (element.querySelector('[data-price]')?.textContent ?? '').trim();
+  if (!title || !price) return null;
+
+  const subtitle =
+    element.getAttribute('data-subtitle')?.trim() ||
+    (element.querySelector('[data-subtitle]')?.textContent ?? '').trim() ||
+    undefined;
+  const originalPrice = element.getAttribute('data-original-price')?.trim() || undefined;
+  const currency = element.getAttribute('data-currency')?.trim() || undefined;
+  const badge = element.getAttribute('data-badge')?.trim() || undefined;
+  const image =
+    element.getAttribute('data-image-src')?.trim() ||
+    element.querySelector('img')?.getAttribute('src')?.trim() ||
+    undefined;
+  const rating = parseProductRating(element);
+  const actionsContainer = element.querySelector('[data-actions]');
+  const actions = actionsContainer ? parseCardActions(actionsContainer) : [];
+  const fallbackAction = parseActionFromElement(element);
+
+  return {
+    type: 'product',
+    title,
+    ...(subtitle ? { subtitle } : {}),
+    price,
+    ...(originalPrice ? { originalPrice } : {}),
+    ...(currency ? { currency } : {}),
+    ...(image ? { image } : {}),
+    ...(badge ? { badge } : {}),
+    ...(rating ? { rating } : {}),
+    ...(actions.length ? { actions } : {}),
+    ...(fallbackAction ? { action: fallbackAction } : {})
+  };
+};
+
+const parseProductListBlock = (element: Element): ConversedContentBlock | null => {
+  const items = Array.from(element.querySelectorAll(':scope > article[data-product], :scope [data-product]'))
+    .map((el) => {
+      const p = parseProductBlock(el);
+      if (!p || p.type !== 'product') return null;
+      const { type: _drop, ...rest } = p;
+      return rest;
+    })
+    .filter((it): it is Omit<ReturnType<typeof parseProductBlock> & { type: 'product' }, 'type'> => it !== null);
+  if (!items.length) return null;
+  const layoutAttr = element.getAttribute('data-layout')?.trim();
+  const layout: 'scroll' | 'grid' = layoutAttr === 'grid' ? 'grid' : 'scroll';
+  return { type: 'products', layout, items };
+};
+
+const parseCartLine = (element: Element): CartLine | null => {
+  const titleEl = element.querySelector('[data-title]') || element.querySelector('strong, h4, h3');
+  const title = (titleEl?.textContent ?? '').trim();
+  const price =
+    element.getAttribute('data-price')?.trim() ||
+    (element.querySelector('[data-price]')?.textContent ?? '').trim();
+  if (!title || !price) return null;
+
+  const rawQty = element.getAttribute('data-quantity');
+  const quantity = rawQty && !Number.isNaN(Number(rawQty)) ? Number(rawQty) : undefined;
+  const note =
+    element.getAttribute('data-note')?.trim() ||
+    (element.querySelector('[data-note]')?.textContent ?? '').trim() ||
+    undefined;
+  const image =
+    element.getAttribute('data-image-src')?.trim() ||
+    element.querySelector('img')?.getAttribute('src')?.trim() ||
+    undefined;
+  const action = parseActionFromElement(element);
+  return {
+    title,
+    price,
+    ...(quantity !== undefined ? { quantity } : {}),
+    ...(image ? { image } : {}),
+    ...(note ? { note } : {}),
+    ...(action ? { action } : {})
+  };
+};
+
+const parseCartSummary = (container: Element): CartSummaryRow[] =>
+  Array.from(container.querySelectorAll(':scope > li, :scope > div, :scope > tr')).flatMap(
+    (row): CartSummaryRow[] => {
+      const label = (row.querySelector('[data-label]')?.textContent ?? '').trim();
+      const value = (row.querySelector('[data-value]')?.textContent ?? '').trim();
+      if (!label || !value) return [];
+      const emphasis = row.hasAttribute('data-emphasis');
+      return [{ label, value, ...(emphasis ? { emphasis: true } : {}) }];
+    }
+  );
+
+const parseCartBlock = (element: Element): ConversedContentBlock | null => {
+  const title =
+    element.getAttribute('data-title')?.trim() ||
+    (element.querySelector(':scope > h2, :scope > h3, :scope > [data-title]')?.textContent ?? '').trim() ||
+    undefined;
+
+  const itemsContainer =
+    element.querySelector('[data-items]') || element.querySelector('ul, ol');
+  const items: CartLine[] = itemsContainer
+    ? Array.from(itemsContainer.querySelectorAll(':scope > li, :scope > [data-item]'))
+        .map((li) => parseCartLine(li))
+        .filter((line): line is CartLine => line !== null)
+    : [];
+
+  const summaryContainer = element.querySelector('[data-summary]');
+  const summary = summaryContainer ? parseCartSummary(summaryContainer) : [];
+
+  const actionsContainer = element.querySelector('[data-actions]');
+  const actions = actionsContainer ? parseCardActions(actionsContainer) : [];
+
+  if (!items.length && !summary.length) return null;
+  return {
+    type: 'cart',
+    ...(title ? { title } : {}),
+    items,
+    ...(summary.length ? { summary } : {}),
+    ...(actions.length ? { actions } : {})
+  };
+};
+
 const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => {
   const tag = element.tagName.toLowerCase();
 
   if (WRAPPER_TAGS.has(tag)) {
+    if (element.hasAttribute('data-gallery')) {
+      const galleryBlock = parseGalleryBlock(element);
+      if (galleryBlock) blocks.push(galleryBlock);
+      return;
+    }
+    if (element.hasAttribute('data-products')) {
+      const listBlock = parseProductListBlock(element);
+      if (listBlock) blocks.push(listBlock);
+      return;
+    }
+    if (element.hasAttribute('data-product')) {
+      const productBlock = parseProductBlock(element);
+      if (productBlock) blocks.push(productBlock);
+      return;
+    }
+    if (element.hasAttribute('data-cart')) {
+      const cartBlock = parseCartBlock(element);
+      if (cartBlock) blocks.push(cartBlock);
+      return;
+    }
     for (const childNode of Array.from(element.childNodes)) {
       parseNode(childNode, blocks);
     }
     return;
   }
+
 
   if (tag === 'p') {
     const onlyImage =
@@ -416,7 +724,19 @@ const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => 
       element.children[0].tagName.toLowerCase() === 'img' &&
       (element.textContent ?? '').trim() === '';
     if (onlyImage) {
-      const mediaBlock = parseMediaBlock(element.children[0]);
+      const inner = element.children[0];
+      if (
+        inner.hasAttribute('data-image') ||
+        inner.hasAttribute('data-aspect') ||
+        inner.hasAttribute('data-href')
+      ) {
+        const imageBlock = parseImageBlock(inner);
+        if (imageBlock) {
+          blocks.push(imageBlock);
+          return;
+        }
+      }
+      const mediaBlock = parseMediaBlock(inner);
       if (mediaBlock) {
         blocks.push(mediaBlock);
         return;
@@ -502,12 +822,52 @@ const parseElementNode = (element: Element, blocks: ConversedContentBlock[]) => 
       if (chartBlock) blocks.push(chartBlock);
       return;
     }
+    if (element.hasAttribute('data-gallery')) {
+      const galleryBlock = parseGalleryBlock(element);
+      if (galleryBlock) blocks.push(galleryBlock);
+      return;
+    }
+    if (element.querySelector('video')) {
+      const videoBlock = parseVideoBlock(element);
+      if (videoBlock) blocks.push(videoBlock);
+      return;
+    }
+    if (
+      element.hasAttribute('data-image') ||
+      element.hasAttribute('data-aspect') ||
+      element.hasAttribute('data-href')
+    ) {
+      const imageBlock = parseImageBlock(element);
+      if (imageBlock) blocks.push(imageBlock);
+      return;
+    }
     const mediaBlock = parseMediaBlock(element);
     if (mediaBlock) blocks.push(mediaBlock);
     return;
   }
 
+  if (tag === 'div' && element.hasAttribute('data-gallery')) {
+    const galleryBlock = parseGalleryBlock(element);
+    if (galleryBlock) blocks.push(galleryBlock);
+    return;
+  }
+
+  if (tag === 'video') {
+    const videoBlock = parseVideoBlock(element);
+    if (videoBlock) blocks.push(videoBlock);
+    return;
+  }
+
   if (tag === 'img') {
+    if (
+      element.hasAttribute('data-image') ||
+      element.hasAttribute('data-aspect') ||
+      element.hasAttribute('data-href')
+    ) {
+      const imageBlock = parseImageBlock(element);
+      if (imageBlock) blocks.push(imageBlock);
+      return;
+    }
     const mediaBlock = parseMediaBlock(element);
     if (mediaBlock) blocks.push(mediaBlock);
     return;

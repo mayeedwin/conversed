@@ -25,6 +25,18 @@ import {
   StepsBlock,
   TimelineBlock,
   MediaBlock,
+  ImageBlock,
+  GalleryBlock,
+  GalleryItem,
+  VideoBlock,
+  ProductBlock,
+  ProductListBlock,
+  ProductListItem,
+  ProductRating,
+  CartBlock,
+  CartLine,
+  CartSummaryRow,
+  RowAction,
   ProgressBlock,
   ProgressItem,
   HeadingBlock,
@@ -766,6 +778,802 @@ export class ConversedMediaComponent {
 }
 
 /**
+ * <conversed-image>
+ * Single image with an optional aspect ratio and click-through URL.
+ */
+@Component({
+  selector: 'conversed-image',
+  standalone: true,
+  template: `
+    <figure class="conversed-image">
+      @if (block?.href) {
+        <dialog #dlg class="conversed-image-modal" aria-label="Image preview" (click)="onDialogClick($event, dlg)">
+          <button type="button" class="conversed-image-modal-close" aria-label="Close preview" (click)="closePreview(dlg)">×</button>
+          <img class="conversed-image-modal-img" [src]="block?.href" [alt]="block?.alt || ''" (click)="toggleZoom(dlg)" />
+        </dialog>
+        <div
+          class="conversed-image-frame conversed-image-preview"
+          [class.has-aspect]="hasAspect"
+          [style]="frameStyle"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'Open preview' + (block?.alt ? ': ' + block?.alt : '')"
+          (click)="openPreview(dlg)"
+          (keydown)="onPreviewKey($event, dlg)"
+        >
+          <img class="conversed-image-img" [src]="block?.src" [alt]="block?.alt || ''" loading="lazy" />
+        </div>
+      } @else {
+        <div class="conversed-image-frame" [class.has-aspect]="hasAspect" [style]="frameStyle">
+          <img class="conversed-image-img" [src]="block?.src" [alt]="block?.alt || ''" loading="lazy" />
+        </div>
+      }
+      @if (block?.caption) {
+        <figcaption class="conversed-image-caption">{{ block?.caption }}</figcaption>
+      }
+    </figure>
+  `,
+  styles: [`
+    :host {
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-image { margin: 0.35rem 0; }
+    .conversed-image-frame {
+      display: block;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--conversed-gray-100, #f2f2f7);
+      position: relative;
+    }
+    .conversed-image-frame.has-aspect { aspect-ratio: var(--conversed-image-aspect, auto); }
+    .conversed-image-link { color: inherit; text-decoration: none; cursor: pointer; }
+    .conversed-image-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .conversed-image-frame:not(.has-aspect) .conversed-image-img { height: auto; }
+    .conversed-image-caption { margin-top: 0.25rem; font-size: 0.66rem; opacity: 0.7; text-align: center; }
+    .conversed-image-preview { cursor: zoom-in; }
+    .conversed-image-preview:hover { border-color: var(--conversed-primary, #0071e3); }
+    .conversed-image-preview:focus-visible { outline: 2px solid var(--conversed-primary, #0071e3); outline-offset: 2px; }
+    .conversed-image-modal {
+      padding: 0; border: 0; background: transparent; color: inherit;
+      max-width: min(70vw, 820px); max-height: 82vh; width: min(70vw, 820px);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .conversed-image-modal::backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px); }
+    .conversed-image-modal-img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; background: #000; cursor: zoom-in; transition: transform 0.15s ease; }
+    .conversed-image-modal.zoomed { width: 92vw; max-width: 92vw; max-height: 92vh; overflow: auto; cursor: grab; }
+    .conversed-image-modal.zoomed .conversed-image-modal-img { width: auto; height: auto; max-width: none; max-height: none; cursor: zoom-out; }
+    .conversed-image-modal-close,
+    .conversed-image-modal-prev,
+    .conversed-image-modal-next {
+      position: absolute; border-radius: 999px; border: 0;
+      background: rgba(0, 0, 0, 0.55); color: #fff;
+      line-height: 1; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; padding: 0;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+    .conversed-image-modal-close { top: 0.5rem; right: 0.5rem; width: 2rem; height: 2rem; font-size: 1.25rem; }
+    .conversed-image-modal-prev, .conversed-image-modal-next {
+      top: 50%; transform: translateY(-50%); width: 2.25rem; height: 2.25rem; font-size: 1.5rem;
+    }
+    .conversed-image-modal-prev { left: 0.5rem; }
+    .conversed-image-modal-next { right: 0.5rem; }
+    .conversed-image-modal-close:hover,
+    .conversed-image-modal-prev:hover,
+    .conversed-image-modal-next:hover { background: rgba(0, 0, 0, 0.75); }
+    .conversed-image-modal-prev[disabled], .conversed-image-modal-next[disabled] { opacity: 0.35; cursor: default; }
+    .conversed-image-modal-counter {
+      position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%);
+      padding: 0.2rem 0.55rem; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: #fff;
+      font-size: 0.7rem; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none;
+    }
+  `]
+})
+export class ConversedImageComponent {
+  @Input() block?: ImageBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  get hasAspect(): boolean {
+    return !!(this.block?.aspect && this.block.aspect !== 'auto');
+  }
+  get frameStyle(): Record<string, string> {
+    return this.hasAspect
+      ? { '--conversed-image-aspect': this.block!.aspect!.replace('/', ' / ') }
+      : {};
+  }
+
+  openPreview(dlg: HTMLDialogElement) {
+    dlg.showModal();
+  }
+  onPreviewKey(event: KeyboardEvent, dlg: HTMLDialogElement) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      dlg.showModal();
+    }
+  }
+  onDialogClick(event: MouseEvent, dlg: HTMLDialogElement) {
+    if (event.target === dlg) this.closePreview(dlg);
+  }
+  toggleZoom(dlg: HTMLDialogElement) {
+    dlg.classList.toggle('zoomed');
+  }
+  closePreview(dlg: HTMLDialogElement) {
+    dlg.classList.remove('zoomed');
+    dlg.close();
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-gallery>
+ * Horizontal snap-scroll strip (default) or responsive grid of images.
+ */
+@Component({
+  selector: 'conversed-gallery',
+  standalone: true,
+  template: `
+    <div class="conversed-gallery" [class.conversed-gallery-scroll]="layout === 'scroll'" [class.conversed-gallery-grid]="layout === 'grid'">
+      @for (item of block?.items || []; track $index) {
+        @if (item.href) {
+          <div
+            class="conversed-gallery-item interactive"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Open preview' + (item.alt ? ': ' + item.alt : '')"
+            (click)="openAt(previewIndexFor($index))"
+            (keydown)="onPreviewKey($event, previewIndexFor($index))"
+          >
+            <img class="conversed-gallery-img" [src]="item.src" [alt]="item.alt || ''" loading="lazy" />
+            @if (item.caption) {
+              <div class="conversed-gallery-caption">{{ item.caption }}</div>
+            }
+          </div>
+        } @else {
+          <div class="conversed-gallery-item">
+            <img class="conversed-gallery-img" [src]="item.src" [alt]="item.alt || ''" loading="lazy" />
+            @if (item.caption) {
+              <div class="conversed-gallery-caption">{{ item.caption }}</div>
+            }
+          </div>
+        }
+      }
+      @if (previewItems.length) {
+        <dialog #dlg class="conversed-image-modal" aria-label="Image preview" (click)="onDialogClick($event)" (keydown)="onDialogKey($event)">
+          <button type="button" class="conversed-image-modal-close" aria-label="Close preview" (click)="closePreview()">×</button>
+          @if (previewItems.length > 1) {
+            <button type="button" class="conversed-image-modal-prev" aria-label="Previous image" [disabled]="currentIndex === 0" (click)="step(-1)">‹</button>
+            <button type="button" class="conversed-image-modal-next" aria-label="Next image" [disabled]="currentIndex === previewItems.length - 1" (click)="step(1)">›</button>
+            <span class="conversed-image-modal-counter">{{ currentIndex + 1 }} / {{ previewItems.length }}</span>
+          }
+          <img class="conversed-image-modal-img" [src]="previewItems[currentIndex].url" [alt]="previewItems[currentIndex].alt" (click)="toggleZoom()" />
+        </dialog>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-gallery { margin: 0.35rem 0; }
+    .conversed-gallery-scroll {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .conversed-gallery-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    .conversed-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+    .conversed-gallery-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--conversed-gray-100, #f2f2f7);
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+    .conversed-gallery-scroll .conversed-gallery-item {
+      flex: 0 0 auto;
+      width: 60%;
+      max-width: 240px;
+      min-width: 140px;
+      scroll-snap-align: start;
+    }
+    .conversed-gallery-item.interactive { cursor: zoom-in; }
+    .conversed-gallery-item.interactive:hover { border-color: var(--conversed-primary, #0071e3); }
+    .conversed-gallery-item.interactive:focus-visible { outline: 2px solid var(--conversed-primary, #0071e3); outline-offset: 2px; }
+    .conversed-gallery-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+    .conversed-gallery-caption { padding: 0.3rem 0.5rem; font-size: 0.66rem; opacity: 0.75; }
+    .conversed-image-modal {
+      padding: 0; border: 0; background: transparent; color: inherit;
+      max-width: min(70vw, 820px); max-height: 82vh; width: min(70vw, 820px);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .conversed-image-modal::backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px); }
+    .conversed-image-modal-img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; background: #000; cursor: zoom-in; transition: transform 0.15s ease; }
+    .conversed-image-modal.zoomed { width: 92vw; max-width: 92vw; max-height: 92vh; overflow: auto; cursor: grab; }
+    .conversed-image-modal.zoomed .conversed-image-modal-img { width: auto; height: auto; max-width: none; max-height: none; cursor: zoom-out; }
+    .conversed-image-modal-close,
+    .conversed-image-modal-prev,
+    .conversed-image-modal-next {
+      position: absolute; border-radius: 999px; border: 0;
+      background: rgba(0, 0, 0, 0.55); color: #fff;
+      line-height: 1; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; padding: 0;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+    .conversed-image-modal-close { top: 0.5rem; right: 0.5rem; width: 2rem; height: 2rem; font-size: 1.25rem; }
+    .conversed-image-modal-prev, .conversed-image-modal-next {
+      top: 50%; transform: translateY(-50%); width: 2.25rem; height: 2.25rem; font-size: 1.5rem;
+    }
+    .conversed-image-modal-prev { left: 0.5rem; }
+    .conversed-image-modal-next { right: 0.5rem; }
+    .conversed-image-modal-close:hover,
+    .conversed-image-modal-prev:hover,
+    .conversed-image-modal-next:hover { background: rgba(0, 0, 0, 0.75); }
+    .conversed-image-modal-prev[disabled], .conversed-image-modal-next[disabled] { opacity: 0.35; cursor: default; }
+    .conversed-image-modal-counter {
+      position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%);
+      padding: 0.2rem 0.55rem; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: #fff;
+      font-size: 0.7rem; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none;
+    }
+  `]
+})
+export class ConversedGalleryComponent {
+  @Input() block?: GalleryBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @ViewChild('dlg') dlgRef?: ElementRef<HTMLDialogElement>;
+  currentIndex = 0;
+
+  get layout(): 'scroll' | 'grid' {
+    return this.block?.layout === 'grid' ? 'grid' : 'scroll';
+  }
+
+  get previewItems(): { url: string; alt: string }[] {
+    return (this.block?.items || [])
+      .filter((item) => !!item.href)
+      .map((item) => ({ url: item.href!, alt: item.alt || item.caption || '' }));
+  }
+
+  private get dlg(): HTMLDialogElement | undefined {
+    return this.dlgRef?.nativeElement;
+  }
+
+  previewIndexFor(itemIndex: number): number {
+    const items = this.block?.items || [];
+    let count = 0;
+    for (let i = 0; i < itemIndex; i++) if (items[i].href) count++;
+    return count;
+  }
+
+  openAt(index: number) {
+    this.currentIndex = Math.max(0, Math.min(this.previewItems.length - 1, index));
+    const dlg = this.dlg;
+    if (!dlg) return;
+    dlg.classList.remove('zoomed');
+    dlg.showModal();
+  }
+  onPreviewKey(event: KeyboardEvent, index: number) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.openAt(index);
+    }
+  }
+  step(delta: number) {
+    const total = this.previewItems.length;
+    if (!total) return;
+    this.currentIndex = Math.max(0, Math.min(total - 1, this.currentIndex + delta));
+  }
+  onDialogKey(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.step(-1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.step(1);
+    }
+  }
+  onDialogClick(event: MouseEvent) {
+    const dlg = this.dlg;
+    if (dlg && event.target === dlg) this.closePreview();
+  }
+  toggleZoom() {
+    this.dlg?.classList.toggle('zoomed');
+  }
+  closePreview() {
+    const dlg = this.dlg;
+    if (!dlg) return;
+    dlg.classList.remove('zoomed');
+    dlg.close();
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-video>
+ * HTML5 video with native controls, optional poster and caption.
+ */
+@Component({
+  selector: 'conversed-video',
+  standalone: true,
+  template: `
+    <figure class="conversed-video">
+      <div class="conversed-video-frame" [class.has-aspect]="hasAspect" [style]="frameStyle">
+        <video
+          class="conversed-video-el"
+          [src]="block?.src"
+          [poster]="block?.poster || null"
+          [attr.aria-label]="block?.alt || null"
+          [attr.autoplay]="block?.autoplay ? true : null"
+          [attr.muted]="block?.autoplay ? true : null"
+          controls
+          preload="metadata"
+          playsinline
+        ></video>
+      </div>
+      @if (block?.caption) {
+        <figcaption class="conversed-video-caption">{{ block?.caption }}</figcaption>
+      }
+    </figure>
+  `,
+  styles: [`
+    :host {
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      display: block;
+    }
+    .conversed-video { margin: 0.35rem 0; }
+    .conversed-video-frame {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
+    .conversed-video-frame.has-aspect { aspect-ratio: var(--conversed-video-aspect, 16 / 9); }
+    .conversed-video-el { display: block; width: 100%; height: 100%; background: #000; }
+    .conversed-video-frame:not(.has-aspect) .conversed-video-el { height: auto; }
+    .conversed-video-caption { margin-top: 0.25rem; font-size: 0.66rem; opacity: 0.7; text-align: center; }
+  `]
+})
+export class ConversedVideoComponent {
+  @Input() block?: VideoBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+
+  get hasAspect(): boolean {
+    return !!(this.block?.aspect && this.block.aspect !== 'auto');
+  }
+  get frameStyle(): Record<string, string> {
+    return this.hasAspect
+      ? { '--conversed-video-aspect': this.block!.aspect!.replace('/', ' / ') }
+      : {};
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-product>
+ * Ecommerce product card with image, price, rating, and CTAs.
+ */
+@Component({
+  selector: 'conversed-product',
+  standalone: true,
+  template: `
+    <article class="conversed-product" [class.interactive]="wholeCardInteractive"
+      [attr.role]="wholeCardInteractive ? 'button' : null"
+      [attr.tabindex]="wholeCardInteractive ? 0 : null"
+      (click)="wholeCardInteractive && emit(block?.action)"
+      (keydown)="wholeCardInteractive && onActivate($event, block?.action)"
+    >
+      @if (block?.image) {
+        <div class="conversed-product-media">
+          <img class="conversed-product-img" [src]="block?.image" [alt]="block?.title || ''" loading="lazy" />
+          @if (block?.badge) {
+            <span class="conversed-product-badge">{{ block?.badge }}</span>
+          }
+        </div>
+      }
+      <div class="conversed-product-body">
+        <h4 class="conversed-product-title">{{ block?.title }}</h4>
+        @if (block?.subtitle) {
+          <div class="conversed-product-subtitle">{{ block?.subtitle }}</div>
+        }
+        @if (block?.rating) {
+          <div class="conversed-product-rating" [attr.aria-label]="ratingReadout(block!.rating!)" [attr.title]="ratingReadout(block!.rating!)">
+            @for (i of ratingRange(block!.rating!); track i) {
+              <span class="conversed-product-star" [class.filled]="i < ratingFilled(block!.rating!)" aria-hidden="true">★</span>
+            }
+            <span class="conversed-product-rating-text">{{ ratingReadout(block!.rating!) }}</span>
+          </div>
+        }
+        <div class="conversed-product-price-row">
+          <span class="conversed-product-price">{{ block?.price }}</span>
+          @if (block?.originalPrice) {
+            <span class="conversed-product-price-original">{{ block?.originalPrice }}</span>
+          }
+        </div>
+        @if (block?.actions?.length) {
+          <div class="conversed-product-actions">
+            @for (cta of block?.actions || []; track $index) {
+              <button
+                type="button"
+                class="conversed-product-cta"
+                [class.primary]="cta.variant === 'primary'"
+                [class.conversed-status-pending]="cta.status === 'pending'"
+                [class.conversed-status-done]="cta.status === 'done'"
+                [class.conversed-status-failed]="cta.status === 'failed'"
+                [attr.aria-busy]="cta.status === 'pending' ? true : null"
+                [disabled]="cta.status === 'pending' || cta.status === 'done'"
+                (click)="onCta(cta, $event)"
+              >
+                @if (cta.status && cta.status !== 'idle') {
+                  <span class="conversed-action-icon" aria-hidden="true"></span>
+                }
+                {{ cta.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </article>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      --card-bg: var(--conversed-card-bg, transparent);
+      display: block;
+    }
+    .conversed-product {
+      display: flex; flex-direction: column;
+      padding: 0; margin: 0.4rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      overflow: hidden;
+      max-width: 280px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .conversed-product.interactive { cursor: pointer; }
+    .conversed-product.interactive:hover { border-color: var(--primary); }
+    .conversed-product-media { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--conversed-gray-100, #f2f2f7); }
+    .conversed-product-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .conversed-product-badge {
+      position: absolute; top: 0.5rem; left: 0.5rem;
+      background: var(--primary); color: #fff;
+      font-size: 0.62rem; font-weight: 700;
+      padding: 0.2rem 0.5rem; border-radius: 999px; letter-spacing: 0.02em;
+    }
+    .conversed-product-body { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; padding: 0.7rem 0.75rem 0.8rem; }
+    .conversed-product-title { margin: 0; font-size: 0.9rem; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
+    .conversed-product-subtitle { font-size: 0.68rem; opacity: 0.7; margin-top: -0.15rem; }
+    .conversed-product-rating { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.66rem; opacity: 0.85; }
+    .conversed-product-star { color: var(--conversed-gray-300, #d1d1d6); font-size: 0.75rem; line-height: 1; }
+    .conversed-product-star.filled { color: #ff9f0a; }
+    .conversed-product-rating-text { opacity: 0.75; }
+    .conversed-product-price-row { display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.1rem; }
+    .conversed-product-price { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+    .conversed-product-price-original { font-size: 0.75rem; text-decoration: line-through; opacity: 0.55; }
+    .conversed-product-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .conversed-product-cta {
+      border: 1px solid var(--border); background: transparent; color: inherit;
+      padding: 0.4rem 0.85rem; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer;
+      line-height: 1; white-space: nowrap; min-height: 1.9rem;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .conversed-product-cta:hover { border-color: var(--primary); }
+    .conversed-product-cta.primary { background: var(--primary); border-color: var(--primary); color: #fff; padding: 0.4rem 1.05rem; }
+    .conversed-product-cta:disabled { opacity: 0.65; cursor: default; }
+  `]
+})
+export class ConversedProductComponent {
+  @Input() block?: ProductBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @Output() action = new EventEmitter<AgentActionEvent>();
+
+  get wholeCardInteractive(): boolean {
+    return !!this.block?.action && !(this.block?.actions && this.block.actions.length > 0);
+  }
+
+  ratingRange(rating: ProductRating): number[] {
+    const max = rating.max && rating.max > 0 ? rating.max : 5;
+    return Array.from({ length: max }, (_, i) => i);
+  }
+  ratingFilled(rating: ProductRating): number {
+    const max = rating.max && rating.max > 0 ? rating.max : 5;
+    return Math.round(Math.max(0, Math.min(max, rating.value)));
+  }
+  ratingReadout(rating: ProductRating): string {
+    const max = rating.max && rating.max > 0 ? rating.max : 5;
+    const value = Math.max(0, Math.min(max, rating.value));
+    return rating.count !== undefined
+      ? `${value.toFixed(1)} · ${rating.count} reviews`
+      : `${value.toFixed(1)} / ${max}`;
+  }
+
+  emit(payload?: AgentActionPayload) {
+    if (!payload) return;
+    this.action.emit({ action: payload, defaultPrevented: false });
+  }
+  onActivate(event: KeyboardEvent, payload?: AgentActionPayload) {
+    if (!payload) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.emit(payload);
+    }
+  }
+  onCta(cta: RowAction, event: MouseEvent) {
+    event.stopPropagation();
+    if (cta.status === 'pending' || cta.status === 'done') return;
+    this.emit(cta.action);
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-products>
+ * Horizontal scroll strip (default) or responsive grid of full product cards.
+ */
+@Component({
+  selector: 'conversed-products',
+  standalone: true,
+  imports: [ConversedProductComponent],
+  template: `
+    <div class="conversed-products" [class.conversed-products-scroll]="layout === 'scroll'" [class.conversed-products-grid]="layout === 'grid'">
+      @for (item of items; track $index) {
+        <conversed-product [block]="asProduct(item)" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-product>
+      }
+    </div>
+  `,
+  styles: [`
+    :host { display: block; }
+    .conversed-products { margin: 0.4rem 0; }
+    .conversed-products-scroll {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .conversed-products-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    .conversed-products-scroll conversed-product {
+      flex: 0 0 auto;
+      width: 220px;
+      scroll-snap-align: start;
+    }
+    .conversed-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.6rem;
+    }
+    @media (max-width: 480px) {
+      .conversed-products-scroll conversed-product { width: 180px; }
+    }
+  `]
+})
+export class ConversedProductListComponent {
+  @Input() block?: ProductListBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @Output() action = new EventEmitter<AgentActionEvent>();
+
+  get items(): ProductListItem[] {
+    return this.block?.items || [];
+  }
+  get layout(): 'scroll' | 'grid' {
+    return this.block?.layout === 'grid' ? 'grid' : 'scroll';
+  }
+
+  asProduct(item: ProductListItem): ProductBlock {
+    return { type: 'product', ...item };
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
+ * <conversed-cart>
+ * Cart summary with line items, totals block, and checkout CTAs.
+ */
+@Component({
+  selector: 'conversed-cart',
+  standalone: true,
+  template: `
+    <section class="conversed-cart">
+      @if (block?.title) {
+        <h3 class="conversed-cart-title">{{ block?.title }}</h3>
+      }
+      <ul class="conversed-cart-lines">
+        @for (line of block?.items || []; track $index) {
+          <li class="conversed-cart-line" [class.interactive]="!!line.action"
+            [attr.role]="line.action ? 'button' : null"
+            [attr.tabindex]="line.action ? 0 : null"
+            (click)="emit(line.action)"
+            (keydown)="onActivate($event, line.action)"
+          >
+            @if (line.image) {
+              <img class="conversed-cart-thumb" [src]="line.image" [alt]="line.title" loading="lazy" />
+            } @else {
+              <div class="conversed-cart-thumb" aria-hidden="true"></div>
+            }
+            <div class="conversed-cart-line-body">
+              <div class="conversed-cart-line-title">{{ line.title }}</div>
+              @if (line.note) {
+                <div class="conversed-cart-line-note">{{ line.note }}</div>
+              }
+              @if (line.quantity !== undefined) {
+                <div class="conversed-cart-line-qty">Qty {{ line.quantity }}</div>
+              }
+            </div>
+            <div class="conversed-cart-line-price">{{ line.price }}</div>
+          </li>
+        }
+      </ul>
+      @if (block?.summary?.length) {
+        <ul class="conversed-cart-summary">
+          @for (row of block?.summary || []; track $index) {
+            <li class="conversed-cart-summary-row" [class.emphasis]="row.emphasis">
+              <span class="conversed-cart-summary-label">{{ row.label }}</span>
+              <span class="conversed-cart-summary-value">{{ row.value }}</span>
+            </li>
+          }
+        </ul>
+      }
+      @if (block?.actions?.length) {
+        <div class="conversed-cart-actions">
+          @for (cta of block?.actions || []; track $index) {
+            <button
+              type="button"
+              class="conversed-cart-cta"
+              [class.primary]="cta.variant === 'primary'"
+              [class.conversed-status-pending]="cta.status === 'pending'"
+              [class.conversed-status-done]="cta.status === 'done'"
+              [attr.aria-busy]="cta.status === 'pending' ? true : null"
+              [disabled]="cta.status === 'pending' || cta.status === 'done'"
+              (click)="emit(cta.action)"
+            >
+              {{ cta.label }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+  `,
+  styles: [`
+    :host {
+      --primary: var(--conversed-primary, #0071e3);
+      --border: var(--conversed-border-color, #e5e5ea);
+      --radius: var(--conversed-radius, 8px);
+      --card-bg: var(--conversed-card-bg, transparent);
+      display: block;
+    }
+    .conversed-cart {
+      margin: 0.35rem 0;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .conversed-cart-title { margin: 0; font-size: 0.85rem; font-weight: 600; }
+    .conversed-cart-lines { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .conversed-cart-line {
+      display: grid; grid-template-columns: 44px 1fr auto; gap: 0.6rem; align-items: center;
+      padding: 0.4rem; border-radius: var(--radius);
+      transition: background 0.15s ease;
+    }
+    .conversed-cart-line.interactive { cursor: pointer; }
+    .conversed-cart-line.interactive:hover { background: var(--conversed-gray-100, #f2f2f7); }
+    .conversed-cart-thumb {
+      width: 44px; height: 44px; object-fit: cover;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid var(--border);
+      background: var(--conversed-gray-100, #f2f2f7);
+    }
+    .conversed-cart-line-body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+    .conversed-cart-line-title { font-size: 0.78rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+    .conversed-cart-line-note { font-size: 0.66rem; opacity: 0.7; }
+    .conversed-cart-line-qty { font-size: 0.66rem; opacity: 0.7; font-variant-numeric: tabular-nums; }
+    .conversed-cart-line-price { font-size: 0.8rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .conversed-cart-summary {
+      list-style: none; padding: 0.5rem 0 0; margin: 0;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .conversed-cart-summary-row { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.72rem; }
+    .conversed-cart-summary-row.emphasis {
+      font-weight: 700; font-size: 0.85rem;
+      padding-top: 0.35rem;
+      border-top: 1px dashed var(--border);
+      margin-top: 0.15rem;
+    }
+    .conversed-cart-summary-value { font-variant-numeric: tabular-nums; }
+    .conversed-cart-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .conversed-cart-cta {
+      border: 1px solid var(--border); background: transparent; color: inherit;
+      padding: 0.45rem 0.9rem; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .conversed-cart-cta:hover { border-color: var(--primary); }
+    .conversed-cart-cta.primary { background: var(--primary); border-color: var(--primary); color: #fff; flex: 1; min-width: 140px; }
+    .conversed-cart-cta:disabled { opacity: 0.65; cursor: default; }
+  `]
+})
+export class ConversedCartComponent {
+  @Input() block?: CartBlock;
+  @Input() primaryColor?: string;
+  @Input() theme?: ConversedThemeTokens;
+  @Output() action = new EventEmitter<AgentActionEvent>();
+
+  emit(payload?: AgentActionPayload) {
+    if (!payload) return;
+    this.action.emit({ action: payload, defaultPrevented: false });
+  }
+  onActivate(event: KeyboardEvent, payload?: AgentActionPayload) {
+    if (!payload) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.emit(payload);
+    }
+  }
+
+  @HostBinding('style')
+  get styleBindings() {
+    const activeTheme = this.theme || (this.primaryColor ? { primaryColor: this.primaryColor } : undefined);
+    return activeTheme ? generateCssVariables(activeTheme) : {};
+  }
+}
+
+/**
  * <conversed-progress>
  * Labelled meters / completion bars. Each item's bar fills `value` as a
  * percentage, or `value / max` when `max` is set, and can carry a tone.
@@ -894,6 +1702,12 @@ export class ConversedProgressComponent {
     ConversedStepsComponent,
     ConversedTimelineComponent,
     ConversedMediaComponent,
+    ConversedImageComponent,
+    ConversedGalleryComponent,
+    ConversedVideoComponent,
+    ConversedProductComponent,
+    ConversedProductListComponent,
+    ConversedCartComponent,
     ConversedProgressComponent
   ],
   template: `
@@ -918,6 +1732,24 @@ export class ConversedProgressComponent {
       }
       @case ('media') {
         <conversed-media [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-media>
+      }
+      @case ('image') {
+        <conversed-image [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-image>
+      }
+      @case ('gallery') {
+        <conversed-gallery [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-gallery>
+      }
+      @case ('video') {
+        <conversed-video [block]="block" [theme]="theme" [primaryColor]="primaryColor"></conversed-video>
+      }
+      @case ('product') {
+        <conversed-product [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-product>
+      }
+      @case ('products') {
+        <conversed-products [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-products>
+      }
+      @case ('cart') {
+        <conversed-cart [block]="block" [theme]="theme" [primaryColor]="primaryColor" (action)="action.emit($event)"></conversed-cart>
       }
       @case ('code') {
         <div class="conversed-code-wrapper">
