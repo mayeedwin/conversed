@@ -107,6 +107,7 @@ CTA buttons carry a lifecycle `status` (`idle` → `pending` → `done` / `faile
 - [Frameworks — React & Angular](docs/frameworks.md)
 - [LLM prompt guide](docs/prompts.md)
 - [Theming](docs/theming.md)
+- [Releasing](docs/releasing.md)
 - [Contributing](CONTRIBUTING.md) · [Git workflow](docs/git_workflow.md)
 
 ## License

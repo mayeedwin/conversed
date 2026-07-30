@@ -1,0 +1,179 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dist_tag:
+        description: 'npm dist-tag (rc | latest). Ignored on tag pushes — derived from the tag name.'
+        required: false
+        default: 'rc'
+        type: choice
+        options:
+          - rc
+          - latest
+      dry_run:
+        description: 'Run npm publish --dry-run (nothing is published)'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Build & publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Upgrade npm for Trusted Publishing (>= 11.5.1)
+        run: npm install --global npm@latest
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve release parameters
+        id: params
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            MODE="tag"
+            DRY_RUN="false"
+          else
+            VERSION="$(node -p "require('./package.json').version")"
+            MODE="dispatch"
+            DRY_RUN="${{ inputs.dry_run }}"
+          fi
+
+          # Tag pushes derive dist-tag from the version; dispatch honors the input.
+          if [[ "${MODE}" == "tag" ]]; then
+            if [[ "${VERSION}" == *-* ]]; then
+              DIST_TAG="rc"
+            else
+              DIST_TAG="latest"
+            fi
+          else
+            DIST_TAG="${{ inputs.dist_tag }}"
+          fi
+
+          echo "version=${VERSION}"     | tee -a "$GITHUB_OUTPUT"
+          echo "mode=${MODE}"           | tee -a "$GITHUB_OUTPUT"
+          echo "dist_tag=${DIST_TAG}"   | tee -a "$GITHUB_OUTPUT"
+          echo "dry_run=${DRY_RUN}"     | tee -a "$GITHUB_OUTPUT"
+
+      - name: Verify package versions match release version
+        shell: bash
+        env:
+          EXPECTED: ${{ steps.params.outputs.version }}
+        run: |
+          set -e
+          fail=0
+          check() {
+            local file="$1"
+            local actual
+            actual="$(node -p "require('./${file}').version")"
+            if [[ "${actual}" != "${EXPECTED}" ]]; then
+              echo "::error file=${file}::version is ${actual}, expected ${EXPECTED}"
+              fail=1
+            fi
+          }
+          check_dep() {
+            local file="$1" dep="$2"
+            local actual
+            actual="$(node -p "require('./${file}').dependencies?.['${dep}'] ?? ''")"
+            if [[ -n "${actual}" && "${actual}" != "${EXPECTED}" ]]; then
+              echo "::error file=${file}::${dep} is pinned to ${actual}, expected ${EXPECTED}"
+              fail=1
+            fi
+          }
+          check package.json
+          check packages/core/package.json
+          check packages/react/package.json
+          check packages/angular/package.json
+          check_dep packages/react/package.json @conversed/core
+          check_dep packages/angular/package.json @conversed/core
+          if [[ "${fail}" -ne 0 ]]; then
+            echo "Version mismatch — run scripts/bump-version.sh ${EXPECTED} and re-tag." >&2
+            exit 1
+          fi
+          echo "All packages report version ${EXPECTED}."
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Publish @conversed/core
+        working-directory: packages/core
+        run: |
+          npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
+            ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Publish @conversed/angular
+        # ng-packagr emits the publishable package into dist/ (APF format).
+        working-directory: packages/angular/dist
+        run: |
+          npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
+            ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Publish @conversed/react
+        working-directory: packages/react
+        run: |
+          npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
+            ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Create GitHub Release
+        if: steps.params.outputs.mode == 'tag' && steps.params.outputs.dry_run == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.params.outputs.version }}
+          name: v${{ steps.params.outputs.version }}
+          generate_release_notes: true
+          prerelease: ${{ steps.params.outputs.dist_tag == 'rc' }}
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### Release ${{ steps.params.outputs.version }}"
+            echo ""
+            echo "- mode: \`${{ steps.params.outputs.mode }}\`"
+            echo "- dist-tag: \`${{ steps.params.outputs.dist_tag }}\`"
+            echo "- dry-run: \`${{ steps.params.outputs.dry_run }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

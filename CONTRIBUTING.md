@@ -120,3 +120,10 @@ Please follow our [Git & Workflow Conventions](./docs/git_workflow.md):
 1. Ensure code compiles cleanly (`pnpm build`).
 2. Follow strict TypeScript typing (avoid `any`).
 3. Keep commits atomic and clearly described.
+
+---
+
+## 🚀 Releasing
+
+Releases are cut by CI from a `v*` git tag — merges to `main` do not publish.
+See the full guide: [Releasing](./docs/releasing.md).
