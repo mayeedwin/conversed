@@ -41,7 +41,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for Trusted Publishing (>= 11.5.1)
+        run: npm install --global npm@latest
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -138,8 +140,6 @@ jobs:
 
       - name: Publish @conversed/core
         working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
             ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}
@@ -147,16 +147,12 @@ jobs:
       - name: Publish @conversed/angular
         # ng-packagr emits the publishable package into dist/ (APF format).
         working-directory: packages/angular/dist
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
             ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}
 
       - name: Publish @conversed/react
         working-directory: packages/react
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm publish --access public --provenance --tag "${{ steps.params.outputs.dist_tag }}" \
             ${{ steps.params.outputs.dry_run == 'true' && '--dry-run' || '' }}

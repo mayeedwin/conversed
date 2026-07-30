@@ -150,4 +150,6 @@ with `dry_run: true` — it exercises every step and runs `npm publish --dry-run
 **Manual emergency path**: [`scripts/release.sh`](./scripts/release.sh) still works
 locally if CI is down. Requires `npm login` and skips provenance.
 
-Prereq: `NPM_TOKEN` repo secret with publish rights to the `@conversed` scope.
+Auth: CI publishes via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
+(OIDC) — no `NPM_TOKEN` secret is needed. Each `@conversed/*` package must be
+configured on npmjs.com to trust this repo's `release.yml` workflow.
