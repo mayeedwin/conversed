@@ -74,6 +74,17 @@ The workflow starts. It:
 
 If any step fails, nothing downstream runs — but note that publishes are ordered, so if `core` succeeded and `angular` failed, `core` is out and you'll need to either fix the failure and re-tag with a bumped patch, or unpublish (npm allows this within 72h for freshly published versions).
 
+## What triggers the workflow (and what doesn't)
+
+`release.yml` listens on `on: push: tags: ['v*']` and `workflow_dispatch`. That's the whole surface. In practice:
+
+- **`git push origin v0.0.1-rc.14` — yes, publishes.** This is the intended path.
+- **"Draft a new release" in the GitHub UI — technically yes, but avoid it.** Creating a Release via the UI also creates the underlying tag, which fires the workflow. But the workflow then tries to create its *own* Release for that tag — `softprops/action-gh-release` updates the existing one instead of erroring, which means your handwritten notes get overwritten by the auto-generated ones. Push the tag from your terminal and let CI cut the Release for you.
+- **Merging a PR to `main` — no.** Merges never publish. The tag push is the only publishing event.
+- **`workflow_dispatch` (Actions → Run workflow) — yes**, and this is how you smoke-test with `dry_run: true`. A dispatch with `dry_run: false` would publish for real from whatever the branch's `package.json` says the version is, so use it deliberately or leave `dry_run: true`.
+
+If you'd rather drive releases from the GitHub UI (write your own notes, click Publish), we can flip the trigger to `on: release: types: [published]` instead. Ask if you want that.
+
 ## Smoke test: dry run
 
 Before trusting a real tag, run the workflow manually with `dry_run: true`:
