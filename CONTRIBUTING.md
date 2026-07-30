@@ -120,3 +120,34 @@ Please follow our [Git & Workflow Conventions](./docs/git_workflow.md):
 1. Ensure code compiles cleanly (`pnpm build`).
 2. Follow strict TypeScript typing (avoid `any`).
 3. Keep commits atomic and clearly described.
+
+---
+
+## 🚀 Releasing
+
+Releases are cut by CI ([`.github/workflows/release.yml`](./.github/workflows/release.yml)) from a git tag.
+
+1. Bump every package.json in lockstep:
+   ```bash
+   ./scripts/bump-version.sh 0.0.1-rc.14
+   pnpm install --lockfile-only
+   git commit -am "chore(release): prep 0.0.1-rc.14"
+   ```
+2. Push to a PR, merge to `main`.
+3. Tag and push:
+   ```bash
+   git tag v0.0.1-rc.14
+   git push origin v0.0.1-rc.14
+   ```
+
+The workflow builds, tests, publishes all three packages with npm provenance, and
+creates a GitHub Release. Dist-tag is derived from the version:
+`v*-rc.*` → `rc`, otherwise → `latest`.
+
+**Smoke-testing the pipeline**: run the workflow via *Actions → Release → Run workflow*
+with `dry_run: true` — it exercises every step and runs `npm publish --dry-run`.
+
+**Manual emergency path**: [`scripts/release.sh`](./scripts/release.sh) still works
+locally if CI is down. Requires `npm login` and skips provenance.
+
+Prereq: `NPM_TOKEN` repo secret with publish rights to the `@conversed` scope.
