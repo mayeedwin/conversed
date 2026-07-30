@@ -43,7 +43,9 @@ jobs:
           node-version: 20
 
       - name: Upgrade npm for Trusted Publishing (>= 11.5.1)
-        run: npm install --global npm@latest
+        # Pin to npm 11.x — npm 12 requires Node >= 22 and would fail
+        # EBADENGINE on the Node 20 runner used above.
+        run: npm install --global npm@^11.5.1
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
