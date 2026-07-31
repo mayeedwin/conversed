@@ -106,6 +106,6 @@ This skips provenance (local `npm publish` can't mint the OIDC token) and requir
 
 ## Version scheme
 
-- **Prereleases**: `0.0.1-rc.N` while the API is still shaking out. Published under the `rc` dist-tag; consumers opt in with `npm install @conversed/core@rc`.
-- **First stable**: `0.1.0` when the API is ready to promise semver. Published under `latest`.
-- **After stable**: standard [semver](https://semver.org/) — patch for fixes, minor for additive changes, major for breaks.
+- **Prereleases**: `0.0.1-rc.N` while the API was shaking out. Published under the `rc` dist-tag; consumers opted in with `npm install @conversed/core@rc`.
+- **First stable**: `0.0.1` — promotes the rc line to `latest`. Semver-wise, `0.0.1` > `0.0.1-rc.13` because prereleases sort below their base version, so this is a clean promotion with no version-number gymnastics.
+- **After stable**: standard [semver](https://semver.org/) — patch for fixes, minor for additive changes, major for breaks. Next expected: `0.0.2` for a fix, or `0.1.0` for the first additive change.
